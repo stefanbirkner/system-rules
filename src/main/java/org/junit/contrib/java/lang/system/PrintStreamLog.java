@@ -8,18 +8,18 @@ import org.junit.rules.ExternalResource;
 
 abstract class PrintStreamLog extends ExternalResource {
 	private final ByteArrayOutputStream log = new ByteArrayOutputStream();
-	private PrintStream originalStandardErrorStream;
+	private PrintStream originalStream;
 
 	@Override
 	protected void before() throws Throwable {
-		originalStandardErrorStream = getOriginalStream();
+		originalStream = getOriginalStream();
 		PrintStream wrappedLog = new PrintStream(log);
 		setStream(wrappedLog);
 	}
 
 	@Override
 	protected void after() {
-		setStream(originalStandardErrorStream);
+		setStream(originalStream);
 	}
 
 	abstract PrintStream getOriginalStream();
