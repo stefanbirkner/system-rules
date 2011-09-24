@@ -22,7 +22,7 @@ import java.io.PrintStream;
  *   }
  * </pre>
  */
-public class StandardOutputStreamLog extends StandardStreamLog {
+public class StandardOutputStreamLog extends PrintStreamLog {
 	@Override
 	PrintStream getOriginalStream() {
 		return out;

@@ -22,7 +22,7 @@ import java.io.PrintStream;
  *   }
  * </pre>
  */
-public class StandardErrorStreamLog extends StandardStreamLog {
+public class StandardErrorStreamLog extends PrintStreamLog {
 	@Override
 	PrintStream getOriginalStream() {
 		return err;

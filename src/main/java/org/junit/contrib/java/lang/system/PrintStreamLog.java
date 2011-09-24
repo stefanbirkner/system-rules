@@ -6,7 +6,7 @@ import java.io.UnsupportedEncodingException;
 
 import org.junit.rules.ExternalResource;
 
-abstract class StandardStreamLog extends ExternalResource {
+abstract class PrintStreamLog extends ExternalResource {
 	private final ByteArrayOutputStream log = new ByteArrayOutputStream();
 	private PrintStream originalStandardErrorStream;
 
