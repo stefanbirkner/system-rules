@@ -1,8 +1,7 @@
 package org.junit.contrib.java.lang.system;
 
 import static java.lang.System.setSecurityManager;
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import java.security.Permission;
@@ -88,13 +87,13 @@ public class ExpectedSystemExit implements TestRule {
 		if (!expectExit)
 			fail("Unexpected call of System.exit(" + e.status + ").");
 		else if (expectedStatus != null)
-			assertThat("Wrong exit status", e.status, is(expectedStatus));
+			assertEquals("Wrong exit status", expectedStatus, e.status);
 	}
 
 	private static class TryToExitException extends SecurityException {
 		private static final long serialVersionUID = 159678654L;
 
-		final int status;
+		final Integer status;
 
 		public TryToExitException(int status) {
 			super("Tried to exit with status " + status + ".");
