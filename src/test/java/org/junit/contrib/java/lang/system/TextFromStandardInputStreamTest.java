@@ -32,7 +32,7 @@ public class TextFromStandardInputStreamTest {
 	@Test
 	public void restoreSystemIn() throws Throwable {
 		InputStream originalSystemIn = System.in;
-		executeRuleWithStatement(new Noop());
+		executeRuleWithStatement(new EmptyStatement());
 		assertThat(System.in, is(equalTo(originalSystemIn)));
 	}
 
@@ -48,12 +48,6 @@ public class TextFromStandardInputStreamTest {
 			BufferedReader reader = new BufferedReader(new InputStreamReader(
 					System.in));
 			textFromSystemIn = reader.readLine();
-		}
-	}
-
-	private class Noop extends Statement {
-		@Override
-		public void evaluate() throws Throwable {
 		}
 	}
 }
