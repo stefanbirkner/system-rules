@@ -12,40 +12,44 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runners.model.Statement;
 
-public class ClearSystemPropertyTest {
-	
-	private static final String ARBITRARY_NAME = "arbitrary property";
+public class ClearSystemPropertiesTest {
+	private static final String FIRST_ARBITRARY_NAME = "first arbitrary property";
+	private static final String SECOND_ARBITRARY_NAME = "second arbitrary property";
 	private static final String ARBITRARY_VALUE = "arbitrary value";
 
 	@Rule
 	public final RestoreSystemProperties restore = new RestoreSystemProperties(
-			ARBITRARY_NAME);
+			SECOND_ARBITRARY_NAME);
+
+	private final ClearSystemProperties rule = new ClearSystemProperties(
+			FIRST_ARBITRARY_NAME, SECOND_ARBITRARY_NAME);
 
 	@Test
-	public void restoresOriginalValue() throws Throwable {
-		setProperty(ARBITRARY_NAME, ARBITRARY_VALUE);
-		
-		ClearSystemProperty rule = new ClearSystemProperty(ARBITRARY_NAME);
-		rule.apply(new ClearedValue(), null).evaluate();
-		
-		assertThat(getProperty(ARBITRARY_NAME), is(equalTo(ARBITRARY_VALUE)));
+	public void restoresOriginalValueOfSecondProperty() throws Throwable {
+		setProperty(SECOND_ARBITRARY_NAME, ARBITRARY_VALUE);
+		applyRule();
+		assertThat(getProperty(SECOND_ARBITRARY_NAME),
+				is(equalTo(ARBITRARY_VALUE)));
 	}
 
 	@Test
 	public void originallyUnsetPropertyRemainsUnset() throws Throwable {
-		clearProperty(ARBITRARY_NAME);
-		
-		ClearSystemProperty rule = new ClearSystemProperty(ARBITRARY_NAME);
+		clearProperty(SECOND_ARBITRARY_NAME);
+		applyRule();
+		assertThat(getProperty(SECOND_ARBITRARY_NAME),
+				is(nullValue(String.class)));
+	}
+
+	private void applyRule() throws Throwable {
 		rule.apply(new ClearedValue(), null).evaluate();
-		
-		assertThat(getProperty(ARBITRARY_NAME), is(nullValue(String.class)));
 	}
 
 	private class ClearedValue extends Statement {
 
 		@Override
 		public void evaluate() throws Throwable {
-			assertThat(getProperty(ARBITRARY_NAME), is(nullValue(String.class)));
+			assertThat(getProperty(SECOND_ARBITRARY_NAME),
+					is(nullValue(String.class)));
 		}
 	}
 }

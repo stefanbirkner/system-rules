@@ -5,8 +5,8 @@ import static java.lang.System.clearProperty;
 import org.junit.rules.ExternalResource;
 
 /**
- * The {@code ClearSystemProperty} rule clears a system property to a test.
- * After the test the original value is restored.
+ * The {@code ClearSystemProperty} rule clears a set of system properties to a
+ * test. After the test the original values are restored.
  * 
  * Let's assume the system property {@code MyProperty} has the value
  * {@code MyValue}. Now run the test
@@ -26,21 +26,29 @@ import org.junit.rules.ExternalResource;
  * 
  * The test succeeds and after the test, the system property {@code MyProperty}
  * has the value {@code MyValue}.
+ * 
+ * The {@code ClearSystemProperty} rule accepts a list of properties:
+ * 
+ * <pre>
+ * &#064;Rule
+ * public final ClearSystemProperty myPropertyIsCleared = new ClearSystemProperty(
+ * 		&quot;first&quot;, &quot;second&quot;, &quot;third&quot;);
+ * </pre>
  */
-public class ClearSystemProperty extends ExternalResource {
+public class ClearSystemProperties extends ExternalResource {
 
 	private final RestoreSystemProperties restoreSystemProperty;
-	private final String name;
+	private final String[] names;
 
-	public ClearSystemProperty(String name) {
-		this.name = name;
-		this.restoreSystemProperty = new RestoreSystemProperties(name);
+	public ClearSystemProperties(String... names) {
+		this.names = names;
+		this.restoreSystemProperty = new RestoreSystemProperties(names);
 	}
 
 	@Override
 	protected void before() throws Throwable {
 		backupOriginalValue();
-		clearProperty(name);
+		clearProperties();
 	}
 
 	@Override
@@ -50,6 +58,11 @@ public class ClearSystemProperty extends ExternalResource {
 
 	private void backupOriginalValue() throws Throwable {
 		restoreSystemProperty.before();
+	}
+
+	private void clearProperties() {
+		for (String name : names)
+			clearProperty(name);
 	}
 
 	private void restoreOriginalValue() {
