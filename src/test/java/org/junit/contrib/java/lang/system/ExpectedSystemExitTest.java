@@ -1,9 +1,12 @@
 package org.junit.contrib.java.lang.system;
 
 import static java.lang.System.getSecurityManager;
+import static java.lang.System.setSecurityManager;
 import static org.hamcrest.core.IsSame.sameInstance;
 import static org.junit.Assert.assertThat;
 import static org.junit.rules.ExpectedException.none;
+
+import java.security.Permission;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -56,7 +59,8 @@ public class ExpectedSystemExitTest {
 
 	@Test
 	public void restoreOldSecurityManager() throws Throwable {
-		SecurityManager manager = getSecurityManager();
+		SecurityManager manager = new ArbitrarySecurityManager();
+		setSecurityManager(manager);
 		executeRuleWithoutExitCall();
 		assertThat(getSecurityManager(), sameInstance(manager));
 	}
@@ -77,6 +81,13 @@ public class ExpectedSystemExitTest {
 		@Override
 		public void evaluate() throws Throwable {
 			System.exit(0);
+		}
+	}
+
+	private static class ArbitrarySecurityManager extends SecurityManager {
+		@Override
+		public void checkPermission(Permission perm) {
+			// allow anything.
 		}
 	}
 }

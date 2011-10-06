@@ -1,6 +1,5 @@
 package org.junit.contrib.java.lang.system;
 
-import static java.lang.System.setSecurityManager;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
@@ -61,21 +60,21 @@ public class ExpectedSystemExit implements TestRule {
 		expectExit = true;
 	}
 
-	public Statement apply(final Statement base, final Description description) {
-		return new Statement() {
+	public Statement apply(final Statement base, Description description) {
+		ProvideSecurityManager provideNoExitSecurityManager = new ProvideSecurityManager(
+				new NoExitSecurityManager());
+		Statement statement = new Statement() {
 			@Override
 			public void evaluate() throws Throwable {
-				setSecurityManager(new NoExitSecurityManager());
 				try {
 					base.evaluate();
 					handleMissingSystemExit();
 				} catch (TryToExitException e) {
 					handleSystemExit(e);
-				} finally {
-					setSecurityManager(null);
 				}
 			}
 		};
+		return provideNoExitSecurityManager.apply(statement, description);
 	}
 
 	private void handleMissingSystemExit() {
