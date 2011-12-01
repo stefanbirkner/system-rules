@@ -41,6 +41,10 @@
 			<url>http://marcphilipp.tumblr.com/</url>
 			<timezone>+1</timezone>
 		</developer>
+		<developer>
+			<name>Tobias Mühl</name>
+			<timezone>+1</timezone>
+		</developer>
 	</developers>
 
 	<scm>
