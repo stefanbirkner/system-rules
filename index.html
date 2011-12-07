@@ -3,8 +3,7 @@
 <head>
   <meta charset='utf-8'>
 
-  <title>stefanbirkner/system-rules @ GitHub</title>
-
+  <title>System Rules</title>
   <style type="text/css">
     body {
       margin-top: 1.0em;
@@ -34,41 +33,206 @@
   <a href="https://github.com/stefanbirkner/system-rules"><img style="position: absolute; top: 0; right: 0; border: 0;" src="http://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub" /></a>
 
   <div id="container">
-
-    <div class="download">
-      <a href="https://github.com/stefanbirkner/system-rules/zipball/master">
-        <img border="0" width="90" src="https://github.com/images/modules/download/zip.png"></a>
-      <a href="https://github.com/stefanbirkner/system-rules/tarball/master">
-        <img border="0" width="90" src="https://github.com/images/modules/download/tar.png"></a>
-    </div>
-
-    <h1><a href="https://github.com/stefanbirkner/system-rules">System Rules</a>
-      <span class="small">by <a href="https://github.com/stefanbirkner">stefanbirkner</a></span></h1>
+    <h1><a href="https://github.com/stefanbirkner/system-rules">System Rules</a></h1>
 
     <div class="description">
       A collection of JUnit rules for testing code which uses java.lang.System.
     </div>
 
-    
+		<h2>System Properties</h2>
 
-    
+		<p>There're three rules for testing code, which reads or
+		writes system properties</p>
 
-    
+		<h3>Restore Properties</h3>
+		<p>The RestoreSystemProperties rule restores the original value of
+		the property when the test is finished.</p>
+    <pre>
+public void MyTest {
+	&#064;Rule
+	public final RestoreSystemProperties restoreSystemProperties
+	 = new RestoreSystemProperties("MyProperty");
 
-    
+	&#064;Test
+	public void overrideProperty() {
+		//after the test the original value of "MyProperty" will be restored.
+		System.setProperty("MyProperty", "other value");
+		...
+	}
+}
+		</pre>
+
+		<h3>Clear Properties</h3>
+		<p>The ClearSystemProperty rule deletes the property before the test
+		and restores the original value of the property when the test is
+		finished.</p>
+		<pre>
+public void MyTest {
+	&#064;Rule
+	public final ClearSystemProperty myPropertyIsCleared
+	 = new ClearSystemProperty("MyProperty");
+
+	&#064;Test
+	public void overrideProperty() {
+		assertNull(System.getProperty("MyProperty"));
+	}
+}
+		</pre>
+
+		<h3>Provide Properties</h3>
+		<p>The ProvideSystemProperty rule provides an arbitrary value for a
+		system property to a test. After the test the original value is
+		restored.</p>
+		<pre>
+			public void MyTest {
+				&#064;Rule
+				public final ProvideSystemProperty myPropertyHasMyValue
+				 = new ProvideSystemProperty("MyProperty", "MyValue");
+
+				&#064;Rule
+				public final ProvideSystemProperty otherPropertyIsMissing
+				 = new ProvideSystemProperty("OtherProperty", null);
+
+				&#064;Test
+				public void overrideProperty() {
+					assertEquals("MyValue", System.getProperty("MyProperty"));
+					assertNull(System.getProperty("OtherProperty"));
+				}
+			}
+		</pre>
+		<p>You could also use a single instance of the rule to achieve the
+		same effect:</p>
+		<pre>
+			public void MyTest {
+				&#064;Rule
+				public final ProvideSystemProperty properties
+				 = new ProvideSystemProperty("MyProperty", "MyValue").and("OtherProperty", null);
+
+				&#064;Test
+				public void overrideProperty() {
+					assertEquals("MyValue", System.getProperty("MyProperty"));
+					assertNull(System.getProperty("OtherProperty"));
+				}
+			}
+		</pre>
+
+		<h2>System.err and System.out</h2>
+		<p>You want to verify the text, which your code writes to System.err
+		or System.out. The StandardErrorStreamLog and
+		StandardOutputStreamLog rule are logging everything written to
+		System.err or System.out. The text is available by calling getLog().
+		</p>
+		<pre>
+public void MyTest {
+	&#064;Rule
+	public final StandardErrorStreamLog log = new StandardErrorStreamLog();
+
+	&#064;Test
+	public void overrideProperty() {
+		System.err.print("hello world");
+		assertEquals("hello world", log.getLog());
+	}
+}
+		</pre>
+
+    <pre>
+public void MyTest {
+	&#064;Rule
+	public final StandardOutputStreamLog log = new StandardOutputStreamLog();
+
+	&#064;Test
+	public void overrideProperty() {
+		System.out.print("hello world");
+		assertEquals("hello world", log.getLog());
+	}
+}
+		</pre>
+
+		<h2>System.in</h2>
+		<p>With the TextFromStandardInputStream rule you are able to provide
+		text, which is read by your code from System.in.</p>
+		<pre>
+public void MyTest {
+	&#064;Rule
+	public final TextFromStandardInputStream textFromStandardInputStream
+	 = new TextFromStandardInputStream("foo");
+
+	&#064;Test
+	public void readTextFromStandardInputStream() {
+		BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+		assertEquals("foo", reader.readLine());
+	}
+}
+		</pre>
+
+		<h2>System.exit()</h2>
+		<p>If your code calls System.exit(), then your test stops and
+		doesn't finish. The ExpectedSystemExit rule allows in-test
+		specification of expected System.exit() calls.</p>
+		<pre>
+public void MyTest {
+	&#064;Rule
+	public final ExpectedSystemExit exit = ExpectedSystemExit.none();
+
+	&#064;Test
+	public void noSystemExit() {
+		//passes
+	}
+
+	&#064;Test
+	public void systemExitWithArbitraryStatusCode() {
+		exit.expectSystemExit();
+		System.exit(0);
+	}
+
+	&#064;Test
+	public void systemExitWithSelectedStatusCode0() {
+		exit.expectSystemExitWithStatus(0);
+		System.exit(0);
+	}
+}
+		</pre>
+
+		<h2>Security Manager</h2>
+		<p>If you need a special security manager to test your code, you may
+		provide it by using the ProvideSecurityManager rule. This rule
+		replaces the system's security manager with yours throughout the
+		test</p>
+		<pre>
+public void MyTest {
+	private final MySecurityManager securityManager
+	 = new MySecurityManager();
+
+	&#064;Rule
+	public final ProvideSecurityManager provideSecurityManager
+	 = new ProvideSecurityManager(securityManager);
+
+	&#064;Test
+	public void overrideProperty() {
+		assertEquals(securityManager, System.getSecurityManager());
+	}
+}
+		</pre>
+
       <h2>License</h2>
       <p>Common Public License Version 1.0</p>
     
 
     
       <h2>Authors</h2>
-      <p>Marc Philipp (mail@marcphilipp.de)<br/>Stefan Birkner (mail@stefan-birkner.de)<br/>      </p>
+      <p>Marc Philipp (mail@marcphilipp.de)
+<br/>Stefan Birkner (mail@stefan-birkner.de)
+<br/>      </p>
     
 
     
       <h2>Contact</h2>
-      <p>Stefan Birkner (github@stefan-birkner.de)<br/>      </p>
+      <p>Stefan Birkner (github@stefan-birkner.de)
+<br/>      </p>
     
+
+	<h2>Add System Rules to your build system</h2>
+	<p><a href="http://search.maven.org/#artifactdetails|com.github.stefanbirkner|system-rules|1.0.0|jar">Artifact Details for com.github.stefanbirkner:system-rules:1.0.0</a></p>
 
     <h2>Download</h2>
     <p>
@@ -80,11 +244,6 @@
       by running:
       <pre>$ git clone git://github.com/stefanbirkner/system-rules</pre>
     </p>
-
-    <div class="footer">
-      get the source code on GitHub : <a href="https://github.com/stefanbirkner/system-rules">stefanbirkner/system-rules</a>
-    </div>
-
   </div>
 
 <script type=\"text/javascript\">
