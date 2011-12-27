@@ -3,6 +3,7 @@ package org.junit.contrib.java.lang.system;
 import static java.lang.System.getSecurityManager;
 import static java.lang.System.setSecurityManager;
 import static org.hamcrest.core.IsSame.sameInstance;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.rules.ExpectedException.none;
 
@@ -15,6 +16,8 @@ import org.junit.runners.model.Statement;
 
 
 public class ExpectedSystemExitTest {
+	private static final Object ARBITRARY_CONTEXT = new Object();
+
 	@Rule
 	public final ExpectedException thrown = none();
 
@@ -65,6 +68,13 @@ public class ExpectedSystemExitTest {
 		assertThat(getSecurityManager(), sameInstance(manager));
 	}
 
+	@Test
+	public void delegateToOldSecurityManager() throws Throwable {
+		SecurityManager manager = new ArbitrarySecurityManager();
+		setSecurityManager(manager);
+		executeRuleWithStatement(new CheckContext());
+	}
+
 	private void executeRuleWithoutExitCall() throws Throwable {
 		executeRuleWithStatement(new EmptyStatement());
 	}
@@ -84,7 +94,20 @@ public class ExpectedSystemExitTest {
 		}
 	}
 
+	private static class CheckContext extends Statement {
+		@Override
+		public void evaluate() throws Throwable {
+			assertEquals(ARBITRARY_CONTEXT, getSecurityManager()
+					.getSecurityContext());
+		}
+	}
+
 	private static class ArbitrarySecurityManager extends SecurityManager {
+		@Override
+		public Object getSecurityContext() {
+			return ARBITRARY_CONTEXT;
+		}
+
 		@Override
 		public void checkPermission(Permission perm) {
 			// allow anything.

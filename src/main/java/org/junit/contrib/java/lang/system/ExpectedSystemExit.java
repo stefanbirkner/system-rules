@@ -1,11 +1,11 @@
 package org.junit.contrib.java.lang.system;
 
+import static java.lang.System.getSecurityManager;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-
-import org.junit.contrib.java.lang.system.internal.NoExitSecurityManager;
 import org.junit.contrib.java.lang.system.internal.CheckExitCalled;
+import org.junit.contrib.java.lang.system.internal.NoExitSecurityManager;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
@@ -62,9 +62,19 @@ public class ExpectedSystemExit implements TestRule {
 	}
 
 	public Statement apply(final Statement base, Description description) {
-		ProvideSecurityManager provideNoExitSecurityManager = new ProvideSecurityManager(
-				new NoExitSecurityManager());
-		Statement statement = new Statement() {
+		ProvideSecurityManager noExitSecurityManagerRule = createNoExitSecurityManagerRule();
+		Statement statement = createStatement(base);
+		return noExitSecurityManagerRule.apply(statement, description);
+	}
+
+	private ProvideSecurityManager createNoExitSecurityManagerRule() {
+		NoExitSecurityManager noExitSecurityManager = new NoExitSecurityManager(
+				getSecurityManager());
+		return new ProvideSecurityManager(noExitSecurityManager);
+	}
+
+	private Statement createStatement(final Statement base) {
+		return new Statement() {
 			@Override
 			public void evaluate() throws Throwable {
 				try {
@@ -75,7 +85,6 @@ public class ExpectedSystemExit implements TestRule {
 				}
 			}
 		};
-		return provideNoExitSecurityManager.apply(statement, description);
 	}
 
 	private void handleMissingSystemExit() {
@@ -85,8 +94,8 @@ public class ExpectedSystemExit implements TestRule {
 
 	private void handleSystemExit(CheckExitCalled e) {
 		if (!expectExit)
-			fail("Unexpected call of System.exit(" + e.status + ").");
+			fail("Unexpected call of System.exit(" + e.getStatus() + ").");
 		else if (expectedStatus != null)
-			assertEquals("Wrong exit status", expectedStatus, e.status);
+			assertEquals("Wrong exit status", expectedStatus, e.getStatus());
 	}
 }
