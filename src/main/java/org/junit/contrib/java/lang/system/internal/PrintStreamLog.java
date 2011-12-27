@@ -1,4 +1,4 @@
-package org.junit.contrib.java.lang.system;
+package org.junit.contrib.java.lang.system.internal;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -6,7 +6,7 @@ import java.io.UnsupportedEncodingException;
 
 import org.junit.rules.ExternalResource;
 
-abstract class PrintStreamLog extends ExternalResource {
+public abstract class PrintStreamLog extends ExternalResource {
 	private final ByteArrayOutputStream log = new ByteArrayOutputStream();
 	private PrintStream originalStream;
 
@@ -22,9 +22,9 @@ abstract class PrintStreamLog extends ExternalResource {
 		setStream(originalStream);
 	}
 
-	abstract PrintStream getOriginalStream();
+	protected abstract PrintStream getOriginalStream();
 
-	abstract void setStream(PrintStream wrappedLog);
+	protected abstract void setStream(PrintStream wrappedLog);
 
 	/**
 	 * Returns the text written to the standard error stream.

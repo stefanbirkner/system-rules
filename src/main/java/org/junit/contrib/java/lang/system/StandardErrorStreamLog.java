@@ -5,6 +5,8 @@ import static java.lang.System.setErr;
 
 import java.io.PrintStream;
 
+import org.junit.contrib.java.lang.system.internal.PrintStreamLog;
+
 /**
  * The {@code StandardErrorStreamLog} captures writes to the standard error
  * stream. The text written is available via {@link #getLog()}.
@@ -24,12 +26,12 @@ import java.io.PrintStream;
  */
 public class StandardErrorStreamLog extends PrintStreamLog {
 	@Override
-	PrintStream getOriginalStream() {
+	protected PrintStream getOriginalStream() {
 		return err;
 	}
 
 	@Override
-	void setStream(PrintStream wrappedLog) {
+	protected void setStream(PrintStream wrappedLog) {
 		setErr(wrappedLog);
 	}
 }

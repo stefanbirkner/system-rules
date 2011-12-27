@@ -5,6 +5,8 @@ import static java.lang.System.setOut;
 
 import java.io.PrintStream;
 
+import org.junit.contrib.java.lang.system.internal.PrintStreamLog;
+
 /**
  * The {@code StandardOutputStreamLog} captures writes to the standard output
  * stream. The text written is available via {@link #getLog()}.
@@ -24,12 +26,12 @@ import java.io.PrintStream;
  */
 public class StandardOutputStreamLog extends PrintStreamLog {
 	@Override
-	PrintStream getOriginalStream() {
+	protected PrintStream getOriginalStream() {
 		return out;
 	}
 
 	@Override
-	void setStream(PrintStream wrappedLog) {
+	protected void setStream(PrintStream wrappedLog) {
 		setOut(wrappedLog);
 	}
 }

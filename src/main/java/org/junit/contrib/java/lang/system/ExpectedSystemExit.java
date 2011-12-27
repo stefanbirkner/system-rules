@@ -3,8 +3,9 @@ package org.junit.contrib.java.lang.system;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import java.security.Permission;
 
+import org.junit.contrib.java.lang.system.internal.NoExitSecurityManager;
+import org.junit.contrib.java.lang.system.internal.CheckExitCalled;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
@@ -69,7 +70,7 @@ public class ExpectedSystemExit implements TestRule {
 				try {
 					base.evaluate();
 					handleMissingSystemExit();
-				} catch (TryToExitException e) {
+				} catch (CheckExitCalled e) {
 					handleSystemExit(e);
 				}
 			}
@@ -82,33 +83,10 @@ public class ExpectedSystemExit implements TestRule {
 			fail("System.exit has not been called.");
 	}
 
-	private void handleSystemExit(TryToExitException e) {
+	private void handleSystemExit(CheckExitCalled e) {
 		if (!expectExit)
 			fail("Unexpected call of System.exit(" + e.status + ").");
 		else if (expectedStatus != null)
 			assertEquals("Wrong exit status", expectedStatus, e.status);
-	}
-
-	private static class TryToExitException extends SecurityException {
-		private static final long serialVersionUID = 159678654L;
-
-		final Integer status;
-
-		public TryToExitException(int status) {
-			super("Tried to exit with status " + status + ".");
-			this.status = status;
-		}
-	}
-
-	private static class NoExitSecurityManager extends SecurityManager {
-		@Override
-		public void checkPermission(Permission perm) {
-			// allow anything.
-		}
-
-		@Override
-		public void checkExit(int status) {
-			throw new TryToExitException(status);
-		}
 	}
 }
