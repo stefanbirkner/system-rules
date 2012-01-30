@@ -3,9 +3,13 @@ package org.junit.contrib.java.lang.system;
 import static java.lang.System.clearProperty;
 import static java.lang.System.setProperty;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Properties;
 
 import org.junit.rules.ExternalResource;
 
@@ -40,7 +44,7 @@ import org.junit.rules.ExternalResource;
  * is not set and the system property {@code OtherProperty} has the value
  * {@code OtherValue}.
  * <p>
- * You could also use a single instance of the rule to achieve the same effect:
+ * You can also use a single instance of the rule to achieve the same effect:
  * 
  * <pre>
  *   public void MyTest {
@@ -56,10 +60,54 @@ import org.junit.rules.ExternalResource;
  *     }
  *   }
  * </pre>
+ * 
+ * You can use a properties file to supply properties for the
+ * ProvideSystemProperty rule. The file can be from the file system or the class
+ * path. In the first case use
+ * 
+ * <pre>
+ * &#064;Rule
+ * public final ProvideSystemProperty properties = ProvideSystemProperty
+ * 		.fromFile(&quot;/home/myself/example.properties&quot;);
+ * </pre>
+ * 
+ * and in the second case use
+ * 
+ * <pre>
+ * &#064;Rule
+ * public final ProvideSystemProperty properties = ProvideSystemProperty
+ * 		.fromResource(&quot;example.properties&quot;);
+ * </pre>
  */
 public class ProvideSystemProperty extends ExternalResource {
 	private final Map<String, String> properties = new LinkedHashMap<String, String>();
 	private RestoreSystemProperties restoreSystemProperty;
+
+	public static ProvideSystemProperty fromFile(String name)
+			throws IOException {
+		FileInputStream fis = new FileInputStream(name);
+		return fromInputStream(fis);
+	}
+
+	public static ProvideSystemProperty fromResource(String name)
+			throws IOException {
+		InputStream is = ProvideSystemProperty.class.getResourceAsStream(name);
+		return fromInputStream(is);
+	}
+
+	private static ProvideSystemProperty fromInputStream(InputStream is)
+			throws IOException {
+		Properties p = new Properties();
+		p.load(is);
+		ProvideSystemProperty rule = new ProvideSystemProperty();
+		for (Map.Entry<Object, Object> property : p.entrySet())
+			rule.addProperty((String) property.getKey(),
+					(String) property.getValue());
+		return rule;
+	}
+
+	private ProvideSystemProperty() {
+	}
 
 	public ProvideSystemProperty(String name, String value) {
 		addProperty(name, value);
@@ -76,7 +124,8 @@ public class ProvideSystemProperty extends ExternalResource {
 
 	@Override
 	protected void before() throws Throwable {
-		restoreSystemProperty = new RestoreSystemProperties(collectPropertyNames());
+		restoreSystemProperty = new RestoreSystemProperties(
+				collectPropertyNames());
 		restoreSystemProperty.before();
 		updateProperties();
 	}
