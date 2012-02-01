@@ -76,38 +76,50 @@ public void MyTest {
 		system property to a test. After the test the original value is
 		restored.</p>
 		<pre>
-			public void MyTest {
-				&#064;Rule
-				public final ProvideSystemProperty myPropertyHasMyValue
-				 = new ProvideSystemProperty("MyProperty", "MyValue");
+public void MyTest {
+	&#064;Rule
+	public final ProvideSystemProperty myPropertyHasMyValue
+	 = new ProvideSystemProperty("MyProperty", "MyValue");
 
-				&#064;Rule
-				public final ProvideSystemProperty otherPropertyIsMissing
-				 = new ProvideSystemProperty("OtherProperty", null);
+	&#064;Rule
+	public final ProvideSystemProperty otherPropertyIsMissing
+	 = new ProvideSystemProperty("OtherProperty", null);
 
-				&#064;Test
-				public void overrideProperty() {
-					assertEquals("MyValue", System.getProperty("MyProperty"));
-					assertNull(System.getProperty("OtherProperty"));
-				}
-			}
+	&#064;Test
+	public void overrideProperty() {
+		assertEquals("MyValue", System.getProperty("MyProperty"));
+		assertNull(System.getProperty("OtherProperty"));
+	}
+}
 		</pre>
 		<p>You could also use a single instance of the rule to achieve the
 		same effect:</p>
 		<pre>
-			public void MyTest {
-				&#064;Rule
-				public final ProvideSystemProperty properties
-				 = new ProvideSystemProperty("MyProperty", "MyValue").and("OtherProperty", null);
+public void MyTest {
+	&#064;Rule
+	public final ProvideSystemProperty properties
+	 = new ProvideSystemProperty("MyProperty", "MyValue").and("OtherProperty", null);
 
-				&#064;Test
-				public void overrideProperty() {
-					assertEquals("MyValue", System.getProperty("MyProperty"));
-					assertNull(System.getProperty("OtherProperty"));
-				}
-			}
+	&#064;Test
+	public void overrideProperty() {
+		assertEquals("MyValue", System.getProperty("MyProperty"));
+		assertNull(System.getProperty("OtherProperty"));
+	}
+}
 		</pre>
 
+		<p>You can use a properties file to supply properties for the
+ProvideSystemProperty rule. The file can be from the file system or the
+class path. In the first case use</p>
+		<pre>@Rule
+public final ProvideSystemProperty properties
+ = ProvideSystemProperty.fromFile("/home/myself/example.properties");</pre>
+
+		<p>and in the second case use</p>
+		<pre>@Rule
+public final ProvideSystemProperty properties
+ = ProvideSystemProperty.fromResource("example.properties");</pre>
+    
 		<h2>System.err and System.out</h2>
 		<p>You want to verify the text, which your code writes to System.err
 		or System.out. The StandardErrorStreamLog and
