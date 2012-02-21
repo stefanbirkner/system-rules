@@ -4,12 +4,13 @@
   <meta charset='utf-8'>
 
   <title>System Rules</title>
-  <link rel="stylesheet" href="http://twitter.github.com/bootstrap/1.4.0/bootstrap.min.css" />
+  <link rel="stylesheet" href="bootstrap.min.css" />
+  <link rel="stylesheet" href="bootstrap-responsive.min.css" />
 </head>
 
 <body>
-  <div class="topbar" data-scrollspy="scrollspy">
-    <div class="topbar-inner">
+  <div class="navbar" data-scrollspy="scrollspy">
+    <div class="navbar-inner">
       <div class="container">
         <a class="brand" href="#">System Rules</a>
         <ul class="nav">
@@ -20,16 +21,14 @@
     </div>
   </div>
 
-  <div class="container" style="margin-top:5em;">
-    <h1><a href="https://github.com/stefanbirkner/system-rules">System Rules</a></h1>
-
-    <div class="description">
-      A collection of JUnit rules for testing code which uses java.lang.System.
-    </div>
-
-		<div>
-			The System Rules library is available from <a href="download.html">GitHub</a> and the <a href="download.html">Maven repository.</a>
-		</div>
+  <div class="container">
+		<header>
+		  <div class="hero-unit">
+		    <h1>System Rules</h1>
+		    <p>A collection of JUnit rules for testing code which uses java.lang.System.</p>
+				<p><a class="btn btn-primary btn-large" href="download.html">Get System Rules</a></p>
+		  </div>
+		</header>
 
 		<h2>System Properties</h2>
 
@@ -234,6 +233,7 @@ public void MyTest {
       <p>Stefan Birkner (mail@stefan-birkner.de)</p>
   </div>
 
+  <script src="bootstrap.min.js"></script>
 <script type=\"text/javascript\">
 var gaJsHost = ((\"https:\" == document.location.protocol) ? \"https://ssl.\" : \"http://www.\");
 document.write(unescape(\"%3Cscript src='\" + gaJsHost + \"google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E\"));
