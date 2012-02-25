@@ -6,6 +6,10 @@
   <title>System Rules</title>
   <link rel="stylesheet" href="bootstrap.min.css" />
   <link rel="stylesheet" href="bootstrap-responsive.min.css" />
+	<style>
+		#overview h2 {font-weight:200;}
+		.span4 {margin-bottom:2em;}
+	</style>
 </head>
 
 <body>
@@ -21,7 +25,7 @@
     </div>
   </div>
 
-  <div class="container">
+  <div class="container-fluid">
 		<header>
 		  <div class="hero-unit">
 		    <h1>System Rules</h1>
@@ -30,35 +34,66 @@
 		  </div>
 		</header>
 
-		<h2>System Properties</h2>
+		<section id="overview">
+    	<div class="row-fluid">
+	    	<div class="span4">
+					<h2>System.getProperty(…)</h2>
+					<p>When your test reads a system property, you have to set it before the test and
+					restore its original value afterwards. Use the 
+					<a href="#ClearSystemProperty">ClearSystemProperty</a> and
+					<a href="#ProvideSystemProperty">ProvideSystemProperty</a> rules for this
+					purpose.
+				</div>
+	    	<div class="span4">
+					<h2>System.setProperty(…)</h2>
+					<p>When your test changes a system property, you should restore its original value
+					after the test. The <a href="#RestoreSystemProperties">RestoreSystemProperties</a>
+					rule does this for you.</p>
+				</div>
+	    	<div class="span4">
+					<h2>System.exit(…)</h2>
+					<p>Use the <a href="#ExpectedSystemExit">ExpectedSystemExit</a> rule to verify that
+					<code>System.exit(…)</code> is called. You could verify the exit status, too.</p>
+				</div>
+	    </div>
+    	<div class="row-fluid">
+	    	<div class="span4">
+					<h2>System.getSecurityManager()</h2>
+					<p>Use the <a href="#ProvideSecurityManager">ProvideSecurityManager</a> rule to
+					provide a special security manager for your test. The system's security manager is
+					restored after the test.</p>
+				</div>
+	    </div>
+    	<div class="row-fluid">
+	    	<div class="span4">
+					<h2>System.err</h2>
+					<p>Use the <a href="#StandardErrorStreamLog">StandardErrorStreamLog</a> rule
+					to capture and verify the text, that your test writes to <code>System.err.</code></p>
+				</div>
+	    	<div class="span4">
+					<h2>System.in</h2>
+					<p>Use the <a href="#TextFromStandardInputStream">TextFromStandardInputStream</a> rule
+					to provide text, that your test reads from <code>System.in.</code></p>
+				</div>
+	    	<div class="span4">
+					<h2>System.out</h2>
+					<p>Use the <a href="#StandardOutputStreamLog">StandardOutputStreamLog</a> rule
+					to capture and verify the text, that your test writes to <code>System.out.</code></p>
+				</div>
+	    </div>
+		</section>
 
-		<p>There're three rules for testing code, which reads or
-		writes system properties</p>
+		<section id="getProperty">
+			<div class="page-header">
+				<h1>Usage</h1>
+			</div>
 
-		<h3>Restore Properties</h3>
-		<p>The RestoreSystemProperties rule restores the original value of
-		the property when the test is finished.</p>
-    <pre>
-public void MyTest {
-	&#064;Rule
-	public final RestoreSystemProperties restoreSystemProperties
-	 = new RestoreSystemProperties("MyProperty");
-
-	&#064;Test
-	public void overrideProperty() {
-		//after the test the original value of "MyProperty" will be restored.
-		System.setProperty("MyProperty", "other value");
-		...
-	}
-}
-		</pre>
-
-		<h3>Clear Properties</h3>
-		<p>The ClearSystemProperty rule deletes the property before the test
-		and restores the original value of the property when the test is
-		finished.</p>
-		<pre>
-public void MyTest {
+			<section id="ClearSystemProperty">
+				<h3>Clear Properties</h3>
+				<p>The ClearSystemProperty rule deletes the property before the test
+				and restores the original value of the property when the test is
+				finished.</p>
+				<pre>public void MyTest {
 	&#064;Rule
 	public final ClearSystemProperty myPropertyIsCleared
 	 = new ClearSystemProperty("MyProperty");
@@ -67,15 +102,15 @@ public void MyTest {
 	public void overrideProperty() {
 		assertNull(System.getProperty("MyProperty"));
 	}
-}
-		</pre>
-
-		<h3>Provide Properties</h3>
-		<p>The ProvideSystemProperty rule provides an arbitrary value for a
-		system property to a test. After the test the original value is
-		restored.</p>
-		<pre>
-public void MyTest {
+}</pre>
+			</section>
+				
+			<section id="ProvideSystemProperty">
+				<h3>Provide Properties</h3>
+				<p>The ProvideSystemProperty rule provides an arbitrary value for a
+				system property to a test. After the test the original value is
+				restored.</p>
+				<pre>public void MyTest {
 	&#064;Rule
 	public final ProvideSystemProperty myPropertyHasMyValue
 	 = new ProvideSystemProperty("MyProperty", "MyValue");
@@ -89,12 +124,10 @@ public void MyTest {
 		assertEquals("MyValue", System.getProperty("MyProperty"));
 		assertNull(System.getProperty("OtherProperty"));
 	}
-}
-		</pre>
-		<p>You could also use a single instance of the rule to achieve the
-		same effect:</p>
-		<pre>
-public void MyTest {
+}</pre>
+				<p>You could also use a single instance of the rule to achieve the
+				same effect:</p>
+				<pre>public void MyTest {
 	&#064;Rule
 	public final ProvideSystemProperty properties
 	 = new ProvideSystemProperty("MyProperty", "MyValue").and("OtherProperty", null);
@@ -104,29 +137,47 @@ public void MyTest {
 		assertEquals("MyValue", System.getProperty("MyProperty"));
 		assertNull(System.getProperty("OtherProperty"));
 	}
-}
-		</pre>
+}</pre>
 
-		<p>You can use a properties file to supply properties for the
-ProvideSystemProperty rule. The file can be from the file system or the
-class path. In the first case use</p>
-		<pre>@Rule
+				<p>You can use a properties file to supply properties for the
+		ProvideSystemProperty rule. The file can be from the file system or the
+		class path. In the first case use</p>
+				<pre>@Rule
 public final ProvideSystemProperty properties
  = ProvideSystemProperty.fromFile("/home/myself/example.properties");</pre>
 
-		<p>and in the second case use</p>
-		<pre>@Rule
+				<p>and in the second case use</p>
+				<pre>@Rule
 public final ProvideSystemProperty properties
  = ProvideSystemProperty.fromResource("example.properties");</pre>
+			</section>
+
+			<section id="RestoreSystemProperties">
+				<h3>Restore Properties</h3>
+				<p>The RestoreSystemProperties rule restores the original value of
+				the property when the test is finished.</p>
+				<pre>public void MyTest {
+	&#064;Rule
+	public final RestoreSystemProperties restoreSystemProperties
+	 = new RestoreSystemProperties("MyProperty");
+
+	&#064;Test
+	public void overrideProperty() {
+		//after the test the original value of "MyProperty" will be restored.
+		System.setProperty("MyProperty", "other value");
+		...
+	}
+}</pre>
+			</section>
     
-		<h2>System.err and System.out</h2>
-		<p>You want to verify the text, which your code writes to System.err
-		or System.out. The StandardErrorStreamLog and
-		StandardOutputStreamLog rule are logging everything written to
-		System.err or System.out. The text is available by calling getLog().
-		</p>
-		<pre>
-public void MyTest {
+			<section id="StandardErrorStreamLog">
+				<h3>System.err and System.out</h3>
+				<p>You want to verify the text, which your code writes to System.err
+				or System.out. The StandardErrorStreamLog and
+				StandardOutputStreamLog rule are logging everything written to
+				System.err or System.out. The text is available by calling getLog().
+				</p>
+				<pre>public void MyTest {
 	&#064;Rule
 	public final StandardErrorStreamLog log = new StandardErrorStreamLog();
 
@@ -135,11 +186,9 @@ public void MyTest {
 		System.err.print("hello world");
 		assertEquals("hello world", log.getLog());
 	}
-}
-		</pre>
+}</pre>
 
-    <pre>
-public void MyTest {
+    		<pre>public void MyTest {
 	&#064;Rule
 	public final StandardOutputStreamLog log = new StandardOutputStreamLog();
 
@@ -148,14 +197,14 @@ public void MyTest {
 		System.out.print("hello world");
 		assertEquals("hello world", log.getLog());
 	}
-}
-		</pre>
+}</pre>
+			</section>
 
-		<h2>System.in</h2>
-		<p>With the TextFromStandardInputStream rule you are able to provide
-		text, which is read by your code from System.in.</p>
-		<pre>
-public void MyTest {
+			<section id="TextFromStandardInputStream">
+				<h3>System.in</h3>
+				<p>With the TextFromStandardInputStream rule you are able to provide
+				text, which is read by your code from System.in.</p>
+				<pre>public void MyTest {
 	&#064;Rule
 	public final TextFromStandardInputStream textFromStandardInputStream
 	 = new TextFromStandardInputStream("foo");
@@ -165,15 +214,15 @@ public void MyTest {
 		BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 		assertEquals("foo", reader.readLine());
 	}
-}
-		</pre>
+}</pre>
+			</section>
 
-		<h2>System.exit()</h2>
-		<p>If your code calls System.exit(), then your test stops and
-		doesn't finish. The ExpectedSystemExit rule allows in-test
-		specification of expected System.exit() calls.</p>
-		<pre>
-public void MyTest {
+			<section id="ExpectedSystemExit">
+				<h3>System.exit()</h3>
+				<p>If your code calls System.exit(), then your test stops and
+				doesn't finish. The ExpectedSystemExit rule allows in-test
+				specification of expected System.exit() calls.</p>
+				<pre>public void MyTest {
 	&#064;Rule
 	public final ExpectedSystemExit exit = ExpectedSystemExit.none();
 
@@ -193,16 +242,16 @@ public void MyTest {
 		exit.expectSystemExitWithStatus(0);
 		System.exit(0);
 	}
-}
-		</pre>
+}</pre>
+			</section>
 
-		<h2>Security Manager</h2>
-		<p>If you need a special security manager to test your code, you may
-		provide it by using the ProvideSecurityManager rule. This rule
-		replaces the system's security manager with yours throughout the
-		test</p>
-		<pre>
-public void MyTest {
+			<section id="ProvideSecurityManager">
+				<h3>Security Manager</h3>
+				<p>If you need a special security manager to test your code, you may
+				provide it by using the ProvideSecurityManager rule. This rule
+				replaces the system's security manager with yours throughout the
+				test</p>
+				<pre>public void MyTest {
 	private final MySecurityManager securityManager
 	 = new MySecurityManager();
 
@@ -214,8 +263,9 @@ public void MyTest {
 	public void overrideProperty() {
 		assertEquals(securityManager, System.getSecurityManager());
 	}
-}
-		</pre>
+}</pre>
+			</section>
+		</section>
 
       <h2>License</h2>
       <p>Common Public License Version 1.0</p>
