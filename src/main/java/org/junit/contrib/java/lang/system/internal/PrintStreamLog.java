@@ -13,7 +13,7 @@ public abstract class PrintStreamLog extends ExternalResource {
 	@Override
 	protected void before() throws Throwable {
 		originalStream = getOriginalStream();
-		PrintStream wrappedLog = new PrintStream(log);
+		PrintStream wrappedLog = new PrintStream(log, false, "UTF-8");
 		setStream(wrappedLog);
 	}
 
