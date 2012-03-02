@@ -7,13 +7,15 @@ import java.io.UnsupportedEncodingException;
 import org.junit.rules.ExternalResource;
 
 public abstract class PrintStreamLog extends ExternalResource {
+	private static final boolean NO_AUTO_FLUSH = false;
+	private static final String ENCODING = "UTF-8";
 	private final ByteArrayOutputStream log = new ByteArrayOutputStream();
 	private PrintStream originalStream;
 
 	@Override
 	protected void before() throws Throwable {
 		originalStream = getOriginalStream();
-		PrintStream wrappedLog = new PrintStream(log, false, "UTF-8");
+		PrintStream wrappedLog = new PrintStream(log, NO_AUTO_FLUSH, ENCODING);
 		setStream(wrappedLog);
 	}
 
@@ -33,7 +35,7 @@ public abstract class PrintStreamLog extends ExternalResource {
 	 */
 	public String getLog() {
 		try {
-			return log.toString("UTF-8");
+			return log.toString(ENCODING);
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
 		}
