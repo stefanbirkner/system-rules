@@ -3,8 +3,9 @@ package org.junit.contrib.java.lang.system;
 import static java.lang.System.in;
 import static java.lang.System.setIn;
 
-import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
 
 import org.junit.rules.ExternalResource;
 
@@ -16,34 +17,64 @@ import org.junit.rules.ExternalResource;
  * <pre>
  *   public void MyTest {
  *     &#064;Rule
- *     public final TextFromStandardInputStream textFromStandardInputStream
- *       = new TextFromStandardInputStream("foo");
+ *     public final TextFromStandardInputStream systemInMock
+ *       = emptyStandardInputStream();
  * 
  *     &#064;Test
  *     public void readTextFromStandardInputStream() {
- *       BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
- *       assertEquals("foo", reader.readLine());
+ *       systemInMock.provide("foo");
+ *       Scanner scanner = new Scanner(System.in);
+ *       assertEquals("foo", scanner.nextLine());
  *     }
  *   }
  * </pre>
  */
 public class TextFromStandardInputStream extends ExternalResource {
-	private final String text;
+	private final SystemInMock systemInMock = new SystemInMock();
 	private InputStream originalIn;
 
+	public static TextFromStandardInputStream emptyStandardInputStream() {
+		return new TextFromStandardInputStream("");
+	}
+
+	/**
+	 * Create a new {@code TextFromStandardInputStream}, which provides the
+	 * specified text.
+	 * 
+	 * @param text
+	 *            this text is return by {@code System.in}.
+	 * @deprecated use {@link #provideText(String)}
+	 */
+	@Deprecated
 	public TextFromStandardInputStream(String text) {
-		this.text = text;
+		provideText(text);
+	}
+
+	public void provideText(String text) {
+		systemInMock.provideText(text);
 	}
 
 	@Override
 	protected void before() throws Throwable {
 		originalIn = in;
-		InputStream is = new ByteArrayInputStream(text.getBytes());
-		setIn(is);
+		setIn(systemInMock);
 	}
 
 	@Override
 	protected void after() {
 		setIn(originalIn);
+	}
+
+	private static class SystemInMock extends InputStream {
+		private StringReader reader;
+
+		public void provideText(String text) {
+			reader = new StringReader(text);
+		}
+
+		@Override
+		public int read() throws IOException {
+			return reader.read();
+		}
 	}
 }

@@ -2,11 +2,12 @@ package org.junit.contrib.java.lang.system;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertThat;
+import static org.junit.contrib.java.lang.system.TextFromStandardInputStream.emptyStandardInputStream;
 
-import java.io.BufferedReader;
 import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.util.Scanner;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -19,12 +20,12 @@ public class TextFromStandardInputStreamTest {
 	@Rule
 	public final Timeout timeout = new Timeout(1000);
 
-	private final TextFromStandardInputStream rule = new TextFromStandardInputStream(
-			ARBITRARY_TEXT);
+	private final TextFromStandardInputStream systemInMock = emptyStandardInputStream();
 
 	@Test
 	public void provideText() throws Throwable {
-		ReadTextFromSystemIn statement = new ReadTextFromSystemIn();
+		ReadTextFromSystemIn statement = new ReadTextFromSystemIn(
+				ARBITRARY_TEXT);
 		executeRuleWithStatement(statement);
 		assertThat(statement.textFromSystemIn, is(equalTo(ARBITRARY_TEXT)));
 	}
@@ -33,21 +34,26 @@ public class TextFromStandardInputStreamTest {
 	public void restoreSystemIn() throws Throwable {
 		InputStream originalSystemIn = System.in;
 		executeRuleWithStatement(new EmptyStatement());
-		assertThat(System.in, is(equalTo(originalSystemIn)));
+		assertThat(System.in, is(sameInstance(originalSystemIn)));
 	}
 
 	private void executeRuleWithStatement(Statement statement) throws Throwable {
-		rule.apply(statement, null).evaluate();
+		systemInMock.apply(statement, null).evaluate();
 	}
 
 	private class ReadTextFromSystemIn extends Statement {
+		private final String textProvidedBySystemIn;
 		private String textFromSystemIn;
+
+		public ReadTextFromSystemIn(String textProvidedBySystemIn) {
+			this.textProvidedBySystemIn = textProvidedBySystemIn;
+		}
 
 		@Override
 		public void evaluate() throws Throwable {
-			BufferedReader reader = new BufferedReader(new InputStreamReader(
-					System.in));
-			textFromSystemIn = reader.readLine();
+			systemInMock.provideText(textProvidedBySystemIn);
+			Scanner scanner = new Scanner(System.in);
+			textFromSystemIn = scanner.nextLine();
 		}
 	}
 }
