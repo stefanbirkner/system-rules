@@ -204,18 +204,44 @@ public final ProvideSystemProperty properties
 
 			<section id="TextFromStandardInputStream">
 				<h3>System.in</h3>
-				<p>With the TextFromStandardInputStream rule you are able to provide
-				text, which is read by your code from System.in.</p>
-				<pre>public void MyTest {
-	&#064;Rule
-	public final TextFromStandardInputStream textFromStandardInputStream
-	 = new TextFromStandardInputStream("foo");
+				<p>The <code>TextFromStandardInputStream</code> rule helps you
+				to create tests for classes which read from
+				<code>System.in.</code> You specify the text provided by
+				<code>System.in</code>, by calling
+				<code>provideText(String).</code>
+				The example's class under test reads two numbers from
+				<code>System.in</code> and calculates the sum of these numbers.</p>
 
-	&#064;Test
-	public void readTextFromStandardInputStream() {
-		BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-		assertEquals("foo", reader.readLine());
-	}
+				<h4>Class Under Test</h4>
+				<pre>import java.util.Scanner;
+
+public class Summarize {
+  public static int sumOfNumbersFromSystemIn() {
+    Scanner scanner = new Scanner(System.in);
+    int firstSummand = scanner.nextInt();
+    int secondSummand = scanner.nextInt();
+    return firstSummand + secondSummand;
+  }
+}</pre>
+
+				<h4>Test</h4>
+				<pre>import static org.junit.Assert.*;
+import static org.junit.contrib.java.lang.system.TextFromStandardInputStream.*;
+
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.contrib.java.lang.system.TextFromStandardInputStream;
+
+public class SummarizeTest {
+  &#064;Rule
+  public final TextFromStandardInputStream systemInMock
+    = emptyStandardInputStream();
+
+  &#064;Test
+  public void summarizesTwoNumbers() {
+    systemInMock.provideText("1\n2\n");
+    assertEquals(3, Summarize.sumOfNumbersFromSystemIn());
+  }
 }</pre>
 			</section>
 
