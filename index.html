@@ -54,8 +54,8 @@
 				</div>
 	    	<div class="span4">
 					<h2>System.exit(…)</h2>
-					<p>Use the <a href="#ExpectedSystemExit">ExpectedSystemExit</a> rule to verify that
-					<code>System.exit(…)</code> is called. You could verify the exit status, too.</p>
+					<p>Use the <a href="#ExpectedSystemExit">ExpectedSystemExit</a> rule to test code that calls <code>System.exit(…).</code> Verify that
+					<code>System.exit(…)</code> is called, verify the status code of this call or check assertions afterwards.</p>
 				</div>
 	    </div>
     	<div class="row-fluid">
@@ -252,29 +252,67 @@ public class SummarizeTest {
 
 			<section id="ExpectedSystemExit">
 				<h3>System.exit()</h3>
-				<p>If your code calls System.exit(), then your test stops and
-				doesn't finish. The ExpectedSystemExit rule allows in-test
-				specification of expected System.exit() calls.</p>
-				<pre>public void MyTest {
-	&#064;Rule
-	public final ExpectedSystemExit exit = ExpectedSystemExit.none();
+				<p>If your code calls <code>System.exit(),</code> then your test
+				stops and doesn't finish. The <code>ExpectedSystemExit</code>
+				rule allows in-test specification of expected
+				<code>System.exit()</code> calls. Furthermore you cannot use
+				JUnit's assert methods because of the abnormal termination of
+				your code. As a substitute you can provide an
+				<code>Assertion</code> object to the
+				<code>ExpectedSystemExit</code> rule.</p>
 
-	&#064;Test
-	public void noSystemExit() {
-		//passes
-	}
+				<h4>Class Under Test</h4>
+				<pre>public class AppWithExit {
+  public static String message;
 
-	&#064;Test
-	public void systemExitWithArbitraryStatusCode() {
-		exit.expectSystemExit();
-		System.exit(0);
-	}
+  public static void doSomethingAndExit() {
+    message = "exit ...";
+    System.exit(1);		
+  }
 
-	&#064;Test
-	public void systemExitWithSelectedStatusCode0() {
-		exit.expectSystemExitWithStatus(0);
-		System.exit(0);
-	}
+  public static void doNothing() {
+  }
+}</pre>
+
+				<h4>Test</h4>
+				<pre>public void AppWithExitTest {
+  &#064;Rule
+  public final ExpectedSystemExit exit = ExpectedSystemExit.none();
+
+  &#064;Test
+  public void exits() {
+    exit.expectSystemExit();
+    AppWithExit.doSomethingAndExit();
+  }
+
+  &#064;Test
+  public void exitsWithStatusCode1() {
+    exit.expectSystemExitWithStatus(1);
+    AppWithExit.doSomethingAndExit();
+  }
+
+  &#064;Test
+  public void writesMessage() {
+    exit.expectSystemExitWithStatus(1);
+    exit.checkAssertionAfterwards(new Assertion() {
+      public void checkAssertion() {
+        assertEquals("exit ...", AppWithExit.message);
+      }
+    });
+    AppWithExit.doSomethingAndExit();
+  }
+
+  &#064;Test
+  public void systemExitWithStatusCode1() {
+    exit.expectSystemExitWithStatus(1);
+    AppWithExit.doSomethingAndExit();
+  }
+
+  &#064;Test
+  public void noSystemExit() {
+    AppWithExit.doNothing();
+    //passes
+  }
 }</pre>
 			</section>
 
