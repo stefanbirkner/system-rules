@@ -2,9 +2,12 @@ package org.junit.contrib.java.lang.system;
 
 import static java.lang.System.getSecurityManager;
 import static java.lang.System.setSecurityManager;
-import static org.hamcrest.core.IsSame.sameInstance;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.junit.rules.ExpectedException.none;
 
 import java.security.Permission;
@@ -17,9 +20,18 @@ import org.junit.runners.model.Statement;
 
 public class ExpectedSystemExitTest {
 	private static final Object ARBITRARY_CONTEXT = new Object();
+	private static final Assertion INVALID_ASSERTION = new Assertion() {
+		public void checkAssertion() throws Exception {
+			fail("Assertion failed.");
+		}
+	};
+	private static final Assertion VALID_ASSERTION = new Assertion() {
+		public void checkAssertion() throws Exception {
+		}
+	};
 
 	@Rule
-	public final ExpectedException thrown = none();
+	public final ExpectedException thrown = none().handleAssertionErrors();
 
 	private final ExpectedSystemExit rule = ExpectedSystemExit.none();
 
@@ -58,6 +70,41 @@ public class ExpectedSystemExitTest {
 		thrown.expectMessage("Wrong exit status");
 		rule.expectSystemExitWithStatus(1);
 		executeRuleWithExitStatus0();
+	}
+
+	@Test
+	public void succeedOnExitWithValidAssertion() throws Throwable {
+		rule.expectSystemExit();
+		rule.checkAssertionAfterwards(new Assertion() {
+			public void checkAssertion() throws Exception {
+				assertTrue(true);
+			}
+		});
+		executeRuleWithExitStatus0();
+	}
+
+	@Test
+	public void failsOnExitWithInvalidAssertion() throws Throwable {
+		thrown.expectMessage(equalTo("Assertion failed."));
+		rule.expectSystemExit();
+		rule.checkAssertionAfterwards(INVALID_ASSERTION);
+		executeRuleWithExitStatus0();
+	}
+
+	@Test
+	public void failsOnFirstOfTwoAssertions() throws Throwable {
+		thrown.expectMessage(equalTo("Assertion failed."));
+		rule.checkAssertionAfterwards(INVALID_ASSERTION);
+		rule.checkAssertionAfterwards(VALID_ASSERTION);
+		executeRuleWithoutExitCall();
+	}
+
+	@Test
+	public void failsOnSecondOfTwoAssertions() throws Throwable {
+		thrown.expectMessage(equalTo("Assertion failed."));
+		rule.checkAssertionAfterwards(VALID_ASSERTION);
+		rule.checkAssertionAfterwards(INVALID_ASSERTION);
+		executeRuleWithoutExitCall();
 	}
 
 	@Test
