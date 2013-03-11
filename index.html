@@ -6,6 +6,7 @@
   <title>System Rules</title>
   <link rel="stylesheet" href="bootstrap.min.css" />
   <link rel="stylesheet" href="bootstrap-responsive.min.css" />
+  <link rel="stylesheet" href="prettify.css" />
 	<style>
 		#overview h2 {font-weight:200;}
 		.span4 {margin-bottom:2em;}
@@ -100,7 +101,7 @@
 				<p>The ClearSystemProperty rule deletes the property before the test
 				and restores the original value of the property when the test is
 				finished.</p>
-				<pre>public void MyTest {
+				<pre class="prettyprint">public void MyTest {
 	&#064;Rule
 	public final ClearSystemProperty myPropertyIsCleared
 	 = new ClearSystemProperty("MyProperty");
@@ -117,7 +118,7 @@
 				<p>The ProvideSystemProperty rule provides an arbitrary value for a
 				system property to a test. After the test the original value is
 				restored.</p>
-				<pre>public void MyTest {
+				<pre class="prettyprint">public void MyTest {
 	&#064;Rule
 	public final ProvideSystemProperty myPropertyHasMyValue
 	 = new ProvideSystemProperty("MyProperty", "MyValue");
@@ -134,7 +135,7 @@
 }</pre>
 				<p>You could also use a single instance of the rule to achieve the
 				same effect:</p>
-				<pre>public void MyTest {
+				<pre class="prettyprint">public void MyTest {
 	&#064;Rule
 	public final ProvideSystemProperty properties
 	 = new ProvideSystemProperty("MyProperty", "MyValue").and("OtherProperty", null);
@@ -149,12 +150,12 @@
 				<p>You can use a properties file to supply properties for the
 		ProvideSystemProperty rule. The file can be from the file system or the
 		class path. In the first case use</p>
-				<pre>@Rule
+				<pre class="prettyprint">@Rule
 public final ProvideSystemProperty properties
  = ProvideSystemProperty.fromFile("/home/myself/example.properties");</pre>
 
 				<p>and in the second case use</p>
-				<pre>@Rule
+				<pre class="prettyprint">@Rule
 public final ProvideSystemProperty properties
  = ProvideSystemProperty.fromResource("example.properties");</pre>
 			</section>
@@ -163,7 +164,7 @@ public final ProvideSystemProperty properties
 				<h3>Restore Properties</h3>
 				<p>The RestoreSystemProperties rule restores the original value of
 				the property when the test is finished.</p>
-				<pre>public void MyTest {
+				<pre class="prettyprint">public void MyTest {
 	&#064;Rule
 	public final RestoreSystemProperties restoreSystemProperties
 	 = new RestoreSystemProperties("MyProperty");
@@ -184,7 +185,7 @@ public final ProvideSystemProperty properties
 				StandardOutputStreamLog rule are logging everything written to
 				System.err or System.out. The text is available by calling getLog().
 				</p>
-				<pre>public void MyTest {
+				<pre class="prettyprint">public void MyTest {
 	&#064;Rule
 	public final StandardErrorStreamLog log = new StandardErrorStreamLog();
 
@@ -195,7 +196,7 @@ public final ProvideSystemProperty properties
 	}
 }</pre>
 
-    		<pre>public void MyTest {
+    		<pre class="prettyprint">public void MyTest {
 	&#064;Rule
 	public final StandardOutputStreamLog log = new StandardOutputStreamLog();
 
@@ -218,7 +219,7 @@ public final ProvideSystemProperty properties
 				<code>System.in</code> and calculates the sum of these numbers.</p>
 
 				<h4>Class Under Test</h4>
-				<pre>import java.util.Scanner;
+				<pre class="prettyprint">import java.util.Scanner;
 
 public class Summarize {
   public static int sumOfNumbersFromSystemIn() {
@@ -230,7 +231,7 @@ public class Summarize {
 }</pre>
 
 				<h4>Test</h4>
-				<pre>import static org.junit.Assert.*;
+				<pre class="prettyprint">import static org.junit.Assert.*;
 import static org.junit.contrib.java.lang.system.TextFromStandardInputStream.*;
 
 import org.junit.Rule;
@@ -262,7 +263,7 @@ public class SummarizeTest {
 				<code>ExpectedSystemExit</code> rule.</p>
 
 				<h4>Class Under Test</h4>
-				<pre>public class AppWithExit {
+				<pre class="prettyprint">public class AppWithExit {
   public static String message;
 
   public static void doSomethingAndExit() {
@@ -275,7 +276,7 @@ public class SummarizeTest {
 }</pre>
 
 				<h4>Test</h4>
-				<pre>public void AppWithExitTest {
+				<pre class="prettyprint">public void AppWithExitTest {
   &#064;Rule
   public final ExpectedSystemExit exit = ExpectedSystemExit.none();
 
@@ -322,7 +323,7 @@ public class SummarizeTest {
 				provide it by using the ProvideSecurityManager rule. This rule
 				replaces the system's security manager with yours throughout the
 				test</p>
-				<pre>public void MyTest {
+				<pre class="prettyprint">public void MyTest {
 	private final MySecurityManager securityManager
 	 = new MySecurityManager();
 
@@ -361,5 +362,7 @@ public class SummarizeTest {
       var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
     })();
   </script>
+  <script src="prettify.js"></script>
+  <script type="text/javascript">prettyPrint();</script>
 </body>
 </html>
