@@ -2,6 +2,7 @@ package org.junit.contrib.java.lang.system;
 
 import static java.lang.System.getSecurityManager;
 import static java.lang.System.setSecurityManager;
+import static java.lang.Thread.sleep;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertEquals;
@@ -20,6 +21,7 @@ import org.junit.runners.model.Statement;
 
 public class ExpectedSystemExitTest {
 	private static final Object ARBITRARY_CONTEXT = new Object();
+	private static final int ARBITRARY_EXIT_STATUS = 216843;
 	private static final Assertion INVALID_ASSERTION = new Assertion() {
 		public void checkAssertion() throws Exception {
 			fail("Assertion failed.");
@@ -122,6 +124,12 @@ public class ExpectedSystemExitTest {
 		executeRuleWithStatement(new CheckContext());
 	}
 
+	@Test
+	public void succeedsOnExitInThread() throws Throwable {
+		rule.expectSystemExitWithStatus(ARBITRARY_EXIT_STATUS);
+		executeRuleWithStatement(new SystemExitInThread());
+	}
+
 	private void executeRuleWithoutExitCall() throws Throwable {
 		executeRuleWithStatement(new EmptyStatement());
 	}
@@ -146,6 +154,20 @@ public class ExpectedSystemExitTest {
 		public void evaluate() throws Throwable {
 			assertEquals(ARBITRARY_CONTEXT, getSecurityManager()
 					.getSecurityContext());
+		}
+	}
+
+	private static class SystemExitInThread extends Statement {
+		@Override
+		public void evaluate() throws Throwable {
+			Runnable callSystemExit = new Runnable() {
+				public void run() {
+					System.exit(ARBITRARY_EXIT_STATUS);
+				}
+			};
+			Thread thread = new Thread(callSystemExit);
+			thread.start();
+			sleep(1000); // wait until the thread exits
 		}
 	}
 

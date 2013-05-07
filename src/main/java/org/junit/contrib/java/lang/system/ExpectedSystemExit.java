@@ -25,6 +25,11 @@ import org.junit.runners.model.Statement;
  * substitute you can provide an {@code Assertion} object to the
  * {@code ExpectedSystemExit} rule.
  * 
+ * <p>
+ * Some care must be taken if your system under test creates a new thread and
+ * this thread calls {@code System.exit()}. In this case you have to ensure that
+ * the test does not finish before {@code System.exit()} is called.
+ * 
  * <pre>
  * public class AppWithExit {
  * 	public static String message;
@@ -122,13 +127,21 @@ public class ExpectedSystemExit implements TestRule {
 			public void evaluate() throws Throwable {
 				try {
 					base.evaluate();
-					handleMissingSystemExit();
-				} catch (CheckExitCalled e) {
-					handleSystemExit(e);
+				} catch (CheckExitCalled ignored) {
 				}
+				checkSystemExit();
 				checkAssertions();
 			}
 		};
+	}
+
+	private void checkSystemExit() {
+		NoExitSecurityManager securityManager = (NoExitSecurityManager) getSecurityManager();
+		if (securityManager.isCheckExitCalled())
+			handleSystemExitWithStatus(securityManager
+					.getStatusOfFirstCheckExitCall());
+		else
+			handleMissingSystemExit();
 	}
 
 	private void handleMissingSystemExit() {
@@ -136,11 +149,12 @@ public class ExpectedSystemExit implements TestRule {
 			fail("System.exit has not been called.");
 	}
 
-	private void handleSystemExit(CheckExitCalled e) {
+	private void handleSystemExitWithStatus(int status) {
 		if (!expectExit)
-			fail("Unexpected call of System.exit(" + e.getStatus() + ").");
+			fail("Unexpected call of System.exit(" + status + ").");
 		else if (expectedStatus != null)
-			assertEquals("Wrong exit status", expectedStatus, e.getStatus());
+			assertEquals("Wrong exit status", expectedStatus,
+					Integer.valueOf(status));
 	}
 
 	private void checkAssertions() throws Exception {

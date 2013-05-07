@@ -11,6 +11,7 @@ import java.security.Permission;
  */
 public class NoExitSecurityManager extends SecurityManager {
 	private final SecurityManager originalSecurityManager;
+	private Integer statusOfFirstExitCall = null;
 
 	public NoExitSecurityManager(SecurityManager originalSecurityManager) {
 		this.originalSecurityManager = originalSecurityManager;
@@ -18,7 +19,21 @@ public class NoExitSecurityManager extends SecurityManager {
 
 	@Override
 	public void checkExit(int status) {
+		if (statusOfFirstExitCall == null)
+			statusOfFirstExitCall = status;
 		throw new CheckExitCalled(status);
+	}
+
+	public boolean isCheckExitCalled() {
+		return statusOfFirstExitCall != null;
+	}
+
+	public int getStatusOfFirstCheckExitCall() {
+		if (isCheckExitCalled())
+			return statusOfFirstExitCall;
+		else
+			throw new IllegalStateException(
+					"checkExit(int) has not been called.");
 	}
 
 	@Override

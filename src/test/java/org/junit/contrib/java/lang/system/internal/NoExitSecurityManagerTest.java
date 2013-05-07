@@ -446,4 +446,40 @@ public class NoExitSecurityManagerTest {
 	public void dontFailWithoutParentForGetThreadGroup() {
 		managerWithoutOriginal.getThreadGroup();
 	}
+
+	@Test
+	public void provideInformationThatCheckExitHasNotBeenCalled() {
+		assertThat(managerWithOriginal,
+				hasProperty("checkExitCalled", is(false)));
+	}
+
+	@Test
+	public void provideInformationThatCheckExitHasBeenCalled() {
+		safeCallCheckExitWithStatus(DUMMY_STATUS);
+		assertThat(managerWithOriginal,
+				hasProperty("checkExitCalled", is(true)));
+	}
+
+	@Test
+	public void providesStatusOfFirstCheckExitCall() {
+		safeCallCheckExitWithStatus(DUMMY_STATUS);
+		safeCallCheckExitWithStatus(DUMMY_STATUS + 1);
+		assertThat(
+				managerWithOriginal,
+				hasProperty("statusOfFirstCheckExitCall", equalTo(DUMMY_STATUS)));
+	}
+
+	private void safeCallCheckExitWithStatus(int status) {
+		try {
+			managerWithOriginal.checkExit(status);
+		} catch (CheckExitCalled ignored) {
+		}
+	}
+
+	@Test
+	public void doesNotProvideStatusOfFirstCheckExitCallWithoutCall() {
+		thrown.expect(IllegalStateException.class);
+		thrown.expectMessage("checkExit(int) has not been called.");
+		managerWithOriginal.getStatusOfFirstCheckExitCall();
+	}
 }
