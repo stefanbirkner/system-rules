@@ -15,7 +15,7 @@
 
 	<name>System Rules</name>
 	<description>A collection of JUnit rules for testing code which uses java.lang.System.</description>
-	<url>http://stefanbirkner.github.com/system-rules/</url>
+	<url>http://stefanbirkner.github.io/system-rules/</url>
 	<inceptionYear>2011</inceptionYear>
 	<licenses>
 		<license>
