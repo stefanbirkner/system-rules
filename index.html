@@ -262,6 +262,11 @@ public class SummarizeTest {
 				<code>Assertion</code> object to the
 				<code>ExpectedSystemExit</code> rule.</p>
 
+				<p>Some care must be taken if your system under test creates a
+				new thread and this thread calls <code>System.exit()</code>. In
+				this case you have to ensure that the test does not finish
+				before <code>System.exit()</code> is called.</p>
+
 				<h4>Class Under Test</h4>
 				<pre class="prettyprint">public class AppWithExit {
   public static String message;
