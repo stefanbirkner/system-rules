@@ -7,14 +7,35 @@ import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertThat;
 
 import java.io.PrintStream;
+import java.util.Arrays;
+import java.util.Collection;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 import org.junit.runners.model.Statement;
 
+@RunWith(value = Parameterized.class)
 public class StandardOutputStreamLogTest {
 	private static final String ARBITRARY_TEXT = "arbitrary text";
 
-	private final StandardOutputStreamLog log = new StandardOutputStreamLog();
+	private final StandardOutputStreamLog log;
+
+	@Parameters
+	public static Collection<Object[]> data() {
+		Object[][] data = new Object[][] { { null }, { Boolean.TRUE }, { Boolean.FALSE } };
+		return Arrays.asList(data);
+	}
+
+	public StandardOutputStreamLogTest(Boolean keepOutput) {
+		if (keepOutput == null) {
+			log = new StandardOutputStreamLog();
+		}
+		else {
+			log = new StandardOutputStreamLog(keepOutput);
+		}
+	}
 
 	@Test
 	public void logWriting() throws Throwable {
