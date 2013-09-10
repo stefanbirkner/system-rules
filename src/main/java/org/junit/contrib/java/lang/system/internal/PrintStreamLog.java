@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 
+import org.apache.commons.io.output.TeeOutputStream;
 import org.junit.rules.ExternalResource;
 
 public abstract class PrintStreamLog extends ExternalResource {
@@ -15,7 +16,8 @@ public abstract class PrintStreamLog extends ExternalResource {
 	@Override
 	protected void before() throws Throwable {
 		originalStream = getOriginalStream();
-		PrintStream wrappedLog = new PrintStream(log, NO_AUTO_FLUSH, ENCODING);
+		TeeOutputStream tee = new TeeOutputStream(originalStream, log);
+		PrintStream wrappedLog = new PrintStream(tee, NO_AUTO_FLUSH, ENCODING);
 		setStream(wrappedLog);
 	}
 

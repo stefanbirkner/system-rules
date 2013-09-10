@@ -1,11 +1,14 @@
 package org.junit.contrib.java.lang.system;
 
 import static java.lang.System.out;
+import static java.lang.System.setOut;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertThat;
 
+import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
 import org.junit.Test;
@@ -27,6 +30,20 @@ public class StandardOutputStreamLogTest {
 		PrintStream originalStream = out;
 		executeRuleWithStatement();
 		assertThat(originalStream, is(sameInstance(out)));
+	}
+
+	@Test
+	public void stillWritesToSystemOutputStream() throws Throwable {
+		PrintStream originalStream = out;
+		try {
+			ByteArrayOutputStream captureOutputStream = new ByteArrayOutputStream();
+			setOut(new PrintStream(captureOutputStream));
+			executeRuleWithStatement();
+			assertThat(captureOutputStream,
+					hasToString(equalTo(ARBITRARY_TEXT)));
+		} finally {
+			setOut(originalStream);
+		}
 	}
 
 	private void executeRuleWithStatement() throws Throwable {
