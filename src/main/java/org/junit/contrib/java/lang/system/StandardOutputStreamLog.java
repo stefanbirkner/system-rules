@@ -25,6 +25,14 @@ import org.junit.contrib.java.lang.system.internal.PrintStreamLog;
  * </pre>
  */
 public class StandardOutputStreamLog extends PrintStreamLog {
+	
+	public StandardOutputStreamLog() {
+	}
+	
+	public StandardOutputStreamLog(boolean keepOutput) {
+		super(keepOutput);
+	}
+	
 	@Override
 	protected PrintStream getOriginalStream() {
 		return out;
