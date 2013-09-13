@@ -1,83 +1,44 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset='utf-8'>
+---
+layout: page
+title: Get System Rules
+headline: Get System Rules
+---
+<p>The System Rules library is available from the Maven repository.</p>
 
-  <title>Get System Rules</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="bootstrap.min.css" />
-</head>
+<h3>Download</h3>
+<ul>
+  <li><a href="http://search.maven.org/remotecontent?filepath=com/github/stefanbirkner/system-rules/1.4.0/system-rules-1.4.0.jar">system-rules-1.4.0.jar</a></li>
+  <li><a href="http://search.maven.org/remotecontent?filepath=com/github/stefanbirkner/system-rules/1.4.0/system-rules-1.4.0-javadoc.jar">system-rules-1.4.0-javadoc.jar</a></li>
+  <li><a href="http://search.maven.org/remotecontent?filepath=com/github/stefanbirkner/system-rules/1.4.0/system-rules-1.4.0-sources.jar">system-rules-1.4.0-sources.jar</a></li>
+</ul>
 
-<body>
-  <nav class="navbar navbar-inverse">
-    <div class="navbar-header">
-      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
-        <span class="sr-only">Toggle navigation</span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </button>
-      <a class="navbar-brand" href="index.html">System Rules</a>
-    </div>
-    <div class="collapse navbar-collapse navbar-ex1-collapse">
-      <ul class="nav navbar-nav">
-        <li><a href="index.html">Home</a></li>
-        <li class="active"><a href="#">Get it!</a></li>
-        <li><a href="license.html">License</a></li>
-        <li><a href="releases.html">Releases</a></li>
-      </ul>
-    </div>
-  </nav>
+<h3>Use in Maven</h3>
+{% highlight xml %}
+<dependency>
+  <groupId>com.github.stefanbirkner</groupId>
+  <artifactId>system-rules</artifactId>
+  <version>1.4.0</version>
+</dependency>
+{% endhighlight %}
 
-  <div class="container">
-    <div class="page-header">
-      <h1>Get System Rules</h1>
-    </div>
+<h3>Use in Buildr</h3>
+<pre>'com.github.stefanbirkner:system-rules:jar:1.4.0'</pre>
 
-		<p>The System Rules library is available from the Maven repository.</p>
+<h3>Use in Ivy</h3>
+{% highlight xml %}
+<dependency org="com.github.stefanbirkner" name="system-rules" rev="1.4.0">
+  <artifact name="system-rules" type="jar"/>
+</dependency>
+{% endhighlight %}
 
-		<h3>Download</h3>
-		<ul>
-			<li><a href="http://search.maven.org/remotecontent?filepath=com/github/stefanbirkner/system-rules/1.4.0/system-rules-1.4.0.jar">system-rules-1.4.0.jar</a></li>
-			<li><a href="http://search.maven.org/remotecontent?filepath=com/github/stefanbirkner/system-rules/1.4.0/system-rules-1.4.0-javadoc.jar">system-rules-1.4.0-javadoc.jar</a></li>
-			<li><a href="http://search.maven.org/remotecontent?filepath=com/github/stefanbirkner/system-rules/1.4.0/system-rules-1.4.0-sources.jar">system-rules-1.4.0-sources.jar</a></li>
-		</ul>
+<h3>Use in Groovy Grape</h3>
+{% highlight groovy %}
+@Grapes(
+  @Grab(group='com.github.stefanbirkner', module='system-rules', version='1.4.0')
+)
+{% endhighlight %}
 
-		<h3>Use in Maven</h3>
-    	<pre>&lt;dependency&gt;
-    &lt;groupId>com.github.stefanbirkner&lt;/groupId&gt;
-    &lt;artifactId>system-rules&lt;/artifactId&gt;
-    &lt;version>1.4.0&lt;/version&gt;
-&lt;/dependency></pre>
-
-		<h3>Use in Buildr</h3>
-    	<pre>'com.github.stefanbirkner:system-rules:jar:1.4.0'</pre>
-
-		<h3>Use in Ivy</h3>
-    	<pre>&lt;dependency org="com.github.stefanbirkner" name="system-rules" rev="1.4.0" &gt;
-    &lt;artifact name="system-rules" type="jar"/&gt;
-&lt;/dependency&gt;</pre>
-
-		<h3>Use in Groovy Grape</h3>
-		<pre>@Grapes(
-	@Grab(group='com.github.stefanbirkner', module='system-rules', version='1.4.0')
-)</pre>
-
-		<h3>Use in Grails</h3>
-		<pre>compile 'com.github.stefanbirkner:system-rules:1.4.0'</pre>
-	</div>
-
-  <script type="text/javascript">
-    var _gaq = _gaq || [];
-    _gaq.push(['_setAccount', 'UA-27382940-1']);
-    _gaq.push(['_gat._anonymizeIp']);
-    _gaq.push(['_trackPageview']);
-
-    (function() {
-      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-    })();
-  </script>
-</body>
-</html>
+<h3>Use in Grails</h3>
+{% highlight groovy %}
+compile 'com.github.stefanbirkner:system-rules:1.4.0'
+{% endhighlight %}

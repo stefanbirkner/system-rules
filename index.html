@@ -1,12 +1,11 @@
+---
+title: System Rules
+---
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset='utf-8'>
-  <title>System Rules</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="bootstrap.min.css" />
+  {% include basicHead.html %}
   <link rel="stylesheet" href="bootstrap-theme.min.css" />
-  <link rel="stylesheet" href="prettify.css" />
 	<style>
 		#overview h2 {font-weight:200;}
 		.col-md-4 {margin-bottom:2em;}
@@ -14,26 +13,7 @@
 </head>
 
 <body>
-  <nav class="navbar navbar-inverse">
-    <div class="navbar-header">
-      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
-        <span class="sr-only">Toggle navigation</span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </button>
-      <a class="navbar-brand" href="index.html">System Rules</a>
-    </div>
-    <div class="collapse navbar-collapse navbar-ex1-collapse">
-      <ul class="nav navbar-nav">
-        <li class="active"><a href="#">Home</a></li>
-        <li><a href="download.html">Get it!</a></li>
-        <li><a href="license.html">License</a></li>
-        <li><a href="releases.html">Releases</a></li>
-      </ul>
-    </div>
-  </nav>
-
+  {% include navbar.html %}
   <div class="container">
 		<header>
 		  <div class="jumbotron">
@@ -107,16 +87,16 @@
 				<p>The ClearSystemProperty rule deletes the property before the test
 				and restores the original value of the property when the test is
 				finished.</p>
-				<pre class="prettyprint">public void MyTest {
-	&#064;Rule
+				{% highlight java %}public void MyTest {
+	@Rule
 	public final ClearSystemProperty myPropertyIsCleared
 	 = new ClearSystemProperty("MyProperty");
 
-	&#064;Test
+	@Test
 	public void overrideProperty() {
 		assertNull(System.getProperty("MyProperty"));
 	}
-}</pre>
+}{% endhighlight %}
 			</section>
 				
 			<section id="ProvideSystemProperty">
@@ -124,64 +104,64 @@
 				<p>The ProvideSystemProperty rule provides an arbitrary value for a
 				system property to a test. After the test the original value is
 				restored.</p>
-				<pre class="prettyprint">public void MyTest {
-	&#064;Rule
+				{% highlight java %}public void MyTest {
+	@Rule
 	public final ProvideSystemProperty myPropertyHasMyValue
 	 = new ProvideSystemProperty("MyProperty", "MyValue");
 
-	&#064;Rule
+	@Rule
 	public final ProvideSystemProperty otherPropertyIsMissing
 	 = new ProvideSystemProperty("OtherProperty", null);
 
-	&#064;Test
+	@Test
 	public void overrideProperty() {
 		assertEquals("MyValue", System.getProperty("MyProperty"));
 		assertNull(System.getProperty("OtherProperty"));
 	}
-}</pre>
+}{% endhighlight %}
 				<p>You could also use a single instance of the rule to achieve the
 				same effect:</p>
-				<pre class="prettyprint">public void MyTest {
-	&#064;Rule
+				{% highlight java %}public void MyTest {
+	@Rule
 	public final ProvideSystemProperty properties
 	 = new ProvideSystemProperty("MyProperty", "MyValue").and("OtherProperty", null);
 
-	&#064;Test
+	@Test
 	public void overrideProperty() {
 		assertEquals("MyValue", System.getProperty("MyProperty"));
 		assertNull(System.getProperty("OtherProperty"));
 	}
-}</pre>
+}{% endhighlight %}
 
 				<p>You can use a properties file to supply properties for the
 		ProvideSystemProperty rule. The file can be from the file system or the
 		class path. In the first case use</p>
-				<pre class="prettyprint">@Rule
+				{% highlight java %}@Rule
 public final ProvideSystemProperty properties
- = ProvideSystemProperty.fromFile("/home/myself/example.properties");</pre>
+ = ProvideSystemProperty.fromFile("/home/myself/example.properties");{% endhighlight %}
 
 				<p>and in the second case use</p>
-				<pre class="prettyprint">@Rule
+				{% highlight java %}@Rule
 public final ProvideSystemProperty properties
- = ProvideSystemProperty.fromResource("example.properties");</pre>
+ = ProvideSystemProperty.fromResource("example.properties");{% endhighlight %}
 			</section>
 
 			<section id="RestoreSystemProperties">
 				<h3>Restore Properties</h3>
 				<p>The RestoreSystemProperties rule restores the original value of
 				the property when the test is finished.</p>
-				<pre class="prettyprint">public void MyTest {
-	&#064;Rule
+				{% highlight java %}public void MyTest {
+	@Rule
 	public final RestoreSystemProperties restoreSystemProperties
 	 = new RestoreSystemProperties("MyProperty");
 
-	&#064;Test
+	@Test
 	public void overrideProperty() {
 		//after the test the original value of "MyProperty" will be restored.
 		System.setProperty("MyProperty", "other value");
 		...
 	}
-}</pre>
+}{% endhighlight %}
 			</section>
     
 			<section id="StandardErrorStreamLog">
@@ -191,27 +171,27 @@ public final ProvideSystemProperty properties
 				StandardOutputStreamLog rule are logging everything written to
 				System.err or System.out. The text is available by calling getLog().
 				</p>
-				<pre class="prettyprint">public void MyTest {
-	&#064;Rule
+				{% highlight java %}public void MyTest {
+	@Rule
 	public final StandardErrorStreamLog log = new StandardErrorStreamLog();
 
-	&#064;Test
+	@Test
 	public void overrideProperty() {
 		System.err.print("hello world");
 		assertEquals("hello world", log.getLog());
 	}
-}</pre>
+}{% endhighlight %}
 
-    		<pre class="prettyprint">public void MyTest {
-	&#064;Rule
+    		{% highlight java %}public void MyTest {
+	@Rule
 	public final StandardOutputStreamLog log = new StandardOutputStreamLog();
 
-	&#064;Test
+	@Test
 	public void overrideProperty() {
 		System.out.print("hello world");
 		assertEquals("hello world", log.getLog());
 	}
-}</pre>
+}{% endhighlight %}
 			</section>
 
 			<section id="TextFromStandardInputStream">
@@ -225,7 +205,7 @@ public final ProvideSystemProperty properties
 				<code>System.in</code> and calculates the sum of these numbers.</p>
 
 				<h4>Class Under Test</h4>
-				<pre class="prettyprint">import java.util.Scanner;
+				{% highlight java %}import java.util.Scanner;
 
 public class Summarize {
   public static int sumOfNumbersFromSystemIn() {
@@ -234,10 +214,10 @@ public class Summarize {
     int secondSummand = scanner.nextInt();
     return firstSummand + secondSummand;
   }
-}</pre>
+}{% endhighlight %}
 
 				<h4>Test</h4>
-				<pre class="prettyprint">import static org.junit.Assert.*;
+				{% highlight java %}import static org.junit.Assert.*;
 import static org.junit.contrib.java.lang.system.TextFromStandardInputStream.*;
 
 import org.junit.Rule;
@@ -245,16 +225,16 @@ import org.junit.Test;
 import org.junit.contrib.java.lang.system.TextFromStandardInputStream;
 
 public class SummarizeTest {
-  &#064;Rule
+  @Rule
   public final TextFromStandardInputStream systemInMock
     = emptyStandardInputStream();
 
-  &#064;Test
+  @Test
   public void summarizesTwoNumbers() {
     systemInMock.provideText("1\n2\n");
     assertEquals(3, Summarize.sumOfNumbersFromSystemIn());
   }
-}</pre>
+}{% endhighlight %}
 			</section>
 
 			<section id="ExpectedSystemExit">
@@ -274,7 +254,7 @@ public class SummarizeTest {
 				before <code>System.exit()</code> is called.</p>
 
 				<h4>Class Under Test</h4>
-				<pre class="prettyprint">public class AppWithExit {
+				{% highlight java %}public class AppWithExit {
   public static String message;
 
   public static void doSomethingAndExit() {
@@ -284,26 +264,26 @@ public class SummarizeTest {
 
   public static void doNothing() {
   }
-}</pre>
+}{% endhighlight %}
 
 				<h4>Test</h4>
-				<pre class="prettyprint">public void AppWithExitTest {
-  &#064;Rule
+				{% highlight java %}public void AppWithExitTest {
+  @Rule
   public final ExpectedSystemExit exit = ExpectedSystemExit.none();
 
-  &#064;Test
+  @Test
   public void exits() {
     exit.expectSystemExit();
     AppWithExit.doSomethingAndExit();
   }
 
-  &#064;Test
+  @Test
   public void exitsWithStatusCode1() {
     exit.expectSystemExitWithStatus(1);
     AppWithExit.doSomethingAndExit();
   }
 
-  &#064;Test
+  @Test
   public void writesMessage() {
     exit.expectSystemExitWithStatus(1);
     exit.checkAssertionAfterwards(new Assertion() {
@@ -314,18 +294,18 @@ public class SummarizeTest {
     AppWithExit.doSomethingAndExit();
   }
 
-  &#064;Test
+  @Test
   public void systemExitWithStatusCode1() {
     exit.expectSystemExitWithStatus(1);
     AppWithExit.doSomethingAndExit();
   }
 
-  &#064;Test
+  @Test
   public void noSystemExit() {
     AppWithExit.doNothing();
     //passes
   }
-}</pre>
+}{% endhighlight %}
 			</section>
 
 			<section id="ProvideSecurityManager">
@@ -334,19 +314,19 @@ public class SummarizeTest {
 				provide it by using the ProvideSecurityManager rule. This rule
 				replaces the system's security manager with yours throughout the
 				test</p>
-				<pre class="prettyprint">public void MyTest {
+				{% highlight java %}public void MyTest {
 	private final MySecurityManager securityManager
 	 = new MySecurityManager();
 
-	&#064;Rule
+	@Rule
 	public final ProvideSecurityManager provideSecurityManager
 	 = new ProvideSecurityManager(securityManager);
 
-	&#064;Test
+	@Test
 	public void overrideProperty() {
 		assertEquals(securityManager, System.getSecurityManager());
 	}
-}</pre>
+}{% endhighlight %}
 			</section>
 		</section>
 
@@ -362,19 +342,6 @@ public class SummarizeTest {
   </div>
 
   <script src="bootstrap.min.js"></script>
-  <script type="text/javascript">
-    var _gaq = _gaq || [];
-    _gaq.push(['_setAccount', 'UA-27382940-1']);
-    _gaq.push(['_gat._anonymizeIp']);
-    _gaq.push(['_trackPageview']);
-
-    (function() {
-      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-    })();
-  </script>
-  <script src="prettify.js"></script>
-  <script type="text/javascript">prettyPrint();</script>
+  {% include tracking.html %}
 </body>
 </html>
