@@ -2,43 +2,46 @@
 layout: page
 title: Get System Rules
 headline: Get System Rules
+groupId: com.github.stefanbirkner
+artifactId: system-rules
+version: 1.4.0
 ---
 <p>The System Rules library is available from the Maven repository.</p>
 
 <h3>Download</h3>
 <ul>
-  <li><a href="http://search.maven.org/remotecontent?filepath=com/github/stefanbirkner/system-rules/1.4.0/system-rules-1.4.0.jar">system-rules-1.4.0.jar</a></li>
-  <li><a href="http://search.maven.org/remotecontent?filepath=com/github/stefanbirkner/system-rules/1.4.0/system-rules-1.4.0-javadoc.jar">system-rules-1.4.0-javadoc.jar</a></li>
-  <li><a href="http://search.maven.org/remotecontent?filepath=com/github/stefanbirkner/system-rules/1.4.0/system-rules-1.4.0-sources.jar">system-rules-1.4.0-sources.jar</a></li>
+  <li><a href="http://search.maven.org/remotecontent?filepath={{ page.groupId | replace: '.', '/' }}/{{ page.artifactId }}/{{ page.version }}/{{ page.artifactId }}-{{ page.version }}.jar">{{ page.artifactId }}-{{ page.version }}.jar</a></li>
+  <li><a href="http://search.maven.org/remotecontent?filepath={{ page.groupId | replace: '.', '/' }}/{{ page.artifactId }}/{{ page.version }}/{{ page.artifactId }}-{{ page.version }}-javadoc.jar">{{ page.artifactId }}-{{ page.version }}-javadoc.jar</a></li>
+  <li><a href="http://search.maven.org/remotecontent?filepath={{ page.groupId | replace: '.', '/' }}/{{ page.artifactId }}/{{ page.version }}/{{ page.artifactId }}-{{ page.version }}-sources.jar">{{ page.artifactId }}-{{ page.version }}-sources.jar</a></li>
 </ul>
 
 <h3>Use in Maven</h3>
 {% highlight xml %}
 <dependency>
-  <groupId>com.github.stefanbirkner</groupId>
-  <artifactId>system-rules</artifactId>
-  <version>1.4.0</version>
+  <groupId>{{ page.groupId }}</groupId>
+  <artifactId>{{ page.artifactId }}</artifactId>
+  <version>{{ page.version }}</version>
 </dependency>
 {% endhighlight %}
 
 <h3>Use in Buildr</h3>
-<pre>'com.github.stefanbirkner:system-rules:jar:1.4.0'</pre>
+<pre>'{{ page.groupId }}:{{ page.artifactId }}:jar:{{ page.version }}'</pre>
 
 <h3>Use in Ivy</h3>
 {% highlight xml %}
-<dependency org="com.github.stefanbirkner" name="system-rules" rev="1.4.0">
-  <artifact name="system-rules" type="jar"/>
+<dependency org="{{ page.groupId }}" name="{{ page.artifactId }}" rev="{{ page.version }}">
+  <artifact name="{{ page.artifactId }}" type="jar"/>
 </dependency>
 {% endhighlight %}
 
 <h3>Use in Groovy Grape</h3>
 {% highlight groovy %}
 @Grapes(
-  @Grab(group='com.github.stefanbirkner', module='system-rules', version='1.4.0')
+  @Grab(group='{{ page.groupId }}', module='{{ page.artifactId }}', version='{{ page.version }}')
 )
 {% endhighlight %}
 
 <h3>Use in Grails</h3>
 {% highlight groovy %}
-compile 'com.github.stefanbirkner:system-rules:1.4.0'
+compile '{{ page.groupId }}:{{ page.artifactId }}:{{ page.version }}'
 {% endhighlight %}
