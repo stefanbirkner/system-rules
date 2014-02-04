@@ -21,14 +21,14 @@ public class StandardErrorStreamLogTest {
 
 	@Test
 	public void logWriting() throws Throwable {
-		executeRuleWithStatement();
+		executeRuleWithStatement(new WriteTextToStandardOutputStream());
 		assertThat(log.getLog(), is(equalTo(ARBITRARY_TEXT)));
 	}
 
 	@Test
 	public void restoreSystemErrorStream() throws Throwable {
 		PrintStream originalStream = err;
-		executeRuleWithStatement();
+		executeRuleWithStatement(new WriteTextToStandardOutputStream());
 		assertThat(originalStream, is(sameInstance(err)));
 	}
 
@@ -38,20 +38,36 @@ public class StandardErrorStreamLogTest {
 		try {
 			ByteArrayOutputStream captureErrorStream = new ByteArrayOutputStream();
 			setErr(new PrintStream(captureErrorStream));
-			executeRuleWithStatement();
+			executeRuleWithStatement(new WriteTextToStandardOutputStream());
 			assertThat(captureErrorStream, hasToString(equalTo(ARBITRARY_TEXT)));
 		} finally {
 			setErr(originalStream);
 		}
 	}
 
-	private void executeRuleWithStatement() throws Throwable {
-		log.apply(new WriteTextToStandardErrorStream(), null).evaluate();
+	@Test
+	public void collectsLogAfterClearing() throws Throwable {
+		executeRuleWithStatement(new ClearLogWhileWritingTextToStandardOutputStream());
+		assertThat(log.getLog(), is(equalTo(ARBITRARY_TEXT)));
 	}
 
-	private class WriteTextToStandardErrorStream extends Statement {
+	private void executeRuleWithStatement(Statement statement) throws Throwable {
+		log.apply(statement, null).evaluate();
+	}
+
+	private class WriteTextToStandardOutputStream extends Statement {
 		@Override
 		public void evaluate() throws Throwable {
+			err.print(ARBITRARY_TEXT);
+		}
+	}
+
+	private class ClearLogWhileWritingTextToStandardOutputStream extends
+			Statement {
+		@Override
+		public void evaluate() throws Throwable {
+			err.print(ARBITRARY_TEXT);
+			log.clear();
 			err.print(ARBITRARY_TEXT);
 		}
 	}

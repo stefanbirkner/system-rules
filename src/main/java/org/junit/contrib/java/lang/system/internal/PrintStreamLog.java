@@ -31,6 +31,13 @@ public abstract class PrintStreamLog extends ExternalResource {
 	protected abstract void setStream(PrintStream wrappedLog);
 
 	/**
+	 * Clears the log. The log can be used again.
+	 */
+	public void clear() {
+		log.reset();
+	}
+
+	/**
 	 * Returns the text written to the standard error stream.
 	 * 
 	 * @return the text written to the standard error stream.

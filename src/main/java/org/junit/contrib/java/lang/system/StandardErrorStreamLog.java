@@ -23,6 +23,19 @@ import org.junit.contrib.java.lang.system.internal.PrintStreamLog;
  *     }
  *   }
  * </pre>
+ *
+ * You can clear the log if you only want to test parts of the text written to
+ * the standard error stream.
+ *
+ * <pre>
+ *   &#064;Test
+ *   public void captureErrorStream() {
+ *     System.err.print("before");
+ *     log.clear();
+ *     System.err.print("afterwards");
+ *     assertEquals("afterwards", log.getLog());
+ *   }
+ * </pre>
  */
 public class StandardErrorStreamLog extends PrintStreamLog {
 	@Override

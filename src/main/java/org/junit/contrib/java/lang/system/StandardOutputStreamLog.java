@@ -23,6 +23,19 @@ import org.junit.contrib.java.lang.system.internal.PrintStreamLog;
  *     }
  *   }
  * </pre>
+ *
+ * You can clear the log if you only want to test parts of the text written to
+ * the standard output stream.
+ *
+ * <pre>
+ *   &#064;Test
+ *   public void captureOutputStream() {
+ *     System.out.print("before");
+ *     log.clear();
+ *     System.out.print("afterwards");
+ *     assertEquals("afterwards", log.getLog());
+ *   }
+ * </pre>
  */
 public class StandardOutputStreamLog extends PrintStreamLog {
 	@Override
