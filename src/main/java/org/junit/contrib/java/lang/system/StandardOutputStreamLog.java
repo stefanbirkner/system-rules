@@ -17,7 +17,7 @@ import org.junit.contrib.java.lang.system.internal.PrintStreamLog;
  *     public final StandardOutputStreamLog log = new StandardOutputStreamLog();
  * 
  *     &#064;Test
- *     public void overrideProperty() {
+ *     public void captureOutputStream() {
  *       System.out.print("hello world");
  *       assertEquals("hello world", log.getLog());
  *     }
