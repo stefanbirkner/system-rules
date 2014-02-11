@@ -171,7 +171,7 @@ public final ProvideSystemProperty properties
 	public final StandardErrorStreamLog log = new StandardErrorStreamLog();
 
 	@Test
-	public void overrideProperty() {
+	public void writesTextToSystemErr() {
 		System.err.print("hello world");
 		assertEquals("hello world", log.getLog());
 	}
@@ -182,9 +182,36 @@ public final ProvideSystemProperty properties
 	public final StandardOutputStreamLog log = new StandardOutputStreamLog();
 
 	@Test
-	public void overrideProperty() {
+	public void writesTextToSystemOut() {
 		System.out.print("hello world");
 		assertEquals("hello world", log.getLog());
+	}
+}{% endhighlight %}
+				<p>The log can be cleared if you want to discard some text that has
+				been written to the log.</p>
+				{% highlight java %}public void MyTest {
+	@Rule
+	public final StandardErrorStreamLog log = new StandardErrorStreamLog();
+
+	@Test
+	public void writesTextToSystemErr() {
+		System.err.print("hello world");
+		log.clear().
+		System.err.print("foo");
+		assertEquals("foo", log.getLog());
+	}
+}{% endhighlight %}
+
+    		{% highlight java %}public void MyTest {
+	@Rule
+	public final StandardOutputStreamLog log = new StandardOutputStreamLog();
+
+	@Test
+	public void writesTextToSystemOut() {
+		System.out.print("hello world");
+		log.clear().
+		System.out.print("foo");
+		assertEquals("foo", log.getLog());
 	}
 }{% endhighlight %}
 			</section>
