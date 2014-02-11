@@ -1,23 +1,25 @@
-<nav class="navbar navbar-inverse" role="navigation">
-  <div class="navbar-header">
-    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
-      <span class="sr-only">Toggle navigation</span>
-      <span class="icon-bar"></span>
-      <span class="icon-bar"></span>
-      <span class="icon-bar"></span>
-    </button>
-    <a class="navbar-brand" href="index.html">System Rules</a>
-  </div>
-  <div class="collapse navbar-collapse navbar-ex1-collapse">
-    <ul class="nav navbar-nav">
-      {% if page.url == "/index.html" %}<li class="active">{% else %}<li>{% endif %}
-      <a href="index.html">Home</a></li>
-      {% if page.url == "/download.html" %}<li class="active">{% else %}<li>{% endif %}
-      <a href="download.html">Get it!</a></li>
-      {% if page.url == "/license.html" %}<li class="active">{% else %}<li>{% endif %}
-      <a href="license.html">License</a></li>
-      {% if page.url == "/releases.html" %}<li class="active">{% else %}<li>{% endif %}
-      <a href="releases.html">Releases</a></li>
-    </ul>
+<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">System Rules</a>
+    </div>
+    <div class="collapse navbar-collapse navbar-ex1-collapse">
+      <ul class="nav navbar-nav">
+        {% if page.url == "/index.html" %}<li class="active">{% else %}<li>{% endif %}
+        <a href="index.html">Home</a></li>
+        {% if page.url == "/download.html" %}<li class="active">{% else %}<li>{% endif %}
+        <a href="download.html">Get it!</a></li>
+        {% if page.url == "/license.html" %}<li class="active">{% else %}<li>{% endif %}
+        <a href="license.html">License</a></li>
+        {% if page.url == "/releases.html" %}<li class="active">{% else %}<li>{% endif %}
+        <a href="releases.html">Releases</a></li>
+      </ul>
+    </div>
   </div>
 </nav>
