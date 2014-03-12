@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  {% include basicHead.html %}
+</head>
+<body>
+  {% include navbar.html %}
+  <div class="container">
+    <div class="page-header">
+      <h1>{{ page.title }}</h1>
+    </div>
+    {{ content }}
+
+    <h3>Download</h3>
+    <ul>
+      <li><a href="http://search.maven.org/remotecontent?filepath={{ page.groupId | replace: '.', '/' }}/{{ page.artifactId }}/{{ page.version }}/{{ page.artifactId }}-{{ page.version }}.jar">{{ page.artifactId }}-{{ page.version }}.jar</a></li>
+      <li><a href="http://search.maven.org/remotecontent?filepath={{ page.groupId | replace: '.', '/' }}/{{ page.artifactId }}/{{ page.version }}/{{ page.artifactId }}-{{ page.version }}-javadoc.jar">{{ page.artifactId }}-{{ page.version }}-javadoc.jar</a></li>
+      <li><a href="http://search.maven.org/remotecontent?filepath={{ page.groupId | replace: '.', '/' }}/{{ page.artifactId }}/{{ page.version }}/{{ page.artifactId }}-{{ page.version }}-sources.jar">{{ page.artifactId }}-{{ page.version }}-sources.jar</a></li>
+    </ul>
+
+<h3>Use in Maven</h3>
+{% highlight xml %}
+<dependency>
+  <groupId>{{ page.groupId }}</groupId>
+  <artifactId>{{ page.artifactId }}</artifactId>
+  <version>{{ page.version }}</version>
+</dependency>
+{% endhighlight %}
+
+<h3>Use in Buildr</h3>
+<pre>'{{ page.groupId }}:{{ page.artifactId }}:jar:{{ page.version }}'</pre>
+
+<h3>Use in Ivy</h3>
+{% highlight xml %}
+<dependency org="{{ page.groupId }}" name="{{ page.artifactId }}" rev="{{ page.version }}">
+  <artifact name="{{ page.artifactId }}" type="jar"/>
+</dependency>
+{% endhighlight %}
+
+<h3>Use in Groovy Grape</h3>
+{% highlight groovy %}
+@Grapes(
+  @Grab(group='{{ page.groupId }}', module='{{ page.artifactId }}', version='{{ page.version }}')
+)
+{% endhighlight %}
+
+<h3>Use in Grails</h3>
+{% highlight groovy %}
+compile '{{ page.groupId }}:{{ page.artifactId }}:{{ page.version }}'
+{% endhighlight %}
+  </div>
+  {% include navbar-js.html %}
+  {% include tracking.html %}
+</body>
+</html>
