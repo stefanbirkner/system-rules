@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  {% include basicHead.html %}
+  <link rel="stylesheet" href="bootstrap-theme.min.css" />
+  <style>
+    #overview h2 {font-weight:200;}
+    .col-md-4 {margin-bottom:2em;}
+  </style>
+</head>
+<body>
+  {% include navbar.html %}
+  <header class="jumbotron">
+    <div class="container">
+      <h1>{{ page.title }}</h1>
+      <p>{{ page.description }}</p>
+      <p><a class="btn btn-primary btn-lg" href="download.html">Get {{ page.title }}</a></p>
+    </div>
+  </header>
+  <div class="container">
+    {{ content }}
+  </div>
+  {% include navbar-js.html %}
+  {% include tracking.html %}
+</body>
+</html>
