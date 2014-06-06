@@ -1,7 +1,6 @@
 package org.junit.contrib.java.lang.system;
 
 import static java.lang.System.clearProperty;
-import static java.lang.System.setProperty;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -25,40 +24,33 @@ import org.junit.rules.ExternalResource;
  * <pre>
  *   public void MyTest {
  *     &#064;Rule
- *     public final ProvideSystemProperty myPropertyHasMyValue
- *       = new ProvideSystemProperty("MyProperty", "MyValue");
- * 
- *     &#064;Rule
- *     public final ProvideSystemProperty otherPropertyIsMissing
- *       = new ProvideSystemProperty("OtherProperty", null);
+ *     public final ProvideSystemProperty provideSystemProperty
+ *         = new ProvideSystemProperty();
  * 
  *     &#064;Test
- *     public void overrideProperty() {
+ *     public void overridesProperty() {
+ *       provideSystemProperty.setProperty("MyProperty", "MyValue");
  *       assertEquals("MyValue", System.getProperty("MyProperty"));
+ *     }
+ * 
+ *     &#064;Test
+ *     public void deletesProperty() {
+ *       provideSystemProperty.setProperty("OtherProperty", null);
  *       assertNull(System.getProperty("OtherProperty"));
  *     }
  *   }
  * </pre>
  * 
- * The test succeeds and after the test, the system property {@code MyProperty}
- * is not set and the system property {@code OtherProperty} has the value
- * {@code OtherValue}.
- * <p>
- * You can also use a single instance of the rule to achieve the same effect:
+ * Both tests succeed and after the tests, the system property
+ * {@code MyProperty} is not set and the system property {@code OtherProperty}
+ * has the value {@code OtherValue}. If you need do provide the same properties
+ * for each test then you can specify the values while creating the
+ * {@code ProvideSystemProperty} rule.
  * 
  * <pre>
- *   public void MyTest {
- *     &#064;Rule
- *     public final ProvideSystemProperty properties
- *       = new ProvideSystemProperty("MyProperty", "MyValue")
- *                              .and("OtherProperty", null);
- * 
- *     &#064;Test
- *     public void overrideProperty() {
- *       assertEquals("MyValue", System.getProperty("MyProperty"));
- *       assertNull(System.getProperty("OtherProperty"));
- *     }
- *   }
+ * &#064;Rule
+ * public final ProvideSystemProperty properties = new ProvideSystemProperty(
+ * 		&quot;MyProperty&quot;, &quot;MyValue&quot;).and(&quot;OtherProperty&quot;, null);
  * </pre>
  * 
  * You can use a properties file to supply properties for the
@@ -81,7 +73,7 @@ import org.junit.rules.ExternalResource;
  */
 public class ProvideSystemProperty extends ExternalResource {
 	private final Map<String, String> properties = new LinkedHashMap<String, String>();
-	private RestoreSystemProperties restoreSystemProperty;
+	private final RestoreSystemProperties restoreSystemProperty = new RestoreSystemProperties();
 
 	public static ProvideSystemProperty fromFile(String name)
 			throws IOException {
@@ -106,7 +98,25 @@ public class ProvideSystemProperty extends ExternalResource {
 		return rule;
 	}
 
-	private ProvideSystemProperty() {
+	public ProvideSystemProperty() {
+	}
+
+	/**
+	 * Sets the property with the name to the specified value. After the test
+	 * the rule restores the value of the property at the point of setting it.
+	 * 
+	 * @param name
+	 *            the name of the property.
+	 * @param value
+	 *            the new value of the property.
+	 * @since 1.6.0
+	 */
+	public void setProperty(String name, String value) {
+		restoreSystemProperty.add(name);
+		if (value == null)
+			clearProperty(name);
+		else
+			System.setProperty(name, value);
 	}
 
 	public ProvideSystemProperty(String name, String value) {
@@ -124,29 +134,15 @@ public class ProvideSystemProperty extends ExternalResource {
 
 	@Override
 	protected void before() throws Throwable {
-		restoreSystemProperty = new RestoreSystemProperties(
-				collectPropertyNames());
-		restoreSystemProperty.before();
-		updateProperties();
+		setProperties();
 	}
 
-	private String[] collectPropertyNames() {
-		return properties.keySet().toArray(new String[properties.size()]);
-	}
-
-	private void updateProperties() {
+	private void setProperties() {
 		for (Entry<String, String> property : properties.entrySet()) {
 			String name = property.getKey();
 			String value = property.getValue();
-			updateProperty(name, value);
-		}
-	}
-
-	private void updateProperty(String name, String value) {
-		if (value == null)
-			clearProperty(name);
-		else
 			setProperty(name, value);
+		}
 	}
 
 	@Override

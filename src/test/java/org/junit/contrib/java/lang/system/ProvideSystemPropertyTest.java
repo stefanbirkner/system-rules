@@ -95,6 +95,17 @@ public class ProvideSystemPropertyTest {
 		assertThat(getProperty(ANOTHER_PROPERTY), is(ARBITRARY_VALUE));
 	}
 
+	@Test
+	public void setsPropertyDuringTestAndRestoresItAfterwards()
+			throws Throwable {
+		setProperty(ARBITRARY_NAME, "value before executing the rule");
+		rule = new ProvideSystemProperty();
+		evaluateRuleForStatement(new SetPropertyAndAssertValue(ARBITRARY_NAME,
+				"dummy value"));
+		assertThat(getProperty(ARBITRARY_NAME),
+				is(equalTo("value before executing the rule")));
+	}
+
 	private void evaluateStatementWithArbitraryValue() throws Throwable {
 		rule = new ProvideSystemProperty(ARBITRARY_NAME, ARBITRARY_VALUE);
 		evaluateAssertPropertyWithNameAndValue(ARBITRARY_NAME, ARBITRARY_VALUE);
@@ -128,6 +139,22 @@ public class ProvideSystemPropertyTest {
 
 		@Override
 		public void evaluate() {
+			assertThat(getProperty(name), is(equalTo(value)));
+		}
+	}
+
+	private class SetPropertyAndAssertValue extends Statement {
+		final String name;
+		final String value;
+
+		SetPropertyAndAssertValue(String name, String value) {
+			this.name = name;
+			this.value = value;
+		}
+
+		@Override
+		public void evaluate() {
+			rule.setProperty(name, value);
 			assertThat(getProperty(name), is(equalTo(value)));
 		}
 	}
