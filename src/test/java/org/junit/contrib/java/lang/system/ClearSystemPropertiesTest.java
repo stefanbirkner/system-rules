@@ -27,7 +27,7 @@ public class ClearSystemPropertiesTest {
 	@Test
 	public void restoresOriginalValueOfSecondProperty() throws Throwable {
 		setProperty(SECOND_ARBITRARY_NAME, ARBITRARY_VALUE);
-		applyRule();
+		applyRuleToStatement(new VerifyValueIsCleared());
 		assertThat(getProperty(SECOND_ARBITRARY_NAME),
 				is(equalTo(ARBITRARY_VALUE)));
 	}
@@ -35,21 +35,43 @@ public class ClearSystemPropertiesTest {
 	@Test
 	public void originallyUnsetPropertyRemainsUnset() throws Throwable {
 		clearProperty(SECOND_ARBITRARY_NAME);
-		applyRule();
+		applyRuleToStatement(new VerifyValueIsCleared());
 		assertThat(getProperty(SECOND_ARBITRARY_NAME),
 				is(nullValue(String.class)));
 	}
 
-	private void applyRule() throws Throwable {
-		rule.apply(new ClearedValue(), null).evaluate();
+	@Test
+	public void clearsPropertyDuringTestAndRestoresItAfterwards()
+			throws Throwable {
+		setProperty("another property", "dummy value");
+		applyRuleToStatement(new ClearPropertyAndVerifyThatItIsCleared(
+				"another property"));
+		assertThat(getProperty("another property"), is("dummy value"));
 	}
 
-	private class ClearedValue extends Statement {
+	private void applyRuleToStatement(Statement statement) throws Throwable {
+		rule.apply(statement, null).evaluate();
+	}
 
+	private class VerifyValueIsCleared extends Statement {
 		@Override
 		public void evaluate() throws Throwable {
 			assertThat(getProperty(SECOND_ARBITRARY_NAME),
 					is(nullValue(String.class)));
+		}
+	}
+
+	private class ClearPropertyAndVerifyThatItIsCleared extends Statement {
+		private final String property;
+
+		ClearPropertyAndVerifyThatItIsCleared(String property) {
+			this.property = property;
+		}
+
+		@Override
+		public void evaluate() throws Throwable {
+			rule.clearProperty(property);
+			assertThat(getProperty(property), is(nullValue(String.class)));
 		}
 	}
 }

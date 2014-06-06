@@ -1,12 +1,10 @@
 package org.junit.contrib.java.lang.system;
 
-import static java.lang.System.clearProperty;
-
 import org.junit.rules.ExternalResource;
 
 /**
- * The {@code ClearSystemProperty} rule clears a set of system properties to a
- * test. After the test the original values are restored.
+ * The {@code ClearSystemProperties} rule clears a set of system properties.
+ * After the test the original values are restored.
  * 
  * Let's assume the system property {@code MyProperty} has the value
  * {@code MyValue}. Now run the test
@@ -14,40 +12,58 @@ import org.junit.rules.ExternalResource;
  * <pre>
  *   public void MyTest {
  *     &#064;Rule
- *     public final ClearSystemProperty myPropertyIsCleared
- *       = new ClearSystemProperty("MyProperty");
+ *     public final ClearSystemProperties clearSystemProperties
+ *         = new ClearSystemProperties();
  * 
  *     &#064;Test
  *     public void overrideProperty() {
+ *       clearSystemProperties.clearProperty("MyProperty");
  *       assertNull(System.getProperty("MyProperty"));
+ *       ...
  *     }
  *   }
  * </pre>
  * 
  * The test succeeds and after the test, the system property {@code MyProperty}
- * has the value {@code MyValue}.
- * 
- * The {@code ClearSystemProperty} rule accepts a list of properties:
+ * again has the value {@code MyValue}. If you need do restore the same
+ * properties for each test then you can provide the properties' names while
+ * creating the {@code ClearSystemProperties} rule.
  * 
  * <pre>
  * &#064;Rule
- * public final ClearSystemProperty myPropertyIsCleared = new ClearSystemProperty(
- * 		&quot;first&quot;, &quot;second&quot;, &quot;third&quot;);
+ * public final ClearSystemProperties clearSystemProperties = new ClearSystemProperties(
+ * 		&quot;MyProperty&quot;, &quot;AnotherProperty&quot;);
  * </pre>
  */
 public class ClearSystemProperties extends ExternalResource {
+	private final RestoreSystemProperties restoreSystemProperty = new RestoreSystemProperties();
+	private final String[] properties;
 
-	private final RestoreSystemProperties restoreSystemProperty;
-	private final String[] names;
+	/**
+	 * Creates a {@code ClearSystemProperties} rule that clears the specified
+	 * properties and restores them after the test.
+	 * 
+	 * @param properties
+	 *            the properties' names.
+	 */
+	public ClearSystemProperties(String... properties) {
+		this.properties = properties;
+	}
 
-	public ClearSystemProperties(String... names) {
-		this.names = names;
-		this.restoreSystemProperty = new RestoreSystemProperties(names);
+	/**
+	 * Clears the property and restores the value of the property at the point
+	 * of clearing it.
+	 * 
+	 * @param property
+	 *            the name of the property.
+	 */
+	public void clearProperty(String property) {
+		restoreSystemProperty.add(property);
+		System.clearProperty(property);
 	}
 
 	@Override
 	protected void before() throws Throwable {
-		backupOriginalValue();
 		clearProperties();
 	}
 
@@ -56,13 +72,9 @@ public class ClearSystemProperties extends ExternalResource {
 		restoreOriginalValue();
 	}
 
-	private void backupOriginalValue() throws Throwable {
-		restoreSystemProperty.before();
-	}
-
 	private void clearProperties() {
-		for (String name : names)
-			clearProperty(name);
+		for (String property : properties)
+			clearProperty(property);
 	}
 
 	private void restoreOriginalValue() {
