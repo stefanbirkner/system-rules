@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 
+import org.junit.contrib.java.lang.system.internal.RestoreSpecificSystemProperties;
 import org.junit.rules.ExternalResource;
 
 /**
@@ -73,7 +74,7 @@ import org.junit.rules.ExternalResource;
  */
 public class ProvideSystemProperty extends ExternalResource {
 	private final Map<String, String> properties = new LinkedHashMap<String, String>();
-	private final RestoreSystemProperties restoreSystemProperty = new RestoreSystemProperties();
+	private final RestoreSpecificSystemProperties restoreSystemProperty = new RestoreSpecificSystemProperties();
 
 	public static ProvideSystemProperty fromFile(String name)
 		throws IOException {
@@ -145,6 +146,6 @@ public class ProvideSystemProperty extends ExternalResource {
 
 	@Override
 	protected void after() {
-		restoreSystemProperty.after();
+		restoreSystemProperty.restore();
 	}
 }

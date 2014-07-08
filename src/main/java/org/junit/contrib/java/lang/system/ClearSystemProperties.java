@@ -1,5 +1,6 @@
 package org.junit.contrib.java.lang.system;
 
+import org.junit.contrib.java.lang.system.internal.RestoreSpecificSystemProperties;
 import org.junit.rules.ExternalResource;
 
 /**
@@ -31,7 +32,7 @@ import org.junit.rules.ExternalResource;
  * </pre>
  */
 public class ClearSystemProperties extends ExternalResource {
-	private final RestoreSystemProperties restoreSystemProperty = new RestoreSystemProperties();
+	private final RestoreSpecificSystemProperties restoreSystemProperty = new RestoreSpecificSystemProperties();
 	private final String[] properties;
 
 	/**
@@ -72,6 +73,6 @@ public class ClearSystemProperties extends ExternalResource {
 	}
 
 	private void restoreOriginalValue() {
-		restoreSystemProperty.after();
+		restoreSystemProperty.restore();
 	}
 }
