@@ -30,6 +30,21 @@ import org.junit.rules.ExternalResource;
  * public final TestRule clearSystemProperties
  *   = new ClearSystemProperties("first", "second", "third");
  * </pre>
+ * <h2>Clear property for a single test</h2>
+ * <p>If you want to clear a property for a single test then you can
+ * use
+ * {@link org.junit.contrib.java.lang.system.RestoreSystemProperties}
+ * along with {@link System#clearProperty(String)}.
+ * <pre>
+ * &#064;Rule
+ * public final TestRule restoreSystemProperties
+ *   = new RestoreSystemProperties();
+ *
+ * &#064;Test
+ * public void test() {
+ *   System.clearProperty("YourProperty");
+ *   ...
+ * }</pre>
  */
 public class ClearSystemProperties extends ExternalResource {
 	private final RestoreSpecificSystemProperties restoreSystemProperty = new RestoreSpecificSystemProperties();
@@ -49,9 +64,33 @@ public class ClearSystemProperties extends ExternalResource {
 	/**
 	 * Clears the property and restores the value of the property at the point
 	 * of clearing it.
+	 * <p>This method is deprecated. If you're still using it, please replace your current code
+	 * <pre>
+	 * &#064;Rule
+	 * public final ClearSystemProperties clearSystemProperties = new ClearSystemProperties();
+	 *
+	 * &#064;Test
+	 * public void test() {
+	 *   clearSystemProperties.clearProperty("YourProperty");
+	 *   ...
+	 * }</pre>
+	 * with this code:
+	 * <pre>
+	 * &#064;Rule
+	 * public final TestRule restoreSystemProperties = new RestoreSystemProperties();
+	 *
+	 * &#064;Test
+	 * public void test() {
+	 *   System.clearProperty("YourProperty");
+	 *   ...
+	 * }</pre>
 	 *
 	 * @param property the name of the property.
+	 * @since 1.6.0
+	 * @deprecated Please use {@link org.junit.contrib.java.lang.system.RestoreSystemProperties}
+	 * along with {@link System#clearProperty(String)}.
 	 */
+	@Deprecated
 	public void clearProperty(String property) {
 		restoreSystemProperty.add(property);
 		System.clearProperty(property);
