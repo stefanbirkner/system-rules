@@ -64,30 +64,30 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit-dep</artifactId>
-			<version>[4.9,)</version>
+			<version>4.9</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
-			<version>[2.0,)</version>
+			<version>2.0</version>
 		</dependency>
 		
 		<dependency>
 			<groupId>org.hamcrest</groupId>
 			<artifactId>hamcrest-core</artifactId>
-			<version>[1.2,)</version>
+			<version>1.2</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.hamcrest</groupId>
 			<artifactId>hamcrest-library</artifactId>
-			<version>[1.2,)</version>
+			<version>1.2</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>
-			<version>[1.9.0,)</version>
+			<version>1.9.0</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
