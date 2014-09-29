@@ -83,6 +83,7 @@ import org.junit.runners.model.Statement;
  *     //passes
  *   }
  * }
+ * </pre>
  */
 public class ExpectedSystemExit implements TestRule {
 	public static ExpectedSystemExit none() {
