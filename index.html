@@ -146,11 +146,12 @@ public final ProvideSystemProperty properties
     
 			<section id="StandardErrorStreamLog">
 				<h3>System.err and System.out</h3>
-				<p>You want to verify the text, which your code writes to System.err
-				or System.out. The StandardErrorStreamLog and
-				StandardOutputStreamLog rule are logging everything written to
-				System.err or System.out. The text is available by calling getLog().
-				</p>
+				<p>The <code>StandardErrorStreamLog</code> and
+				<code>StandardOutputStreamLog</code> rules help you to create tests
+				for classes that write to <code>System.err</code> or
+				<code>System.out</code>. They are recording everything written to
+				<code>System.err</code> or <code>System.out</code>. The text is
+				available by calling getLog().</p>
 				{% highlight java %}public void MyTest {
 	@Rule
 	public final StandardErrorStreamLog log = new StandardErrorStreamLog();
@@ -199,6 +200,16 @@ public final ProvideSystemProperty properties
 		assertEquals("foo", log.getLog());
 	}
 }{% endhighlight %}
+				<p>The output is still written to <code>System.err</code> and
+				<code>System.out</code>. In general this is not necessary. Avoiding
+				the output may speed up the test and reduce the clutter on the
+				commandline. You can disable the output by creating the rules with
+				the flag `LOG_ONLY`.</p>
+				{% highlight java %}@Rule
+public final StandardErrorStreamLog log = new StandardErrorStreamLog(LOG_ONLY);{% endhighlight %}
+
+				{% highlight java %}@Rule
+public final StandardOutputStreamLog log = new StandardOutputStreamLog(LOG_ONLY);{% endhighlight %}
 			</section>
 
 			<section id="TextFromStandardInputStream">
