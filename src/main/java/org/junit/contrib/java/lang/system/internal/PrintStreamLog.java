@@ -1,15 +1,16 @@
 package org.junit.contrib.java.lang.system.internal;
 
+import org.apache.commons.io.output.TeeOutputStream;
+import org.junit.contrib.java.lang.system.LogMode;
+import org.junit.rules.TestWatcher;
+import org.junit.runner.Description;
+
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 
-import org.apache.commons.io.output.TeeOutputStream;
-import org.junit.contrib.java.lang.system.LogMode;
-import org.junit.rules.ExternalResource;
-
-public abstract class PrintStreamLog extends ExternalResource {
+public abstract class PrintStreamLog extends TestWatcher {
 	private static final boolean NO_AUTO_FLUSH = false;
 	private static final String ENCODING = "UTF-8";
 	private final ByteArrayOutputStream log = new ByteArrayOutputStream();
@@ -23,14 +24,22 @@ public abstract class PrintStreamLog extends ExternalResource {
 	}
 
 	@Override
-	protected void before() throws Throwable {
-		originalStream = getOriginalStream();
-		PrintStream wrappedStream = new PrintStream(getNewStream(), NO_AUTO_FLUSH,
-				ENCODING);
-		setStream(wrappedStream);
+	protected void starting(Description description) {
+		try {
+			originalStream = getOriginalStream();
+			PrintStream wrappedStream = new PrintStream(getNewStream(), NO_AUTO_FLUSH, ENCODING);
+			setStream(wrappedStream);
+		} catch (UnsupportedEncodingException e) {
+			throw new Error(e); // JRE missing UTF-8
+		}
 	}
 
-	private OutputStream getNewStream() throws UnsupportedEncodingException {
+	@Override
+	protected void finished(Description description) {
+		setStream(originalStream);
+	}
+
+	private OutputStream getNewStream() {
 		switch (mode) {
 			case LOG_AND_WRITE_TO_STREAM:
 				return new TeeOutputStream(originalStream, log);
@@ -40,11 +49,6 @@ public abstract class PrintStreamLog extends ExternalResource {
 				throw new IllegalArgumentException("The LogMode " + mode
 						+ " is not supported");
 		}
-	}
-
-	@Override
-	protected void after() {
-		setStream(originalStream);
 	}
 
 	protected abstract PrintStream getOriginalStream();
@@ -60,7 +64,7 @@ public abstract class PrintStreamLog extends ExternalResource {
 
 	/**
 	 * Returns the text written to the standard error stream.
-	 * 
+	 *
 	 * @return the text written to the standard error stream.
 	 */
 	public String getLog() {
