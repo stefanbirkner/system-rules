@@ -27,10 +27,27 @@ public abstract class PrintStreamLog extends TestWatcher {
 	protected void starting(Description description) {
 		try {
 			originalStream = getOriginalStream();
-			PrintStream wrappedStream = new PrintStream(getNewStream(), NO_AUTO_FLUSH, ENCODING);
+			PrintStream wrappedStream = new PrintStream(getNewStream(),
+					NO_AUTO_FLUSH, ENCODING);
 			setStream(wrappedStream);
 		} catch (UnsupportedEncodingException e) {
 			throw new Error(e); // JRE missing UTF-8
+		}
+	}
+
+	@Override
+	protected void failed(Throwable e, Description description) {
+		// Only log-on-failure mode needs to print; the others already handle this
+		switch (mode) {
+			case LOG_AND_WRITE_TO_STREAM:
+			case LOG_ONLY:
+				break;
+			case LOG_ONLY_ON_FAILURE:
+				originalStream.print(getLog());
+				break;
+			default:
+				throw new IllegalArgumentException("The LogMode " + mode
+						+ " is not supported");
 		}
 	}
 
@@ -44,6 +61,7 @@ public abstract class PrintStreamLog extends TestWatcher {
 			case LOG_AND_WRITE_TO_STREAM:
 				return new TeeOutputStream(originalStream, log);
 			case LOG_ONLY:
+			case LOG_ONLY_ON_FAILURE:
 				return log;
 			default:
 				throw new IllegalArgumentException("The LogMode " + mode
