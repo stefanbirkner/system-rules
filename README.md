@@ -47,6 +47,9 @@ want to contribute code than
 * Ensure that you didn't break the build by running `mvn test`.
 * Fork the repo and create a pull request. (See [Understanding the GitHub Flow](https://guides.github.com/introduction/flow/index.html))
 
+The basic coding style is described in the
+[EditorConfig](http://editorconfig.org/) file `.editorconfig`.
+
 Fishbowl supports [Travis CI](https://travis-ci.org/) for continuous
 integration. Your pull request will be automatically build by Travis
 CI.
