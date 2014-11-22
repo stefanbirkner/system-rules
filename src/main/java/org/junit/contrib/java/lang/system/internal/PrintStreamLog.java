@@ -1,15 +1,16 @@
 package org.junit.contrib.java.lang.system.internal;
 
+import org.apache.commons.io.output.TeeOutputStream;
+import org.junit.contrib.java.lang.system.LogMode;
+import org.junit.rules.TestWatcher;
+import org.junit.runner.Description;
+
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 
-import org.apache.commons.io.output.TeeOutputStream;
-import org.junit.contrib.java.lang.system.LogMode;
-import org.junit.rules.ExternalResource;
-
-public abstract class PrintStreamLog extends ExternalResource {
+public abstract class PrintStreamLog extends TestWatcher {
 	private static final boolean NO_AUTO_FLUSH = false;
 	private static final String ENCODING = "UTF-8";
 	private final ByteArrayOutputStream log = new ByteArrayOutputStream();
@@ -23,19 +24,27 @@ public abstract class PrintStreamLog extends ExternalResource {
 	}
 
 	@Override
-	protected void before() throws Throwable {
-		originalStream = getOriginalStream();
-		PrintStream wrappedStream = new PrintStream(getNewStream(), NO_AUTO_FLUSH,
-				ENCODING);
-		setStream(wrappedStream);
+	protected void starting(Description description) {
+		try {
+			originalStream = getOriginalStream();
+			PrintStream wrappedStream = new PrintStream(getNewStream(),
+					NO_AUTO_FLUSH, ENCODING);
+			setStream(wrappedStream);
+		} catch (UnsupportedEncodingException e) {
+			throw new Error(e); // JRE missing UTF-8
+		}
 	}
 
-	private OutputStream getNewStream() throws UnsupportedEncodingException {
+	@Override
+	protected void failed(Throwable e, Description description) {
+		// Only log-on-failure mode needs to print; the others already handle this
 		switch (mode) {
 			case LOG_AND_WRITE_TO_STREAM:
-				return new TeeOutputStream(originalStream, log);
 			case LOG_ONLY:
-				return log;
+				break;
+			case LOG_ONLY_ON_FAILURE:
+				originalStream.print(getLog());
+				break;
 			default:
 				throw new IllegalArgumentException("The LogMode " + mode
 						+ " is not supported");
@@ -43,8 +52,21 @@ public abstract class PrintStreamLog extends ExternalResource {
 	}
 
 	@Override
-	protected void after() {
+	protected void finished(Description description) {
 		setStream(originalStream);
+	}
+
+	private OutputStream getNewStream() {
+		switch (mode) {
+			case LOG_AND_WRITE_TO_STREAM:
+				return new TeeOutputStream(originalStream, log);
+			case LOG_ONLY:
+			case LOG_ONLY_ON_FAILURE:
+				return log;
+			default:
+				throw new IllegalArgumentException("The LogMode " + mode
+						+ " is not supported");
+		}
 	}
 
 	protected abstract PrintStream getOriginalStream();
@@ -60,7 +82,7 @@ public abstract class PrintStreamLog extends ExternalResource {
 
 	/**
 	 * Returns the text written to the standard error stream.
-	 * 
+	 *
 	 * @return the text written to the standard error stream.
 	 */
 	public String getLog() {
