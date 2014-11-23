@@ -12,13 +12,12 @@ import java.util.List;
 import org.junit.rules.ExternalResource;
 
 /**
- * The {@code RestoreSystemProperties} rule undoes changes of system properties.
- * 
- * Let's assume the system property {@code MyProperty} has the value
- * {@code MyValue}. Now run the test
- * 
+ * The {@code RestoreSystemProperties} rule undoes changes of system
+ * properties when the test finishes (whether it passes or fails).
+ * <p>Let's assume the system property {@code YourProperty} has the
+ * value {@code YourValue}. Now run the test
  * <pre>
- *   public void MyTest {
+ *   public void YourTest {
  *     &#064;Rule
  *     public final RestoreSystemProperties restoreSystemProperties
  *         = new RestoreSystemProperties();
@@ -31,12 +30,11 @@ import org.junit.rules.ExternalResource;
  *     }
  *   }
  * </pre>
- * 
- * After running the test, the system property {@code MyProperty} has the value
- * {@code MyValue} again. If you need do restore the same property for each test
- * then you can provide the property's name while creating the
- * {@code RestoreSystemProperties} rule.
- * 
+ * After running the test, the system property {@code YourProperty} has
+ * the value {@code YourValue} again. If you need do restore the same
+ * property for each test then you can provide the property's name
+ * while creating the {@code RestoreSystemProperties} rule.
+ *
  * <pre>
  * &#064;Rule
  * public final RestoreSystemProperties restoreSystemProperties = new RestoreSystemProperties(
