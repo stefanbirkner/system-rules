@@ -18,5 +18,5 @@ public enum LogMode {
 	/**
 	 * Capture the writes to the stream.  On test failure write to the original stream.
 	 */
-	LOG_ONLY_ON_FAILURE
+	LOG_AND_WRITE_TO_STREAM_ON_FAILURE_ONLY
 }

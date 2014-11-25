@@ -54,7 +54,7 @@ public class PrintStreamLogOnFailureTest {
 
 	@Test
 	public void doesNotWriteToSystemOutputStreamForLogOnFailureModeWithoutFailure() throws Throwable {
-		StandardOutputStreamLog log = new StandardOutputStreamLog(LogMode.LOG_ONLY_ON_FAILURE);
+		StandardOutputStreamLog log = new StandardOutputStreamLog(LogMode.LOG_AND_WRITE_TO_STREAM_ON_FAILURE_ONLY);
 		PrintStream originalStream = out;
 		try {
 			ByteArrayOutputStream captureOutputStream = new ByteArrayOutputStream();
@@ -68,7 +68,7 @@ public class PrintStreamLogOnFailureTest {
 
 	@Test
 	public void doesWriteToOutputLogForLogOnFailureModeWithoutFailure() throws Throwable {
-		StandardOutputStreamLog log = new StandardOutputStreamLog(LogMode.LOG_ONLY_ON_FAILURE);
+		StandardOutputStreamLog log = new StandardOutputStreamLog(LogMode.LOG_AND_WRITE_TO_STREAM_ON_FAILURE_ONLY);
 		PrintStream originalStream = out;
 		try {
 			ByteArrayOutputStream captureOutputStream = new ByteArrayOutputStream();
@@ -82,7 +82,7 @@ public class PrintStreamLogOnFailureTest {
 
 	@Test
 	public void doesWriteToSystemOutputStreamForLogOnFailureModeWithFailure() throws Throwable {
-		StandardOutputStreamLog log = new StandardOutputStreamLog(LogMode.LOG_ONLY_ON_FAILURE);
+		StandardOutputStreamLog log = new StandardOutputStreamLog(LogMode.LOG_AND_WRITE_TO_STREAM_ON_FAILURE_ONLY);
 		PrintStream originalStream = out;
 		ByteArrayOutputStream captureOutputStream = new ByteArrayOutputStream();
 		try {
@@ -97,7 +97,7 @@ public class PrintStreamLogOnFailureTest {
 
 	@Test
 	public void doesWriteToOutputLogForLogOnFailureModeWithFailure() throws Throwable {
-		StandardOutputStreamLog log = new StandardOutputStreamLog(LogMode.LOG_ONLY_ON_FAILURE);
+		StandardOutputStreamLog log = new StandardOutputStreamLog(LogMode.LOG_AND_WRITE_TO_STREAM_ON_FAILURE_ONLY);
 		PrintStream originalStream = out;
 		try {
 			ByteArrayOutputStream captureOutputStream = new ByteArrayOutputStream();
@@ -112,7 +112,7 @@ public class PrintStreamLogOnFailureTest {
 
 	@Test
 	public void doesNotWriteToSystemErrorStreamForLogOnFailureModeWithoutFailure() throws Throwable {
-		StandardErrorStreamLog log = new StandardErrorStreamLog(LogMode.LOG_ONLY_ON_FAILURE);
+		StandardErrorStreamLog log = new StandardErrorStreamLog(LogMode.LOG_AND_WRITE_TO_STREAM_ON_FAILURE_ONLY);
 		PrintStream originalStream = err;
 		try {
 			ByteArrayOutputStream captureErrorStream = new ByteArrayOutputStream();
@@ -126,7 +126,7 @@ public class PrintStreamLogOnFailureTest {
 
 	@Test
 	public void doesWriteToErrorLogForLogOnFailureModeWithoutFailure() throws Throwable {
-		StandardErrorStreamLog log = new StandardErrorStreamLog(LogMode.LOG_ONLY_ON_FAILURE);
+		StandardErrorStreamLog log = new StandardErrorStreamLog(LogMode.LOG_AND_WRITE_TO_STREAM_ON_FAILURE_ONLY);
 		PrintStream originalStream = err;
 		try {
 			ByteArrayOutputStream captureErrorStream = new ByteArrayOutputStream();
@@ -140,7 +140,7 @@ public class PrintStreamLogOnFailureTest {
 
 	@Test
 	public void doesWriteToSystemErrorStreamForLogOnFailureModeWithFailure() throws Throwable {
-		StandardErrorStreamLog log = new StandardErrorStreamLog(LogMode.LOG_ONLY_ON_FAILURE);
+		StandardErrorStreamLog log = new StandardErrorStreamLog(LogMode.LOG_AND_WRITE_TO_STREAM_ON_FAILURE_ONLY);
 		PrintStream originalStream = err;
 		ByteArrayOutputStream captureErrorStream = new ByteArrayOutputStream();
 		try {
@@ -155,7 +155,7 @@ public class PrintStreamLogOnFailureTest {
 
 	@Test
 	public void doesWriteToErrorLogForLogOnFailureModeWithFailure() throws Throwable {
-		StandardErrorStreamLog log = new StandardErrorStreamLog(LogMode.LOG_ONLY_ON_FAILURE);
+		StandardErrorStreamLog log = new StandardErrorStreamLog(LogMode.LOG_AND_WRITE_TO_STREAM_ON_FAILURE_ONLY);
 		PrintStream originalStream = err;
 		try {
 			ByteArrayOutputStream captureErrorStream = new ByteArrayOutputStream();
