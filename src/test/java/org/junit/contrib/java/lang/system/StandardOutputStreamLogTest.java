@@ -44,7 +44,7 @@ public class StandardOutputStreamLogTest {
 			setOut(new PrintStream(captureOutputStream));
 			executeRuleWithStatement(log, new WriteTextToStandardOutputStream());
 			assertThat(captureOutputStream,
-					hasToString(equalTo(ARBITRARY_TEXT)));
+				hasToString(equalTo(ARBITRARY_TEXT)));
 		} finally {
 			setOut(originalStream);
 		}
@@ -93,8 +93,7 @@ public class StandardOutputStreamLogTest {
 		}
 	}
 
-	private class ClearLogWhileWritingTextToStandardOutputStream extends
-			Statement {
+	private class ClearLogWhileWritingTextToStandardOutputStream extends Statement {
 		private final StandardOutputStreamLog log;
 
 		private ClearLogWhileWritingTextToStandardOutputStream(StandardOutputStreamLog log) {

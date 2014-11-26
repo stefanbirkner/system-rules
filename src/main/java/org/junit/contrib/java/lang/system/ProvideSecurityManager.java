@@ -8,16 +8,16 @@ import org.junit.rules.ExternalResource;
 /**
  * The {@code ProvideSecurityManager} rule provides an arbitrary security
  * manager to a test. After the test the original security manager is restored.
- * 
+ *
  * <pre>
  *   public void MyTest {
  *     private final MySecurityManager securityManager
  *       = new MySecurityManager();
- * 
+ *
  *     &#064;Rule
  *     public final ProvideSecurityManager provideSecurityManager
  *       = new ProvideSecurityManager(securityManager);
- * 
+ *
  *     &#064;Test
  *     public void overrideProperty() {
  *       assertEquals(securityManager, System.getSecurityManager());

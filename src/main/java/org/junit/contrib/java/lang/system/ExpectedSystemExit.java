@@ -16,7 +16,7 @@ import org.junit.runners.model.Statement;
 /**
  * The {@code ExpectedSystemExit} allows in-test specification of expected
  * {@code System.exit(...)} calls.
- * 
+ *
  * <p>
  * If your code calls {@code System.exit(),} then your test stops and doesn't
  * finish. The {@code ExpectedSystemExit} rule allows in-test specification of
@@ -24,43 +24,43 @@ import org.junit.runners.model.Statement;
  * assert methods because of the abnormal termination of your code. As a
  * substitute you can provide an {@code Assertion} object to the
  * {@code ExpectedSystemExit} rule.
- * 
+ *
  * <p>
  * Some care must be taken if your system under test creates a new thread and
  * this thread calls {@code System.exit()}. In this case you have to ensure that
  * the test does not finish before {@code System.exit()} is called.
- * 
+ *
  * <pre>
  * public class AppWithExit {
  * 	public static String message;
- * 
+ *
  * 	public static int doSomethingAndExit() {
  * 		message = &quot;exit ...&quot;;
  * 		System.exit(1);
  * 	}
- * 
+ *
  * 	public static int doNothing() {
  * 	}
  * }
  * </pre>
- * 
+ *
  * <pre>
  * public void AppWithExitTest {
  *   &#064;Rule
  *   public final ExpectedSystemExit exit = ExpectedSystemExit.none();
- * 
+ *
  *   &#064;Test
  *   public void exits() {
  *     exit.expectSystemExit();
  *     AppWithExit.doSomethingAndExit();
  *   }
- * 
+ *
  *   &#064;Test
  *   public void exitsWithStatusCode1() {
  *     exit.expectSystemExitWithStatus(1);
  *     AppWithExit.doSomethingAndExit();
  *   }
- * 
+ *
  *   &#064;Test
  *   public void writesMessage() {
  *     exit.checkAssertionAfterwards(new Assertion() {
@@ -70,13 +70,13 @@ import org.junit.runners.model.Statement;
  *     });
  *     AppWithExit.doSomethingAndExit();
  *   }
- * 
+ *
  *   &#064;Test
  *   public void systemExitWithStatusCode1() {
  *     exit.expectSystemExitWithStatus(1);
  *     AppWithExit.doSomethingAndExit();
  *   }
- * 
+ *
  *   &#064;Test
  *   public void noSystemExit() {
  *     AppWithExit.doNothing();
@@ -118,7 +118,7 @@ public class ExpectedSystemExit implements TestRule {
 
 	private ProvideSecurityManager createNoExitSecurityManagerRule() {
 		NoExitSecurityManager noExitSecurityManager = new NoExitSecurityManager(
-				getSecurityManager());
+			getSecurityManager());
 		return new ProvideSecurityManager(noExitSecurityManager);
 	}
 
@@ -139,8 +139,7 @@ public class ExpectedSystemExit implements TestRule {
 	private void checkSystemExit() {
 		NoExitSecurityManager securityManager = (NoExitSecurityManager) getSecurityManager();
 		if (securityManager.isCheckExitCalled())
-			handleSystemExitWithStatus(securityManager
-					.getStatusOfFirstCheckExitCall());
+			handleSystemExitWithStatus(securityManager.getStatusOfFirstCheckExitCall());
 		else
 			handleMissingSystemExit();
 	}
@@ -154,8 +153,7 @@ public class ExpectedSystemExit implements TestRule {
 		if (!expectExit)
 			fail("Unexpected call of System.exit(" + status + ").");
 		else if (expectedStatus != null)
-			assertEquals("Wrong exit status", expectedStatus,
-					Integer.valueOf(status));
+			assertEquals("Wrong exit status", expectedStatus, Integer.valueOf(status));
 	}
 
 	private void checkAssertions() throws Exception {

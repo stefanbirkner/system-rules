@@ -18,7 +18,7 @@ public class RestoreSystemPropertiesTest {
 	private static final String VALUE_SET_BY_STATEMENT = "value set by statement";
 
 	private final RestoreSystemProperties rule = new RestoreSystemProperties(
-			FIRST_PROPERTY, SECOND_PROPERTY);
+		FIRST_PROPERTY, SECOND_PROPERTY);
 
 	@Test
 	public void restoresFirstPropertySpecifiedByConstructor() throws Throwable {
@@ -46,13 +46,13 @@ public class RestoreSystemPropertiesTest {
 
 	@Test
 	public void restoresPropertyThatHasBeenAddedByTheStatement()
-			throws Throwable {
+		throws Throwable {
 		String originalValue = getProperty("property added by statement");
 		Statement addPropertyAndSetValueOfProperty = new AddPropertyAndSetValueOfProperty(
-				"property added by statement");
+			"property added by statement");
 		rule.apply(addPropertyAndSetValueOfProperty, NO_DESCRIPTION).evaluate();
 		assertThat(getProperty("property added by statement"),
-				is(equalTo(originalValue)));
+			is(equalTo(originalValue)));
 	}
 
 	private class SetValueOfProperty extends Statement {

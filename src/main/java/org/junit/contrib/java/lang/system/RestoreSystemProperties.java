@@ -21,7 +21,7 @@ import org.junit.rules.ExternalResource;
  *     &#064;Rule
  *     public final RestoreSystemProperties restoreSystemProperties
  *         = new RestoreSystemProperties();
- * 
+ *
  *     &#064;Test
  *     public void overrideProperty() {
  *       restoreSystemProperties.add("MyProperty");
@@ -48,9 +48,8 @@ public class RestoreSystemProperties extends ExternalResource {
 	/**
 	 * Creates a {@code RestoreSystemProperties} rule that restores the
 	 * specified properties.
-	 * 
-	 * @param properties
-	 *            the properties' names.
+	 *
+	 * @param properties the properties' names.
 	 */
 	public RestoreSystemProperties(String... properties) {
 		this.properties.addAll(asList(properties));
@@ -60,9 +59,8 @@ public class RestoreSystemProperties extends ExternalResource {
 	 * Add a property that is restored after the test. The
 	 * {@code RestoreSystemProperties} restores the value of the property at the
 	 * point of adding it.
-	 * 
-	 * @param property
-	 *            the name of the property.
+	 *
+	 * @param property the name of the property.
 	 * @since 1.6.0
 	 */
 	public void add(String property) {

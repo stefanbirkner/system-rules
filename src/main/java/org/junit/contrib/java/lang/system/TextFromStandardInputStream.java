@@ -13,13 +13,13 @@ import org.junit.rules.ExternalResource;
  * The {@code TextFromStandardInputStream} rule replaces {@code System.in} with
  * another {@code InputStream}, which provides an arbitrary text. The original
  * {@code System.in} is restored after the test.
- * 
+ *
  * <pre>
  *   public void MyTest {
  *     &#064;Rule
  *     public final TextFromStandardInputStream systemInMock
  *       = emptyStandardInputStream();
- * 
+ *
  *     &#064;Test
  *     public void readTextFromStandardInputStream() {
  *       systemInMock.provide("foo");
@@ -40,9 +40,8 @@ public class TextFromStandardInputStream extends ExternalResource {
 	/**
 	 * Create a new {@code TextFromStandardInputStream}, which provides the
 	 * specified text.
-	 * 
-	 * @param text
-	 *            this text is return by {@code System.in}.
+	 *
+	 * @param text this text is return by {@code System.in}.
 	 * @deprecated use {@link #provideText(String)}
 	 */
 	@Deprecated

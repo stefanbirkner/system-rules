@@ -11,12 +11,12 @@ import org.junit.contrib.java.lang.system.internal.PrintStreamLog;
 /**
  * The {@code StandardOutputStreamLog} records writes to the standard output
  * stream. The text written is available via {@link #getLog()}.
- * 
+ *
  * <pre>
  *   public void MyTest {
  *     &#064;Rule
  *     public final StandardOutputStreamLog log = new StandardOutputStreamLog();
- * 
+ *
  *     &#064;Test
  *     public void captureOutputStream() {
  *       System.out.print("hello world");
@@ -59,6 +59,7 @@ public class StandardOutputStreamLog extends PrintStreamLog {
 	/**
 	 * Creates a rule that records writes to the standard output stream
 	 * according to the specified {@code LogMode}.
+	 *
 	 * @param mode how the rule handles writes to the standard output stream.
 	 * @throws java.lang.NullPointerException if {@code mode} is null.
 	 */

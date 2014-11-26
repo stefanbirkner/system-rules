@@ -33,19 +33,19 @@ public class NoExitSecurityManager extends SecurityManager {
 			return statusOfFirstExitCall;
 		else
 			throw new IllegalStateException(
-					"checkExit(int) has not been called.");
+				"checkExit(int) has not been called.");
 	}
 
 	@Override
 	public boolean getInCheck() {
 		return (originalSecurityManager != null)
-				&& originalSecurityManager.getInCheck();
+			&& originalSecurityManager.getInCheck();
 	}
 
 	@Override
 	public Object getSecurityContext() {
 		return (originalSecurityManager == null) ? super.getSecurityContext()
-				: originalSecurityManager.getSecurityContext();
+			: originalSecurityManager.getSecurityContext();
 	}
 
 	@Override
@@ -176,9 +176,8 @@ public class NoExitSecurityManager extends SecurityManager {
 
 	@Override
 	public boolean checkTopLevelWindow(Object window) {
-		return (originalSecurityManager == null) ? super
-				.checkTopLevelWindow(window) : originalSecurityManager
-				.checkTopLevelWindow(window);
+		return (originalSecurityManager == null) ? super.checkTopLevelWindow(window)
+			: originalSecurityManager.checkTopLevelWindow(window);
 	}
 
 	@Override
@@ -232,6 +231,6 @@ public class NoExitSecurityManager extends SecurityManager {
 	@Override
 	public ThreadGroup getThreadGroup() {
 		return (originalSecurityManager == null) ? super.getThreadGroup()
-				: originalSecurityManager.getThreadGroup();
+			: originalSecurityManager.getThreadGroup();
 	}
 }

@@ -152,8 +152,7 @@ public class ExpectedSystemExitTest {
 	private static class CheckContext extends Statement {
 		@Override
 		public void evaluate() throws Throwable {
-			assertEquals(ARBITRARY_CONTEXT, getSecurityManager()
-					.getSecurityContext());
+			assertEquals(ARBITRARY_CONTEXT, getSecurityManager().getSecurityContext());
 		}
 	}
 

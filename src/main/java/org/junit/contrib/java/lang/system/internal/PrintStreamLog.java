@@ -26,7 +26,7 @@ public abstract class PrintStreamLog extends ExternalResource {
 	protected void before() throws Throwable {
 		originalStream = getOriginalStream();
 		PrintStream wrappedStream = new PrintStream(getNewStream(), NO_AUTO_FLUSH,
-				ENCODING);
+			ENCODING);
 		setStream(wrappedStream);
 	}
 
@@ -38,7 +38,7 @@ public abstract class PrintStreamLog extends ExternalResource {
 				return log;
 			default:
 				throw new IllegalArgumentException("The LogMode " + mode
-						+ " is not supported");
+					+ " is not supported");
 		}
 	}
 
@@ -60,7 +60,7 @@ public abstract class PrintStreamLog extends ExternalResource {
 
 	/**
 	 * Returns the text written to the standard error stream.
-	 * 
+	 *
 	 * @return the text written to the standard error stream.
 	 */
 	public String getLog() {

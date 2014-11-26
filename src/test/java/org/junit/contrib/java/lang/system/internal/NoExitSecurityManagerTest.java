@@ -30,14 +30,13 @@ public class NoExitSecurityManagerTest {
 
 	private final SecurityManager originalSecurityManager = mock(SecurityManager.class);
 	private final NoExitSecurityManager managerWithOriginal = new NoExitSecurityManager(
-			originalSecurityManager);
-	private final NoExitSecurityManager managerWithoutOriginal = new NoExitSecurityManager(
-			null);
+		originalSecurityManager);
+	private final NoExitSecurityManager managerWithoutOriginal = new NoExitSecurityManager(null);
 
 	@Test
 	public void throwExceptionWhenCheckExitIsCalled() {
 		thrown.expect(allOf(instanceOf(CheckExitCalled.class),
-				hasProperty("status", equalTo(DUMMY_STATUS))));
+			hasProperty("status", equalTo(DUMMY_STATUS))));
 		managerWithOriginal.checkExit(DUMMY_STATUS);
 	}
 
@@ -330,8 +329,7 @@ public class NoExitSecurityManagerTest {
 	@Test
 	public void delegateCheckTopLevelWindow() {
 		Object window = new Object();
-		when(originalSecurityManager.checkTopLevelWindow(window)).thenReturn(
-				true);
+		when(originalSecurityManager.checkTopLevelWindow(window)).thenReturn(true);
 		assertThat(managerWithOriginal.checkTopLevelWindow(window), is(true));
 	}
 
@@ -388,8 +386,7 @@ public class NoExitSecurityManagerTest {
 	@Test
 	public void delegateCheckPackageDefinition() {
 		managerWithOriginal.checkPackageDefinition("arbitrary package");
-		verify(originalSecurityManager).checkPackageDefinition(
-				"arbitrary package");
+		verify(originalSecurityManager).checkPackageDefinition("arbitrary package");
 	}
 
 	@Test
@@ -413,8 +410,7 @@ public class NoExitSecurityManagerTest {
 		Class<?> arbitraryClass = Integer.class;
 		int which = 394;
 		managerWithOriginal.checkMemberAccess(arbitraryClass, which);
-		verify(originalSecurityManager)
-				.checkMemberAccess(arbitraryClass, which);
+		verify(originalSecurityManager).checkMemberAccess(arbitraryClass, which);
 	}
 
 	@Test
@@ -449,15 +445,13 @@ public class NoExitSecurityManagerTest {
 
 	@Test
 	public void provideInformationThatCheckExitHasNotBeenCalled() {
-		assertThat(managerWithOriginal,
-				hasProperty("checkExitCalled", is(false)));
+		assertThat(managerWithOriginal, hasProperty("checkExitCalled", is(false)));
 	}
 
 	@Test
 	public void provideInformationThatCheckExitHasBeenCalled() {
 		safeCallCheckExitWithStatus(DUMMY_STATUS);
-		assertThat(managerWithOriginal,
-				hasProperty("checkExitCalled", is(true)));
+		assertThat(managerWithOriginal, hasProperty("checkExitCalled", is(true)));
 	}
 
 	@Test
@@ -465,8 +459,8 @@ public class NoExitSecurityManagerTest {
 		safeCallCheckExitWithStatus(DUMMY_STATUS);
 		safeCallCheckExitWithStatus(DUMMY_STATUS + 1);
 		assertThat(
-				managerWithOriginal,
-				hasProperty("statusOfFirstCheckExitCall", equalTo(DUMMY_STATUS)));
+			managerWithOriginal,
+			hasProperty("statusOfFirstCheckExitCall", equalTo(DUMMY_STATUS)));
 	}
 
 	private void safeCallCheckExitWithStatus(int status) {

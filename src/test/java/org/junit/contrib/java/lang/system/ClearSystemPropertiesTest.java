@@ -19,17 +19,17 @@ public class ClearSystemPropertiesTest {
 
 	@Rule
 	public final RestoreSystemProperties restore = new RestoreSystemProperties(
-			SECOND_ARBITRARY_NAME);
+		SECOND_ARBITRARY_NAME);
 
 	private final ClearSystemProperties rule = new ClearSystemProperties(
-			FIRST_ARBITRARY_NAME, SECOND_ARBITRARY_NAME);
+		FIRST_ARBITRARY_NAME, SECOND_ARBITRARY_NAME);
 
 	@Test
 	public void restoresOriginalValueOfSecondProperty() throws Throwable {
 		setProperty(SECOND_ARBITRARY_NAME, ARBITRARY_VALUE);
 		applyRuleToStatement(new VerifyValueIsCleared());
 		assertThat(getProperty(SECOND_ARBITRARY_NAME),
-				is(equalTo(ARBITRARY_VALUE)));
+			is(equalTo(ARBITRARY_VALUE)));
 	}
 
 	@Test
@@ -37,15 +37,15 @@ public class ClearSystemPropertiesTest {
 		clearProperty(SECOND_ARBITRARY_NAME);
 		applyRuleToStatement(new VerifyValueIsCleared());
 		assertThat(getProperty(SECOND_ARBITRARY_NAME),
-				is(nullValue(String.class)));
+			is(nullValue(String.class)));
 	}
 
 	@Test
 	public void clearsPropertyDuringTestAndRestoresItAfterwards()
-			throws Throwable {
+		throws Throwable {
 		setProperty("another property", "dummy value");
 		applyRuleToStatement(new ClearPropertyAndVerifyThatItIsCleared(
-				"another property"));
+			"another property"));
 		assertThat(getProperty("another property"), is("dummy value"));
 	}
 
@@ -57,7 +57,7 @@ public class ClearSystemPropertiesTest {
 		@Override
 		public void evaluate() throws Throwable {
 			assertThat(getProperty(SECOND_ARBITRARY_NAME),
-					is(nullValue(String.class)));
+				is(nullValue(String.class)));
 		}
 	}
 

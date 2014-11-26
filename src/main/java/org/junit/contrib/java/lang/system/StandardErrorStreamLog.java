@@ -11,12 +11,12 @@ import org.junit.contrib.java.lang.system.internal.PrintStreamLog;
 /**
  * The {@code StandardErrorStreamLog} records writes to the standard error
  * stream. The text written is available via {@link #getLog()}.
- * 
+ *
  * <pre>
  *   public void MyTest {
  *     &#064;Rule
  *     public final StandardErrorStreamLog log = new StandardErrorStreamLog();
- * 
+ *
  *     &#064;Test
  *     public void captureErrorStream() {
  *       System.err.print("hello world");
@@ -60,6 +60,7 @@ public class StandardErrorStreamLog extends PrintStreamLog {
 	/**
 	 * Creates a rule that records writes to the standard error stream according
 	 * to the specified {@code LogMode}.
+	 *
 	 * @param mode how the rule handles writes to the standard error stream.
 	 * @throws java.lang.NullPointerException if {@code mode} is null.
 	 */

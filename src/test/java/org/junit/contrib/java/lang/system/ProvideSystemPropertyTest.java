@@ -33,7 +33,7 @@ public class ProvideSystemPropertyTest {
 
 	@Rule
 	public final RestoreSystemProperties restoreSystemProperty = new RestoreSystemProperties(
-			ARBITRARY_NAME, ANOTHER_PROPERTY);
+		ARBITRARY_NAME, ANOTHER_PROPERTY);
 
 	@Rule
 	public final TemporaryFolder temporaryFolder = new TemporaryFolder();
@@ -62,10 +62,10 @@ public class ProvideSystemPropertyTest {
 	@Test
 	public void providesMultipleProperties() throws Throwable {
 		rule = new ProvideSystemProperty(ARBITRARY_NAME, ARBITRARY_VALUE).and(
-				ANOTHER_PROPERTY, A_DIFFERENT_VALUE);
+			ANOTHER_PROPERTY, A_DIFFERENT_VALUE);
 		evaluateAssertPropertyWithNameAndValue(ARBITRARY_NAME, ARBITRARY_VALUE);
 		evaluateAssertPropertyWithNameAndValue(ANOTHER_PROPERTY,
-				A_DIFFERENT_VALUE);
+			A_DIFFERENT_VALUE);
 	}
 
 	@Test
@@ -87,9 +87,9 @@ public class ProvideSystemPropertyTest {
 		setProperty(ANOTHER_PROPERTY, ARBITRARY_VALUE);
 
 		rule = new ProvideSystemProperty(ARBITRARY_NAME, ARBITRARY_VALUE).and(
-				ANOTHER_PROPERTY, A_DIFFERENT_VALUE);
+			ANOTHER_PROPERTY, A_DIFFERENT_VALUE);
 		evaluateAssertPropertyWithNameAndValue(ANOTHER_PROPERTY,
-				A_DIFFERENT_VALUE);
+			A_DIFFERENT_VALUE);
 
 		assertThat(getProperty(ARBITRARY_NAME), is(nullValue()));
 		assertThat(getProperty(ANOTHER_PROPERTY), is(ARBITRARY_VALUE));
@@ -97,13 +97,13 @@ public class ProvideSystemPropertyTest {
 
 	@Test
 	public void setsPropertyDuringTestAndRestoresItAfterwards()
-			throws Throwable {
+		throws Throwable {
 		setProperty(ARBITRARY_NAME, "value before executing the rule");
 		rule = new ProvideSystemProperty();
 		evaluateRuleForStatement(new SetPropertyAndAssertValue(ARBITRARY_NAME,
-				"dummy value"));
+			"dummy value"));
 		assertThat(getProperty(ARBITRARY_NAME),
-				is(equalTo("value before executing the rule")));
+			is(equalTo("value before executing the rule")));
 	}
 
 	private void evaluateStatementWithArbitraryValue() throws Throwable {
@@ -112,7 +112,7 @@ public class ProvideSystemPropertyTest {
 	}
 
 	private void evaluateAssertPropertyWithNameAndValue(String name,
-			String value) throws Throwable {
+														String value) throws Throwable {
 		AssertValue assertValue = new AssertValue(name, value);
 		evaluateRuleForStatement(assertValue);
 	}

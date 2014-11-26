@@ -24,8 +24,7 @@ public class TextFromStandardInputStreamTest {
 
 	@Test
 	public void provideText() throws Throwable {
-		ReadTextFromSystemIn statement = new ReadTextFromSystemIn(
-				ARBITRARY_TEXT);
+		ReadTextFromSystemIn statement = new ReadTextFromSystemIn(ARBITRARY_TEXT);
 		executeRuleWithStatement(statement);
 		assertThat(statement.textFromSystemIn, is(equalTo(ARBITRARY_TEXT)));
 	}
