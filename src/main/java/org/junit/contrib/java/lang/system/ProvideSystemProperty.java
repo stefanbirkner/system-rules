@@ -16,7 +16,8 @@ import org.junit.rules.ExternalResource;
 /**
  * The {@code ProvideSystemProperty} rule provides an arbitrary value for a
  * system property to a test. After the test the original value is restored. You
- * can ensure that a property is not set by providing {@code null}.
+ * can ensure that a property is not set by providing {@code null} (or using
+ * {@link org.junit.contrib.java.lang.system.ClearSystemProperties}).
  * <p>
  * Let's assume the system property {@code MyProperty} is not set and the system
  * property {@code OtherProperty} has the value {@code OtherValue}. Now run the
@@ -26,17 +27,16 @@ import org.junit.rules.ExternalResource;
  *   public void MyTest {
  *     &#064;Rule
  *     public final ProvideSystemProperty provideSystemProperty
- *         = new ProvideSystemProperty();
+ *       = new ProvideSystemProperty("MyProperty", "MyValue")
+ *         .and("OtherProperty", null);
  *
  *     &#064;Test
  *     public void overridesProperty() {
- *       provideSystemProperty.setProperty("MyProperty", "MyValue");
  *       assertEquals("MyValue", System.getProperty("MyProperty"));
  *     }
  *
  *     &#064;Test
  *     public void deletesProperty() {
- *       provideSystemProperty.setProperty("OtherProperty", null);
  *       assertNull(System.getProperty("OtherProperty"));
  *     }
  *   }
@@ -44,16 +44,8 @@ import org.junit.rules.ExternalResource;
  *
  * Both tests succeed and after the tests, the system property
  * {@code MyProperty} is not set and the system property {@code OtherProperty}
- * has the value {@code OtherValue}. If you need do provide the same properties
- * for each test then you can specify the values while creating the
- * {@code ProvideSystemProperty} rule.
- *
- * <pre>
- * &#064;Rule
- * public final ProvideSystemProperty properties = new ProvideSystemProperty(
- * 		&quot;MyProperty&quot;, &quot;MyValue&quot;).and(&quot;OtherProperty&quot;, null);
- * </pre>
- *
+ * has the value {@code OtherValue}.
+ * <p>
  * You can use a properties file to supply properties for the
  * ProvideSystemProperty rule. The file can be from the file system or the class
  * path. In the first case use
@@ -71,6 +63,20 @@ import org.junit.rules.ExternalResource;
  * public final ProvideSystemProperty properties = ProvideSystemProperty
  * 		.fromResource(&quot;example.properties&quot;);
  * </pre>
+ * <h2>Set property for a single test</h2>
+ * <p>If you want to set a property for a single test then you can use
+ * {@link org.junit.contrib.java.lang.system.RestoreSystemProperties}
+ * along with {@link System#setProperty(String, String)}.
+ * <pre>
+ * &#064;Rule
+ * public final TestRule restoreSystemProperties
+ *   = new RestoreSystemProperties();
+ *
+ * &#064;Test
+ * public void test() {
+ *   System.setProperty("YourProperty", "YourValue");
+ *   ...
+ * }</pre>
  */
 public class ProvideSystemProperty extends ExternalResource {
 	private final Map<String, String> properties = new LinkedHashMap<String, String>();
@@ -99,6 +105,10 @@ public class ProvideSystemProperty extends ExternalResource {
 		return rule;
 	}
 
+	/**
+	 * @deprecated see {@link #setProperty(String, String)}.
+	 */
+	@Deprecated
 	public ProvideSystemProperty() {
 	}
 
@@ -106,10 +116,34 @@ public class ProvideSystemProperty extends ExternalResource {
 	 * Sets the property with the name to the specified value. After the test
 	 * the rule restores the value of the property at the point of setting it.
 	 *
+	 * <p>This method is deprecated. If you're still using it, please replace your current code
+	 * <pre>
+	 * &#064;Rule
+	 * public final ProvideSystemProperty provideSystemProperty = new ProvideSystemProperty();
+	 *
+	 * &#064;Test
+	 * public void test() {
+	 *   provideSystemProperty.setProperty("YourProperty", "YourValue");
+	 *   ...
+	 * }</pre>
+	 * with this code:
+	 * <pre>
+	 * &#064;Rule
+	 * public final TestRule restoreSystemProperties = new RestoreSystemProperties();
+	 *
+	 * &#064;Test
+	 * public void test() {
+	 *   System.setProperty("YourProperty", "YourValue");
+	 *   ...
+	 * }</pre>
+	 *
 	 * @param name the name of the property.
 	 * @param value the new value of the property.
 	 * @since 1.6.0
+	 * @deprecated Please use {@link org.junit.contrib.java.lang.system.RestoreSystemProperties}
+	 * along with {@link System#setProperty(String, String)}.
 	 */
+	@Deprecated
 	public void setProperty(String name, String value) {
 		restoreSystemProperty.add(name);
 		if (value == null)
