@@ -1,14 +1,14 @@
 package org.junit.contrib.java.lang.system.internal;
 
-import org.apache.commons.io.output.TeeOutputStream;
-import org.junit.contrib.java.lang.system.LogMode;
-import org.junit.rules.TestWatcher;
-import org.junit.runner.Description;
-
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
+
+import org.apache.commons.io.output.TeeOutputStream;
+import org.junit.contrib.java.lang.system.LogMode;
+import org.junit.rules.TestWatcher;
+import org.junit.runner.Description;
 
 public abstract class PrintStreamLog extends TestWatcher {
 	private static final boolean NO_AUTO_FLUSH = false;
