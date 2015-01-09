@@ -50,7 +50,7 @@ want to contribute code than
 The basic coding style is described in the
 [EditorConfig](http://editorconfig.org/) file `.editorconfig`.
 
-Fishbowl supports [Travis CI](https://travis-ci.org/) for continuous
+System Rules supports [Travis CI](https://travis-ci.org/) for continuous
 integration. Your pull request will be automatically build by Travis
 CI.
 
