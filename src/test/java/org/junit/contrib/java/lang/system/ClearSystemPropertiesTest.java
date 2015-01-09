@@ -1,10 +1,7 @@
 package org.junit.contrib.java.lang.system;
 
 import static java.lang.System.*;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertThat;
-import static org.junit.contrib.java.lang.system.Matchers.hasPropertyWithValue;
-import static org.junit.contrib.java.lang.system.Matchers.notHasProperty;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.contrib.java.lang.system.Statements.SUCCESSFUL_TEST;
 
 import org.junit.Rule;
@@ -29,9 +26,9 @@ public class ClearSystemPropertiesTest {
 			"first property", "second property");
 		TestThatCapturesProperties test = new TestThatCapturesProperties();
 		runTestWithRule(test, rule);
-		assertThat(test.propertiesAtStart, allOf(
-			notHasProperty("first property"),
-			notHasProperty("second property")));
+		assertThat(test.propertiesAtStart)
+			.doesNotContainKey("first property")
+			.doesNotContainKey("second property");
 	}
 
 	@Test
@@ -40,8 +37,8 @@ public class ClearSystemPropertiesTest {
 		ClearSystemProperties rule = new ClearSystemProperties();
 		TestThatAddsProperty test = new TestThatAddsProperty("property", rule);
 		runTestWithRule(test, rule);
-		assertThat(test.propertiesAfterAddingProperty,
-			notHasProperty("property"));
+		assertThat(test.propertiesAfterAddingProperty)
+			.doesNotContainKey("property");
 	}
 
 	@Test
@@ -52,10 +49,10 @@ public class ClearSystemPropertiesTest {
 		ClearSystemProperties rule = new ClearSystemProperties(
 			"first property", "second property");
 		runTestWithRule(new TestThatAddsProperty("third property", rule), rule);
-		assertThat(getProperties(), allOf(
-			hasPropertyWithValue("first property", "dummy value"),
-			hasPropertyWithValue("second property", "another dummy value"),
-			hasPropertyWithValue("third property", "another dummy value")));
+		assertThat(getProperties())
+			.containsEntry("first property", "dummy value")
+			.containsEntry("second property", "another dummy value")
+			.containsEntry("third property", "another dummy value");
 	}
 
 	@Test

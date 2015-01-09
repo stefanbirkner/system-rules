@@ -2,12 +2,7 @@ package org.junit.contrib.java.lang.system;
 
 import static java.lang.String.format;
 import static java.lang.System.*;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasToString;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.isEmptyString;
-import static org.hamcrest.Matchers.sameInstance;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 import static org.junit.contrib.java.lang.system.Statements.writeTextToSystemOut;
 
@@ -42,7 +37,7 @@ public class SystemOutRuleTest {
 				setOut(otherOut);
 			}
 		});
-		assertThat(out, is(sameInstance(originalOut)));
+		assertThat(out).isSameAs(originalOut);
 	}
 
 	@Test
@@ -51,7 +46,7 @@ public class SystemOutRuleTest {
 		ByteArrayOutputStream systemOut = useReadableSystemOut();
 		SystemOutRule rule = new SystemOutRule();
 		executeRuleWithStatement(rule, writeTextToSystemOut("arbitrary text"));
-		assertThat(systemOut, hasToString(equalTo("arbitrary text")));
+		assertThat(systemOut.toString()).isEqualTo("arbitrary text");
 	}
 
 	@Test
@@ -60,7 +55,7 @@ public class SystemOutRuleTest {
 		ByteArrayOutputStream systemOut = useReadableSystemOut();
 		SystemOutRule rule = new SystemOutRule().mute();
 		executeRuleWithStatement(rule, writeTextToSystemOut("arbitrary text"));
-		assertThat(systemOut, hasToString(isEmptyString()));
+		assertThat(systemOut.toString()).isEmpty();
 	}
 
 	@Test
@@ -76,7 +71,7 @@ public class SystemOutRuleTest {
 				out.print("text after muting");
 			}
 		});
-		assertThat(systemOut, hasToString("text before muting"));
+		assertThat(systemOut.toString()).isEqualTo("text before muting");
 	}
 
 	@Test
@@ -85,7 +80,7 @@ public class SystemOutRuleTest {
 		ByteArrayOutputStream systemOut = useReadableSystemOut();
 		SystemOutRule rule = new SystemOutRule().muteForSuccessfulTests();
 		executeRuleWithStatement(rule, writeTextToSystemOut("arbitrary text"));
-		assertThat(systemOut, hasToString(isEmptyString()));
+		assertThat(systemOut.toString()).isEmpty();
 	}
 
 	@Test
@@ -100,7 +95,7 @@ public class SystemOutRuleTest {
 				fail();
 			}
 		});
-		assertThat(systemOut, hasToString("arbitrary text"));
+		assertThat(systemOut.toString()).isEqualTo("arbitrary text");
 	}
 
 	@Test
@@ -115,7 +110,7 @@ public class SystemOutRuleTest {
 				out.print("arbitrary text");
 			}
 		});
-		assertThat(systemOut, hasToString(isEmptyString()));
+		assertThat(systemOut.toString()).isEmpty();
 	}
 
 	@Test
@@ -131,21 +126,21 @@ public class SystemOutRuleTest {
 				fail();
 			}
 		});
-		assertThat(systemOut, hasToString("arbitrary text"));
+		assertThat(systemOut.toString()).isEqualTo("arbitrary text");
 	}
 
 	@Test
 	public void no_text_is_logged_by_default() throws Throwable {
 		SystemOutRule rule = new SystemOutRule();
 		executeRuleWithStatement(rule, writeTextToSystemOut("arbitrary text"));
-		assertThat(rule.getLog(), isEmptyString());
+		assertThat(rule.getLog()).isEmpty();
 	}
 
 	@Test
 	public void text_is_logged_if_log_has_been_enabled_globally() throws Throwable {
 		SystemOutRule rule = new SystemOutRule().enableLog();
 		executeRuleWithStatement(rule, writeTextToSystemOut("arbitrary text"));
-		assertThat(rule.getLog(), is(equalTo("arbitrary text")));
+		assertThat(rule.getLog()).isEqualTo("arbitrary text");
 	}
 
 	@Test
@@ -159,7 +154,7 @@ public class SystemOutRuleTest {
 				out.print("arbitrary text");
 			}
 		});
-		assertThat(rule.getLog(), is(equalTo("arbitrary text")));
+		assertThat(rule.getLog()).isEqualTo("arbitrary text");
 	}
 
 	@Test
@@ -174,14 +169,14 @@ public class SystemOutRuleTest {
 				out.print("arbitrary text");
 			}
 		});
-		assertThat(rule.getLog(), is(equalTo("arbitrary text")));
+		assertThat(rule.getLog()).isEqualTo("arbitrary text");
 	}
 
 	@Test
 	public void text_is_logged_if_rule_is_enabled_and_muted() throws Throwable {
 		SystemOutRule rule = new SystemOutRule().enableLog().mute();
 		executeRuleWithStatement(rule, writeTextToSystemOut("arbitrary text"));
-		assertThat(rule.getLog(), is(equalTo("arbitrary text")));
+		assertThat(rule.getLog()).isEqualTo("arbitrary text");
 	}
 
 	@Test
@@ -190,7 +185,8 @@ public class SystemOutRuleTest {
 		setProperty("line.separator", "\r\n");
 		SystemOutRule rule = new SystemOutRule().enableLog();
 		executeRuleWithStatement(rule, writeTextToSystemOut(format("arbitrary%ntext%n")));
-		assertThat(rule.getLogWithNormalizedLineSeparator(), is(equalTo("arbitrary\ntext\n")));
+		assertThat(rule.getLogWithNormalizedLineSeparator())
+			.isEqualTo("arbitrary\ntext\n");
 	}
 
 	private ByteArrayOutputStream useReadableSystemOut() {

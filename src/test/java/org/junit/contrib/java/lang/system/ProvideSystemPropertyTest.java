@@ -4,10 +4,7 @@ import static java.lang.System.clearProperty;
 import static java.lang.System.getProperty;
 import static java.lang.System.setProperty;
 import static org.apache.commons.io.IOUtils.copy;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertThat;
-import static org.junit.contrib.java.lang.system.Matchers.hasPropertyWithValue;
-import static org.junit.contrib.java.lang.system.Matchers.notHasProperty;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.contrib.java.lang.system.ProvideSystemProperty.fromFile;
 import static org.junit.contrib.java.lang.system.ProvideSystemProperty.fromResource;
 import static org.junit.contrib.java.lang.system.Statements.TEST_THAT_DOES_NOTHING;
@@ -46,9 +43,9 @@ public class ProvideSystemPropertyTest {
 			.and(ANOTHER_KEY, A_DIFFERENT_VALUE);
 		TestThatCapturesProperties test = new TestThatCapturesProperties();
 		evaluateRuleForStatement(test);
-		assertThat(test.propertiesAtStart, allOf(
-			hasPropertyWithValue(ARBITRARY_KEY, ARBITRARY_VALUE),
-			hasPropertyWithValue(ANOTHER_KEY, A_DIFFERENT_VALUE)));
+		assertThat(test.propertiesAtStart)
+			.containsEntry(ARBITRARY_KEY, ARBITRARY_VALUE)
+			.containsEntry(ANOTHER_KEY, A_DIFFERENT_VALUE);
 	}
 
 	@Test
@@ -57,7 +54,7 @@ public class ProvideSystemPropertyTest {
 		rule = new ProvideSystemProperty(ARBITRARY_KEY, null);
 		TestThatCapturesProperties test = new TestThatCapturesProperties();
 		evaluateRuleForStatement(test);
-		assertThat(test.propertiesAtStart, notHasProperty(ARBITRARY_KEY));
+		assertThat(test.propertiesAtStart).doesNotContainKey(ARBITRARY_KEY);
 	}
 
 	@Test
@@ -67,10 +64,10 @@ public class ProvideSystemPropertyTest {
 		rule = new ProvideSystemProperty(ARBITRARY_KEY, "different value")
 			.and(ANOTHER_KEY, "another different value");
 		evaluateRuleForStatement(TEST_THAT_DOES_NOTHING);
-		assertThat(getProperty(ARBITRARY_KEY),
-			is(equalTo("value of first property")));
-		assertThat(getProperty(ANOTHER_KEY),
-			is(equalTo("value of second property")));
+		assertThat(getProperty(ARBITRARY_KEY))
+			.isEqualTo("value of first property");
+		assertThat(getProperty(ANOTHER_KEY))
+			.isEqualTo("value of second property");
 	}
 
 	@Test
@@ -79,7 +76,7 @@ public class ProvideSystemPropertyTest {
 		clearProperty(ARBITRARY_KEY);
 		rule = new ProvideSystemProperty(ARBITRARY_KEY, "other value");
 		evaluateRuleForStatement(TEST_THAT_DOES_NOTHING);
-		assertThat(getProperty(ARBITRARY_KEY), is(nullValue()));
+		assertThat(getProperty(ARBITRARY_KEY)).isNull();
 	}
 
 	@Test
@@ -87,8 +84,8 @@ public class ProvideSystemPropertyTest {
 		rule = fromResource(EXAMPLE_PROPERTIES);
 		TestThatCapturesProperties test = new TestThatCapturesProperties();
 		evaluateRuleForStatement(test);
-		assertThat(test.propertiesAtStart,
-			hasPropertyWithValue(ARBITRARY_KEY, ARBITRARY_VALUE));
+		assertThat(test.propertiesAtStart)
+			.containsEntry(ARBITRARY_KEY, ARBITRARY_VALUE);
 	}
 
 	@Test
@@ -98,8 +95,8 @@ public class ProvideSystemPropertyTest {
 		rule = fromFile(file.getAbsolutePath());
 		TestThatCapturesProperties test = new TestThatCapturesProperties();
 		evaluateRuleForStatement(test);
-		assertThat(test.propertiesAtStart,
-			hasPropertyWithValue(ARBITRARY_KEY, ARBITRARY_VALUE));
+		assertThat(test.propertiesAtStart)
+			.containsEntry(ARBITRARY_KEY, ARBITRARY_VALUE);
 	}
 
 	@Test
@@ -118,8 +115,8 @@ public class ProvideSystemPropertyTest {
 		rule = new ProvideSystemProperty();
 		evaluateRuleForStatement(
 			new SetProperty(ARBITRARY_KEY, "dummy value"));
-		assertThat(getProperty(ARBITRARY_KEY),
-			is(equalTo("value before executing the rule")));
+		assertThat(getProperty(ARBITRARY_KEY))
+			.isEqualTo("value before executing the rule");
 	}
 
 	private void evaluateRuleForStatement(Statement statement) throws Throwable {
@@ -145,7 +142,7 @@ public class ProvideSystemPropertyTest {
 		@Override
 		public void evaluate() {
 			rule.setProperty(name, value);
-			assertThat(getProperty(name), is(equalTo(value)));
+			assertThat(getProperty(name)).isEqualTo(value);
 		}
 	}
 

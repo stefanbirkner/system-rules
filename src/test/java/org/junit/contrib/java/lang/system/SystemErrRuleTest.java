@@ -4,12 +4,7 @@ import static java.lang.String.format;
 import static java.lang.System.err;
 import static java.lang.System.setErr;
 import static java.lang.System.setProperty;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasToString;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.isEmptyString;
-import static org.hamcrest.Matchers.sameInstance;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 import static org.junit.contrib.java.lang.system.Statements.writeTextToSystemErr;
 
@@ -44,7 +39,7 @@ public class SystemErrRuleTest {
 				setErr(otherErr);
 			}
 		});
-		assertThat(err, is(sameInstance(originalErr)));
+		assertThat(err).isSameAs(originalErr);
 	}
 
 	@Test
@@ -53,7 +48,7 @@ public class SystemErrRuleTest {
 		ByteArrayOutputStream systemErr = useReadableSystemErr();
 		SystemErrRule rule = new SystemErrRule();
 		executeRuleWithStatement(rule, writeTextToSystemErr("arbitrary text"));
-		assertThat(systemErr, hasToString(equalTo("arbitrary text")));
+		assertThat(systemErr.toString()).isEqualTo("arbitrary text");
 	}
 
 	@Test
@@ -62,7 +57,7 @@ public class SystemErrRuleTest {
 		ByteArrayOutputStream systemErr = useReadableSystemErr();
 		SystemErrRule rule = new SystemErrRule().mute();
 		executeRuleWithStatement(rule, writeTextToSystemErr("arbitrary text"));
-		assertThat(systemErr, hasToString(isEmptyString()));
+		assertThat(systemErr.toString()).isEmpty();
 	}
 
 	@Test
@@ -78,7 +73,7 @@ public class SystemErrRuleTest {
 				err.print("text after muting");
 			}
 		});
-		assertThat(systemErr, hasToString("text before muting"));
+		assertThat(systemErr.toString()).isEqualTo("text before muting");
 	}
 
 	@Test
@@ -87,7 +82,7 @@ public class SystemErrRuleTest {
 		ByteArrayOutputStream systemErr = useReadableSystemErr();
 		SystemErrRule rule = new SystemErrRule().muteForSuccessfulTests();
 		executeRuleWithStatement(rule, writeTextToSystemErr("arbitrary text"));
-		assertThat(systemErr, hasToString(isEmptyString()));
+		assertThat(systemErr.toString()).isEmpty();
 	}
 
 	@Test
@@ -102,7 +97,7 @@ public class SystemErrRuleTest {
 				fail();
 			}
 		});
-		assertThat(systemErr, hasToString("arbitrary text"));
+		assertThat(systemErr.toString()).isEqualTo("arbitrary text");
 	}
 
 	@Test
@@ -117,7 +112,7 @@ public class SystemErrRuleTest {
 				err.print("arbitrary text");
 			}
 		});
-		assertThat(systemErr, hasToString(isEmptyString()));
+		assertThat(systemErr.toString()).isEmpty();
 	}
 
 	@Test
@@ -133,21 +128,21 @@ public class SystemErrRuleTest {
 				fail();
 			}
 		});
-		assertThat(systemErr, hasToString("arbitrary text"));
+		assertThat(systemErr.toString()).isEqualTo("arbitrary text");
 	}
 
 	@Test
 	public void no_text_is_logged_by_default() throws Throwable {
 		SystemErrRule rule = new SystemErrRule();
 		executeRuleWithStatement(rule, writeTextToSystemErr("arbitrary text"));
-		assertThat(rule.getLog(), isEmptyString());
+		assertThat(rule.getLog()).isEmpty();
 	}
 
 	@Test
 	public void text_is_logged_if_log_has_been_enabled_globally() throws Throwable {
 		SystemErrRule rule = new SystemErrRule().enableLog();
 		executeRuleWithStatement(rule, writeTextToSystemErr("arbitrary text"));
-		assertThat(rule.getLog(), is(equalTo("arbitrary text")));
+		assertThat(rule.getLog()).isEqualTo("arbitrary text");
 	}
 
 	@Test
@@ -161,7 +156,7 @@ public class SystemErrRuleTest {
 				err.print("arbitrary text");
 			}
 		});
-		assertThat(rule.getLog(), is(equalTo("arbitrary text")));
+		assertThat(rule.getLog()).isEqualTo("arbitrary text");
 	}
 
 	@Test
@@ -176,14 +171,14 @@ public class SystemErrRuleTest {
 				err.print("arbitrary text");
 			}
 		});
-		assertThat(rule.getLog(), is(equalTo("arbitrary text")));
+		assertThat(rule.getLog()).isEqualTo("arbitrary text");
 	}
 
 	@Test
 	public void text_is_logged_if_rule_is_enabled_and_muted() throws Throwable {
 		SystemErrRule rule = new SystemErrRule().enableLog().mute();
 		executeRuleWithStatement(rule, writeTextToSystemErr("arbitrary text"));
-		assertThat(rule.getLog(), is(equalTo("arbitrary text")));
+		assertThat(rule.getLog()).isEqualTo("arbitrary text");
 	}
 
 	@Test
@@ -192,7 +187,8 @@ public class SystemErrRuleTest {
 		setProperty("line.separator", "\r\n");
 		SystemErrRule rule = new SystemErrRule().enableLog();
 		executeRuleWithStatement(rule, writeTextToSystemErr(format("arbitrary%ntext%n")));
-		assertThat(rule.getLogWithNormalizedLineSeparator(), is(equalTo("arbitrary\ntext\n")));
+		assertThat(rule.getLogWithNormalizedLineSeparator())
+			.isEqualTo("arbitrary\ntext\n");
 	}
 
 	private ByteArrayOutputStream useReadableSystemErr() {

@@ -1,9 +1,7 @@
 package org.junit.contrib.java.lang.system;
 
 import static java.lang.System.getSecurityManager;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.sameInstance;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.contrib.java.lang.system.Statements.TEST_THAT_DOES_NOTHING;
 
 import java.security.Permission;
@@ -25,7 +23,7 @@ public class ProvideSecurityManagerTest {
 	public void provided_security_manager_is_present_during_test() throws Throwable {
 		CaptureSecurityManager test = new CaptureSecurityManager();
 		evaluateRuleWithTest(test);
-		assertThat(test.securityManagerDuringTest, is(sameInstance(MANAGER)));
+		assertThat(test.securityManagerDuringTest).isSameAs(MANAGER);
 	}
 
 	@Test
@@ -33,7 +31,7 @@ public class ProvideSecurityManagerTest {
 			throws Throwable {
 		SecurityManager originalManager = getSecurityManager();
 		evaluateRuleWithTest(TEST_THAT_DOES_NOTHING);
-		assertThat(getSecurityManager(), is(originalManager));
+		assertThat(getSecurityManager()).isSameAs(originalManager);
 	}
 
 	private void evaluateRuleWithTest(Statement statement) throws Throwable {

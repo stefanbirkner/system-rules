@@ -1,10 +1,7 @@
 package org.junit.contrib.java.lang.system;
 
 import static java.lang.System.in;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.sameInstance;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.contrib.java.lang.system.Statements.SUCCESSFUL_TEST;
 import static org.junit.contrib.java.lang.system.TextFromStandardInputStream.emptyStandardInputStream;
 
@@ -30,7 +27,7 @@ public class TextFromStandardInputStreamTest {
 				systemInMock.provideText("arbitrary text");
 				Scanner scanner = new Scanner(in);
 				String textFromSystemIn = scanner.nextLine();
-				assertThat(textFromSystemIn, is(equalTo("arbitrary text")));
+				assertThat(textFromSystemIn).isEqualTo("arbitrary text");
 			}
 		});
 	}
@@ -46,7 +43,7 @@ public class TextFromStandardInputStreamTest {
 				firstScanner.nextLine();
 				Scanner secondScanner = new Scanner(in);
 				String textFromSystemIn = secondScanner.nextLine();
-				assertThat(textFromSystemIn, is(equalTo("second text")));
+				assertThat(textFromSystemIn).isEqualTo("second text");
 			}
 		});
 	}
@@ -59,7 +56,7 @@ public class TextFromStandardInputStreamTest {
 			public void evaluate() throws Throwable {
 				systemInMock.provideText();
 				int character = in.read();
-				assertThat(character, is(-1));
+				assertThat(character).isEqualTo(-1);
 			}
 		});
 	}
@@ -74,7 +71,7 @@ public class TextFromStandardInputStreamTest {
 				firstScanner.nextLine();
 				Scanner secondScanner = new Scanner(in);
 				String textFromSystemIn = secondScanner.nextLine();
-				assertThat(textFromSystemIn, is(equalTo("second text")));
+				assertThat(textFromSystemIn).isEqualTo("second text");
 			}
 		});
 	}
@@ -87,7 +84,7 @@ public class TextFromStandardInputStreamTest {
 			public void evaluate() throws Throwable {
 				systemInMock.provideLines();
 				int character = in.read();
-				assertThat(character, is(-1));
+				assertThat(character).isEqualTo(-1);
 			}
 		});
 	}
@@ -96,7 +93,7 @@ public class TextFromStandardInputStreamTest {
 	public void after_the_test_system_in_is_same_as_before() throws Throwable {
 		InputStream originalSystemIn = in;
 		executeRuleWithStatement(SUCCESSFUL_TEST);
-		assertThat(in, is(sameInstance(originalSystemIn)));
+		assertThat(in).isSameAs(originalSystemIn);
 	}
 
 	private void executeRuleWithStatement(Statement statement) throws Throwable {

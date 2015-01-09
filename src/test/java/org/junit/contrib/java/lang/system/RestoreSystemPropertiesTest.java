@@ -2,12 +2,7 @@ package org.junit.contrib.java.lang.system;
 
 import static java.lang.System.clearProperty;
 import static java.lang.System.getProperty;
-import static java.lang.System.setProperty;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertThat;
-import static org.junit.contrib.java.lang.system.Matchers.hasPropertyWithValue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.After;
 import org.junit.Test;
@@ -36,7 +31,7 @@ public class RestoreSystemPropertiesTest {
 		System.setProperty(PROPERTY_KEY, "dummy value");
 		evaluateRuleForStatement(
 			Statements.setProperty(PROPERTY_KEY, "another value"));
-		assertThat(getProperty(PROPERTY_KEY), is(equalTo("dummy value")));
+		assertThat(getProperty(PROPERTY_KEY)).isEqualTo("dummy value");
 	}
 
 	@Test
@@ -45,7 +40,7 @@ public class RestoreSystemPropertiesTest {
 		clearProperty(PROPERTY_KEY);
 		evaluateRuleForStatement(
 			Statements.setProperty(PROPERTY_KEY, "another value"));
-		assertThat(getProperty(PROPERTY_KEY), is(nullValue()));
+		assertThat(getProperty(PROPERTY_KEY)).isNull();
 	}
 
 	@Test
@@ -54,8 +49,8 @@ public class RestoreSystemPropertiesTest {
 		System.setProperty(PROPERTY_KEY, "dummy value");
 		TestThatCapturesProperties test = new TestThatCapturesProperties();
 		evaluateRuleForStatement(test);
-		assertThat(test.propertiesAtStart,
-			hasPropertyWithValue(PROPERTY_KEY, "dummy value"));
+		assertThat(test.propertiesAtStart)
+			.containsEntry(PROPERTY_KEY, "dummy value");
 	}
 
 	private void evaluateRuleForStatement(Statement statement) throws Throwable {

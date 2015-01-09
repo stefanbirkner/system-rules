@@ -1,12 +1,7 @@
 package org.junit.contrib.java.lang.system.internal;
 
 import static com.github.stefanbirkner.fishbowl.Fishbowl.exceptionThrownBy;
-import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasProperty;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -33,32 +28,30 @@ public class NoExitSecurityManagerTest {
 
 	@Test
 	public void an_exception_with_the_status_is_thrown_when_checkExit_is_called() {
-		Throwable exception = exceptionThrownBy(new Statement() {
+		CheckExitCalled exception = exceptionThrownBy(new Statement() {
 			public void evaluate() throws Throwable {
 				managerWithOriginal.checkExit(DUMMY_STATUS);
 			}
-		});
-		assertThat(exception, allOf(
-			instanceOf(CheckExitCalled.class),
-			hasProperty("status", equalTo(DUMMY_STATUS))));
+		}, CheckExitCalled.class);
+		assertThat(exception.getStatus()).isEqualTo(DUMMY_STATUS);
 	}
 
 	@Test
 	public void getInCheck_is_delegated_to_original_security_manager() {
 		when(originalSecurityManager.getInCheck()).thenReturn(true);
-		assertThat(managerWithOriginal.getInCheck(), is(true));
+		assertThat(managerWithOriginal.getInCheck()).isTrue();
 	}
 
 	@Test
 	public void getInCheck_returns_false_without_original_security_manager() {
-		assertThat(managerWithoutOriginal.getInCheck(), is(false));
+		assertThat(managerWithoutOriginal.getInCheck()).isFalse();
 	}
 
 	@Test
 	public void security_context_of_original_security_manager_is_provided() {
 		Object context = new Object();
 		when(originalSecurityManager.getSecurityContext()).thenReturn(context);
-		assertThat(managerWithOriginal.getSecurityContext(), is(context));
+		assertThat(managerWithOriginal.getSecurityContext()).isSameAs(context);
 	}
 
 	@Test
@@ -333,7 +326,7 @@ public class NoExitSecurityManagerTest {
 	public void checkTopLevelWindow_is_delegated_to_original_security_manager() {
 		Object window = new Object();
 		when(originalSecurityManager.checkTopLevelWindow(window)).thenReturn(true);
-		assertThat(managerWithOriginal.checkTopLevelWindow(window), is(true));
+		assertThat(managerWithOriginal.checkTopLevelWindow(window)).isTrue();
 	}
 
 	@Test
@@ -438,7 +431,7 @@ public class NoExitSecurityManagerTest {
 	public void thread_group_of_original_security_manager_is_provided() {
 		ThreadGroup threadGroup = new ThreadGroup("dummy name");
 		when(originalSecurityManager.getThreadGroup()).thenReturn(threadGroup);
-		assertThat(managerWithOriginal.getThreadGroup(), is(threadGroup));
+		assertThat(managerWithOriginal.getThreadGroup()).isSameAs(threadGroup);
 	}
 
 	@Test
@@ -448,22 +441,21 @@ public class NoExitSecurityManagerTest {
 
 	@Test
 	public void information_about_a_missing_checkExit_call_is_available() {
-		assertThat(managerWithOriginal, hasProperty("checkExitCalled", is(false)));
+		assertThat(managerWithOriginal.isCheckExitCalled()).isFalse();
 	}
 
 	@Test
 	public void information_about_a_checkExit_call_is_available() {
 		safeCallCheckExitWithStatus(DUMMY_STATUS);
-		assertThat(managerWithOriginal, hasProperty("checkExitCalled", is(true)));
+		assertThat(managerWithOriginal.isCheckExitCalled()).isTrue();
 	}
 
 	@Test
 	public void status_of_first_call_of_checkExit_is_available() {
 		safeCallCheckExitWithStatus(DUMMY_STATUS);
 		safeCallCheckExitWithStatus(DUMMY_STATUS + 1);
-		assertThat(
-			managerWithOriginal,
-			hasProperty("statusOfFirstCheckExitCall", equalTo(DUMMY_STATUS)));
+		assertThat(managerWithOriginal.getStatusOfFirstCheckExitCall())
+			.isEqualTo(DUMMY_STATUS);
 	}
 
 	private void safeCallCheckExitWithStatus(int status) {
@@ -480,8 +472,8 @@ public class NoExitSecurityManagerTest {
 				managerWithOriginal.getStatusOfFirstCheckExitCall();
 			}
 		});
-		assertThat(exception, allOf(
-			instanceOf(IllegalStateException.class),
-			hasProperty("message", equalTo("checkExit(int) has not been called."))));
+		assertThat(exception)
+			.isInstanceOf(IllegalStateException.class)
+			.hasMessage("checkExit(int) has not been called.");
 	}
 }
