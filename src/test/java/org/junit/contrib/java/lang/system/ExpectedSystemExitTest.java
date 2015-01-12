@@ -1,21 +1,21 @@
 package org.junit.contrib.java.lang.system;
 
+import static com.github.stefanbirkner.fishbowl.Fishbowl.exceptionThrownBy;
 import static java.lang.System.getSecurityManager;
 import static java.lang.System.setSecurityManager;
 import static java.lang.Thread.sleep;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.junit.rules.ExpectedException.none;
 
 import java.security.Permission;
 
-import org.junit.Rule;
+import org.hamcrest.Matcher;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runners.model.Statement;
 
 
@@ -31,9 +31,6 @@ public class ExpectedSystemExitTest {
 		public void checkAssertion() throws Exception {
 		}
 	};
-
-	@Rule
-	public final ExpectedException thrown = none().handleAssertionErrors();
 
 	private final ExpectedSystemExit rule = ExpectedSystemExit.none();
 
@@ -56,22 +53,22 @@ public class ExpectedSystemExitTest {
 
 	@Test
 	public void failForUnexpectedSystemExit() throws Throwable {
-		thrown.expectMessage("Unexpected call of System.exit(0).");
-		executeRuleWithExitStatus0();
+		Throwable exception = exceptionThrownByRuleForStatement(new SystemExit0());
+		assertThat(exception, hasMessage("Unexpected call of System.exit(0)."));
 	}
 
 	@Test
 	public void failBecauseOfMissingSystemExitCall() throws Throwable {
-		thrown.expectMessage("System.exit has not been called.");
 		rule.expectSystemExit();
-		executeRuleWithoutExitCall();
+		Throwable exception = exceptionThrownByRuleForStatement(new EmptyStatement());
+		assertThat(exception, hasMessage("System.exit has not been called."));
 	}
 
 	@Test
 	public void failForWrongStatus() throws Throwable {
-		thrown.expectMessage("Wrong exit status");
 		rule.expectSystemExitWithStatus(1);
-		executeRuleWithExitStatus0();
+		Throwable exception = exceptionThrownByRuleForStatement(new SystemExit0());
+		assertThat(exception, hasMessage("Wrong exit status expected:<1> but was:<0>"));
 	}
 
 	@Test
@@ -87,26 +84,26 @@ public class ExpectedSystemExitTest {
 
 	@Test
 	public void failsOnExitWithInvalidAssertion() throws Throwable {
-		thrown.expectMessage(equalTo("Assertion failed."));
 		rule.expectSystemExit();
 		rule.checkAssertionAfterwards(INVALID_ASSERTION);
-		executeRuleWithExitStatus0();
+		Throwable exception = exceptionThrownByRuleForStatement(new SystemExit0());
+		assertThat(exception, hasMessage("Assertion failed."));
 	}
 
 	@Test
 	public void failsOnFirstOfTwoAssertions() throws Throwable {
-		thrown.expectMessage(equalTo("Assertion failed."));
 		rule.checkAssertionAfterwards(INVALID_ASSERTION);
 		rule.checkAssertionAfterwards(VALID_ASSERTION);
-		executeRuleWithoutExitCall();
+		Throwable exception = exceptionThrownByRuleForStatement(new EmptyStatement());
+		assertThat(exception, hasMessage("Assertion failed."));
 	}
 
 	@Test
 	public void failsOnSecondOfTwoAssertions() throws Throwable {
-		thrown.expectMessage(equalTo("Assertion failed."));
 		rule.checkAssertionAfterwards(VALID_ASSERTION);
 		rule.checkAssertionAfterwards(INVALID_ASSERTION);
-		executeRuleWithoutExitCall();
+		Throwable exception = exceptionThrownByRuleForStatement(new EmptyStatement());
+		assertThat(exception, hasMessage("Assertion failed."));
 	}
 
 	@Test
@@ -130,6 +127,14 @@ public class ExpectedSystemExitTest {
 		executeRuleWithStatement(new SystemExitInThread());
 	}
 
+	private Throwable exceptionThrownByRuleForStatement(final Statement statement) {
+		return exceptionThrownBy(new com.github.stefanbirkner.fishbowl.Statement() {
+			public void evaluate() throws Throwable {
+				executeRuleWithStatement(statement);
+			}
+		});
+	}
+
 	private void executeRuleWithoutExitCall() throws Throwable {
 		executeRuleWithStatement(new EmptyStatement());
 	}
@@ -140,6 +145,10 @@ public class ExpectedSystemExitTest {
 
 	private void executeRuleWithStatement(Statement statement) throws Throwable {
 		rule.apply(statement, null).evaluate();
+	}
+
+	private Matcher<Throwable> hasMessage(String message) {
+		return hasProperty("message", equalTo(message));
 	}
 
 	private static class SystemExit0 extends Statement {

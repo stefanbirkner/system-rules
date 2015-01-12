@@ -1,5 +1,6 @@
 package org.junit.contrib.java.lang.system;
 
+import static com.github.stefanbirkner.fishbowl.Fishbowl.exceptionThrownBy;
 import static java.lang.System.err;
 import static java.lang.System.setErr;
 import static org.hamcrest.Matchers.*;
@@ -8,17 +9,12 @@ import static org.junit.Assert.assertThat;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.rules.TestRule;
 import org.junit.runners.model.Statement;
 
 public class StandardErrorStreamLogTest {
 	private static final String ARBITRARY_TEXT = "arbitrary text";
-
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
 
 	@Test
 	public void logWriting() throws Throwable {
@@ -72,9 +68,15 @@ public class StandardErrorStreamLogTest {
 
 	@Test
 	public void cannotBeCreatedWithoutLogMode() {
-		thrown.expect(NullPointerException.class);
-		thrown.expectMessage(equalTo("The LogMode is missing."));
-		new StandardErrorStreamLog(null);
+		Throwable exception = exceptionThrownBy(
+			new com.github.stefanbirkner.fishbowl.Statement() {
+				public void evaluate() throws Throwable {
+					new StandardErrorStreamLog(null);
+				}
+			});
+		assertThat(exception, allOf(
+			instanceOf(NullPointerException.class),
+			hasProperty("message", equalTo("The LogMode is missing."))));
 	}
 
 	private StandardErrorStreamLog createLogWithoutSpecificMode() {

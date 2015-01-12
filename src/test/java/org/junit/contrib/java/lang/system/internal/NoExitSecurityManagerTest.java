@@ -1,5 +1,6 @@
 package org.junit.contrib.java.lang.system.internal;
 
+import static com.github.stefanbirkner.fishbowl.Fishbowl.exceptionThrownBy;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasProperty;
@@ -14,16 +15,13 @@ import java.io.FileDescriptor;
 import java.net.InetAddress;
 import java.security.Permission;
 
+import com.github.stefanbirkner.fishbowl.Statement;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
 
 public class NoExitSecurityManagerTest {
 	private static final int DUMMY_STATUS = 1;
-
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
 
 	@Rule
 	public final TemporaryFolder temporaryFolder = new TemporaryFolder();
@@ -35,9 +33,14 @@ public class NoExitSecurityManagerTest {
 
 	@Test
 	public void throwExceptionWhenCheckExitIsCalled() {
-		thrown.expect(allOf(instanceOf(CheckExitCalled.class),
+		Throwable exception = exceptionThrownBy(new Statement() {
+			public void evaluate() throws Throwable {
+				managerWithOriginal.checkExit(DUMMY_STATUS);
+			}
+		});
+		assertThat(exception, allOf(
+			instanceOf(CheckExitCalled.class),
 			hasProperty("status", equalTo(DUMMY_STATUS))));
-		managerWithOriginal.checkExit(DUMMY_STATUS);
 	}
 
 	@Test
@@ -472,8 +475,13 @@ public class NoExitSecurityManagerTest {
 
 	@Test
 	public void doesNotProvideStatusOfFirstCheckExitCallWithoutCall() {
-		thrown.expect(IllegalStateException.class);
-		thrown.expectMessage("checkExit(int) has not been called.");
-		managerWithOriginal.getStatusOfFirstCheckExitCall();
+		Throwable exception = exceptionThrownBy(new Statement() {
+			public void evaluate() throws Throwable {
+				managerWithOriginal.getStatusOfFirstCheckExitCall();
+			}
+		});
+		assertThat(exception, allOf(
+			instanceOf(IllegalStateException.class),
+			hasProperty("message", equalTo("checkExit(int) has not been called."))));
 	}
 }
