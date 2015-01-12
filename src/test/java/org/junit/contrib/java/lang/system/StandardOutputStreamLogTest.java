@@ -75,7 +75,7 @@ public class StandardOutputStreamLogTest {
 	public void cannotBeCreatedWithoutLogMode() {
 		thrown.expect(NullPointerException.class);
 		thrown.expectMessage(equalTo("The LogMode is missing."));
-		new StandardErrorStreamLog(null);
+		new StandardOutputStreamLog(null);
 	}
 
 	private StandardOutputStreamLog createLogWithoutSpecificMode() {
