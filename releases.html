@@ -5,6 +5,16 @@ headline: Releases
 ---
 <section>
 	<dl>
+		<dt>1.8.0</dt>
+		<dd>
+			RestoreSystemProperties restores all properties.
+			(<a href="https://github.com/stefanbirkner/system-rules/commit/7590f5177f035e8681183632be45680be180860c">Commit</a>)
+			Consequently the methods <code>ClearSystemProperties.clearProperty(String)</code>
+			(<a href="https://github.com/stefanbirkner/system-rules/commit/326715455e2365c332619131e5b2c7d91e0774d2">Commit</a>)
+			and <code>ProvideSystemProperty.setProperty(String, String)</code>
+			(<a href="https://github.com/stefanbirkner/system-rules/commit/a40eb81039eebf0b9eea2002ad62ce312155983e">Commit</a>)
+			have been deprecated.
+		</dd>
 		<dt>1.7.0</dt>
 		<dd>
 			Optionally prevent output to stdout/stderr.

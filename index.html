@@ -134,12 +134,11 @@ public final ProvideSystemProperty properties
 
 			<section id="RestoreSystemProperties">
 				<h3>Restore Properties</h3>
-				<p>The RestoreSystemProperties rule restores the original value of
-				the property when the test is finished.</p>
+				<p>The RestoreSystemProperties rule undoes changes of all system properties when the test finishes (whether it passes or fails).</p>
 				{% highlight java %}public void MyTest {
 	@Rule
 	public final RestoreSystemProperties restoreSystemProperties
-	 = new RestoreSystemProperties("MyProperty");
+	 = new RestoreSystemProperties();
 
 	@Test
 	public void overrideProperty() {
