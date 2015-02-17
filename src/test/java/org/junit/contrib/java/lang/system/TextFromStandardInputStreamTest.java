@@ -30,6 +30,33 @@ public class TextFromStandardInputStreamTest {
 	}
 
 	@Test
+	public void providesMultipleTexts() throws Throwable {
+		executeRuleWithStatement(new Statement() {
+			@Override
+			public void evaluate() throws Throwable {
+				systemInMock.provideText("first text\n", "second text\n");
+				Scanner firstScanner = new Scanner(System.in);
+				firstScanner.nextLine();
+				Scanner secondScanner = new Scanner(System.in);
+				String textFromSystemIn = secondScanner.nextLine();
+				assertThat(textFromSystemIn, is(equalTo("second text")));
+			}
+		});
+	}
+
+	@Test
+	public void doesNotFailForNoProvidedText() throws Throwable {
+		executeRuleWithStatement(new Statement() {
+			@Override
+			public void evaluate() throws Throwable {
+				systemInMock.provideText();
+				int character = System.in.read();
+				assertThat(character, is(-1));
+			}
+		});
+	}
+
+	@Test
 	public void restoreSystemIn() throws Throwable {
 		InputStream originalSystemIn = System.in;
 		executeRuleWithStatement(new EmptyStatement());

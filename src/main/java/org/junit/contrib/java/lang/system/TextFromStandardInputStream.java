@@ -2,10 +2,13 @@ package org.junit.contrib.java.lang.system;
 
 import static java.lang.System.in;
 import static java.lang.System.setIn;
+import static java.util.Arrays.asList;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
+import java.util.Iterator;
+import java.util.List;
 
 import org.junit.rules.ExternalResource;
 
@@ -28,6 +31,20 @@ import org.junit.rules.ExternalResource;
  *     }
  *   }
  * </pre>
+ *
+ * <h3>Multiple Texts</h3>
+ * You can simulate a user that stops typing and continues afterwards
+ * by providing multiple texts.
+ * <pre>
+ *   &#064;Test
+ *   public void readTextFromStandardInputStream() {
+ *     systemInMock.provide("foo\n", "bar\n");
+ *     Scanner firstScanner = new Scanner(System.in);
+ *     scanner.nextLine();
+ *     Scanner secondScanner = new Scanner(System.in);
+ *     assertEquals("bar", scanner.nextLine());
+ *   }
+ * </pre>
  */
 public class TextFromStandardInputStream extends ExternalResource {
 	private final SystemInMock systemInMock = new SystemInMock();
@@ -42,15 +59,22 @@ public class TextFromStandardInputStream extends ExternalResource {
 	 * specified text.
 	 *
 	 * @param text this text is return by {@code System.in}.
-	 * @deprecated use {@link #provideText(String)}
+	 * @deprecated use {@link #provideText(String...)}
 	 */
 	@Deprecated
 	public TextFromStandardInputStream(String text) {
 		provideText(text);
 	}
 
-	public void provideText(String text) {
-		systemInMock.provideText(text);
+	/**
+	 * Set the text that is returned by {@code System.in}. You can
+	 * provide multiple texts. In that case {@code System.in.read()}
+	 * returns -1 once when the end of a single text is reached and
+	 * continues with the next text afterwards.
+	 * @param texts a list of texts.
+	 */
+	public void provideText(String... texts) {
+		systemInMock.provideText(asList(texts));
 	}
 
 	@Override
@@ -65,15 +89,34 @@ public class TextFromStandardInputStream extends ExternalResource {
 	}
 
 	private static class SystemInMock extends InputStream {
-		private StringReader reader;
+		private Iterator<String> texts;
+		private StringReader currentReader;
 
-		public void provideText(String text) {
-			reader = new StringReader(text);
+		public void provideText(List<String> texts) {
+			this.texts = texts.iterator();
+			optionallyCreateReaderForNextText();
 		}
 
 		@Override
 		public int read() throws IOException {
-			return reader.read();
+			if (currentReader == null)
+				return -1;
+			else
+				return readFromExistingReader();
+		}
+
+		private int readFromExistingReader() throws IOException {
+			int character = currentReader.read();
+			if (character == -1)
+				optionallyCreateReaderForNextText();
+			return character;
+		}
+
+		private void optionallyCreateReaderForNextText() {
+			if (texts.hasNext())
+				currentReader = new StringReader(texts.next());
+			else
+				currentReader = null;
 		}
 	}
 }
