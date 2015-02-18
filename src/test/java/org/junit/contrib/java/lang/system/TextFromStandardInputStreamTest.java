@@ -15,8 +15,6 @@ import org.junit.rules.Timeout;
 import org.junit.runners.model.Statement;
 
 public class TextFromStandardInputStreamTest {
-	private static final String ARBITRARY_TEXT = "arbitrary text";
-
 	@Rule
 	public final Timeout timeout = new Timeout(1000);
 
@@ -24,9 +22,15 @@ public class TextFromStandardInputStreamTest {
 
 	@Test
 	public void provideText() throws Throwable {
-		ReadTextFromSystemIn statement = new ReadTextFromSystemIn(ARBITRARY_TEXT);
-		executeRuleWithStatement(statement);
-		assertThat(statement.textFromSystemIn, is(equalTo(ARBITRARY_TEXT)));
+		executeRuleWithStatement(new Statement() {
+			@Override
+			public void evaluate() throws Throwable {
+				systemInMock.provideText("arbitrary text");
+				Scanner scanner = new Scanner(System.in);
+				String textFromSystemIn = scanner.nextLine();
+				assertThat(textFromSystemIn, is(equalTo("arbitrary text")));
+			}
+		});
 	}
 
 	@Test
@@ -65,21 +69,5 @@ public class TextFromStandardInputStreamTest {
 
 	private void executeRuleWithStatement(Statement statement) throws Throwable {
 		systemInMock.apply(statement, null).evaluate();
-	}
-
-	private class ReadTextFromSystemIn extends Statement {
-		private final String textProvidedBySystemIn;
-		private String textFromSystemIn;
-
-		public ReadTextFromSystemIn(String textProvidedBySystemIn) {
-			this.textProvidedBySystemIn = textProvidedBySystemIn;
-		}
-
-		@Override
-		public void evaluate() throws Throwable {
-			systemInMock.provideText(textProvidedBySystemIn);
-			Scanner scanner = new Scanner(System.in);
-			textFromSystemIn = scanner.nextLine();
-		}
 	}
 }
