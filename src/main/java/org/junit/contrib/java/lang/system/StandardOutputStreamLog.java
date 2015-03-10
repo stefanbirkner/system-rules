@@ -1,10 +1,7 @@
 package org.junit.contrib.java.lang.system;
 
-import static java.lang.System.out;
-import static java.lang.System.setOut;
 import static org.junit.contrib.java.lang.system.LogMode.LOG_AND_WRITE_TO_STREAM;
-
-import java.io.PrintStream;
+import static org.junit.contrib.java.lang.system.internal.PrintStreamHandler.SYSTEM_OUT;
 
 import org.junit.contrib.java.lang.system.internal.PrintStreamLog;
 
@@ -64,16 +61,6 @@ public class StandardOutputStreamLog extends PrintStreamLog {
 	 * @throws java.lang.NullPointerException if {@code mode} is null.
 	 */
 	public StandardOutputStreamLog(LogMode mode) {
-		super(mode);
-	}
-
-	@Override
-	protected PrintStream getOriginalStream() {
-		return out;
-	}
-
-	@Override
-	protected void setStream(PrintStream wrappedLog) {
-		setOut(wrappedLog);
+		super(mode, SYSTEM_OUT);
 	}
 }

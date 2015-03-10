@@ -1,10 +1,7 @@
 package org.junit.contrib.java.lang.system;
 
-import static java.lang.System.err;
-import static java.lang.System.setErr;
 import static org.junit.contrib.java.lang.system.LogMode.LOG_AND_WRITE_TO_STREAM;
-
-import java.io.PrintStream;
+import static org.junit.contrib.java.lang.system.internal.PrintStreamHandler.SYSTEM_ERR;
 
 import org.junit.contrib.java.lang.system.internal.PrintStreamLog;
 
@@ -65,16 +62,6 @@ public class StandardErrorStreamLog extends PrintStreamLog {
 	 * @throws java.lang.NullPointerException if {@code mode} is null.
 	 */
 	public StandardErrorStreamLog(LogMode mode) {
-		super(mode);
-	}
-
-	@Override
-	protected PrintStream getOriginalStream() {
-		return err;
-	}
-
-	@Override
-	protected void setStream(PrintStream wrappedLog) {
-		setErr(wrappedLog);
+		super(mode, SYSTEM_ERR);
 	}
 }
