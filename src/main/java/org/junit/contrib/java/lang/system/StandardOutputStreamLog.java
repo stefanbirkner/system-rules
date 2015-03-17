@@ -1,12 +1,16 @@
 package org.junit.contrib.java.lang.system;
 
 import static org.junit.contrib.java.lang.system.LogMode.LOG_AND_WRITE_TO_STREAM;
-import static org.junit.contrib.java.lang.system.internal.PrintStreamHandler.SYSTEM_OUT;
+import static org.junit.contrib.java.lang.system.LogMode.LOG_ONLY;
 
-import org.junit.contrib.java.lang.system.internal.PrintStreamLog;
+import org.junit.rules.TestRule;
+import org.junit.runner.Description;
+import org.junit.runners.model.Statement;
 
 /**
- * The {@code StandardOutputStreamLog} records writes to the standard output
+ * @deprecated Please use {@link SystemOutRule}.
+ *
+ * <p>The {@code StandardOutputStreamLog} records writes to the standard output
  * stream. The text written is available via {@link #getLog()}.
  *
  * <pre>
@@ -44,23 +48,67 @@ import org.junit.contrib.java.lang.system.internal.PrintStreamLog;
  * &#064;Rule
  * public final StandardOutputStreamLog log = new StandardOutputStreamLog(LOG_ONLY);</pre>
  */
-public class StandardOutputStreamLog extends PrintStreamLog {
+@Deprecated
+public class StandardOutputStreamLog implements TestRule {
+	private final SystemOutRule systemOut = new SystemOutRule();
 	/**
-	 * Creates a rule that records writes while they are still written to the
-	 * standard output stream.
+	 * @deprecated Please use
+	 * {@link SystemOutRule#enableLog() new SystemOutRule().enableLog()}.
+	 *
+	 * <p>Creates a rule that records writes while they are still written to
+	 * the standard output stream.
 	 */
 	public StandardOutputStreamLog() {
 		this(LOG_AND_WRITE_TO_STREAM);
 	}
 
 	/**
-	 * Creates a rule that records writes to the standard output stream
+	 * @deprecated Please use
+	 * {@link SystemOutRule#enableLog() new SystemOutRule().enableLog()}
+	 * instead of
+	 * {@code new StandardOutputStreamLog(LogMode.LOG_AND_WRITE_TO_STREAM)} or
+	 * {@link SystemOutRule#enableLog() new SystemOutRule().enableLog()}.{@link SystemOutRule#mute() mute()}
+	 * instead of {@code new StandardOutputStreamLog(LogMode.LOG_ONLY)}.
+	 *
+	 * <p>Creates a rule that records writes to the standard output stream
 	 * according to the specified {@code LogMode}.
 	 *
 	 * @param mode how the rule handles writes to the standard output stream.
 	 * @throws java.lang.NullPointerException if {@code mode} is null.
 	 */
 	public StandardOutputStreamLog(LogMode mode) {
-		super(mode, SYSTEM_OUT);
+		if (mode == null)
+			throw new NullPointerException("The LogMode is missing.");
+		systemOut.enableLog();
+		if (mode == LOG_ONLY)
+			systemOut.mute();
+	}
+
+	/**
+	 * @deprecated Please use
+	 * {@link org.junit.contrib.java.lang.system.SystemOutRule#clearLog()}.
+	 *
+	 * <p>Clears the log. The log can be used again.
+	 */
+	@Deprecated
+	public void clear() {
+		systemOut.clearLog();
+	}
+
+	/**
+	 * @deprecated Please use
+	 * {@link org.junit.contrib.java.lang.system.SystemOutRule#getLog()}.
+	 *
+	 * <p>Returns the text written to the standard output stream.
+	 *
+	 * @return the text written to the standard output stream.
+	 */
+	@Deprecated
+	public String getLog() {
+		return systemOut.getLog();
+	}
+
+	public Statement apply(Statement base, Description description) {
+		return systemOut.apply(base, description);
 	}
 }

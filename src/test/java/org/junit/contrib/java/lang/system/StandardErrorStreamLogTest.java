@@ -33,11 +33,11 @@ public class StandardErrorStreamLogTest {
 
 	@Test
 	public void stillWritesToSystemErrorStreamIfNoLogModeHasBeenSpecified() throws Throwable {
-		StandardErrorStreamLog log = createLogWithoutSpecificMode();
 		PrintStream originalStream = err;
 		try {
 			ByteArrayOutputStream captureErrorStream = new ByteArrayOutputStream();
 			setErr(new PrintStream(captureErrorStream));
+			StandardErrorStreamLog log = createLogWithoutSpecificMode();
 			executeRuleWithStatement(log, new WriteTextToStandardErrorStream());
 			assertThat(captureErrorStream, hasToString(equalTo(ARBITRARY_TEXT)));
 		} finally {

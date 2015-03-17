@@ -33,11 +33,11 @@ public class StandardOutputStreamLogTest {
 
 	@Test
 	public void stillWritesToSystemOutputStreamIfNoLogModeHasBeenSpecified() throws Throwable {
-		StandardOutputStreamLog log = createLogWithoutSpecificMode();
 		PrintStream originalStream = out;
 		try {
 			ByteArrayOutputStream captureOutputStream = new ByteArrayOutputStream();
 			setOut(new PrintStream(captureOutputStream));
+			StandardOutputStreamLog log = createLogWithoutSpecificMode();
 			executeRuleWithStatement(log, new WriteTextToStandardOutputStream());
 			assertThat(captureOutputStream,
 				hasToString(equalTo(ARBITRARY_TEXT)));

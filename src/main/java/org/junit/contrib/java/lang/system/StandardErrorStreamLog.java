@@ -1,12 +1,16 @@
 package org.junit.contrib.java.lang.system;
 
 import static org.junit.contrib.java.lang.system.LogMode.LOG_AND_WRITE_TO_STREAM;
-import static org.junit.contrib.java.lang.system.internal.PrintStreamHandler.SYSTEM_ERR;
+import static org.junit.contrib.java.lang.system.LogMode.LOG_ONLY;
 
-import org.junit.contrib.java.lang.system.internal.PrintStreamLog;
+import org.junit.rules.TestRule;
+import org.junit.runner.Description;
+import org.junit.runners.model.Statement;
 
 /**
- * The {@code StandardErrorStreamLog} records writes to the standard error
+ * @deprecated Please use {@link SystemErrRule}.
+ *
+ * <p>The {@code StandardErrorStreamLog} records writes to the standard error
  * stream. The text written is available via {@link #getLog()}.
  *
  * <pre>
@@ -45,9 +49,14 @@ import org.junit.contrib.java.lang.system.internal.PrintStreamLog;
  * &#064;Rule
  * public final StandardErrorStreamLog log = new StandardErrorStreamLog(LOG_ONLY);</pre>
  */
-public class StandardErrorStreamLog extends PrintStreamLog {
+@Deprecated
+public class StandardErrorStreamLog implements TestRule {
+	private final SystemErrRule systemErrRule = new SystemErrRule();
 	/**
-	 * Creates a rule that records writes while they are still written to the
+	 * @deprecated Please use
+	 * {@link SystemErrRule#enableLog() new SystemErrRule().enableLog()}.
+	 *
+	 * <p>Creates a rule that records writes while they are still written to the
 	 * standard error stream.
 	 */
 	public StandardErrorStreamLog() {
@@ -55,13 +64,52 @@ public class StandardErrorStreamLog extends PrintStreamLog {
 	}
 
 	/**
-	 * Creates a rule that records writes to the standard error stream according
-	 * to the specified {@code LogMode}.
+	 * @deprecated Please use
+	 * {@link SystemErrRule#enableLog() new SystemErrRule().enableLog()}
+	 * instead of
+	 * {@code new StandardErrorStreamLog(LogMode.LOG_AND_WRITE_TO_STREAM)} or
+	 * {@link SystemErrRule#enableLog() new SystemErrRule().enableLog()}.{@link SystemErrRule#mute() mute()}
+	 * instead of {@code new StandardErrorStreamLog(LogMode.LOG_ONLY)}.
+	 *
+	 * <p>Creates a rule that records writes to the standard error stream
+	 * according to the specified {@code LogMode}.
 	 *
 	 * @param mode how the rule handles writes to the standard error stream.
 	 * @throws java.lang.NullPointerException if {@code mode} is null.
 	 */
 	public StandardErrorStreamLog(LogMode mode) {
-		super(mode, SYSTEM_ERR);
+		if (mode == null)
+			throw new NullPointerException("The LogMode is missing.");
+		systemErrRule.enableLog();
+		if (mode == LOG_ONLY)
+			systemErrRule.mute();
+	}
+
+	/**
+	 * @deprecated Please use
+	 * {@link org.junit.contrib.java.lang.system.SystemErrRule#clearLog()}.
+	 *
+	 * <p>Clears the log. The log can be used again.
+	 */
+	@Deprecated
+	public void clear() {
+		systemErrRule.clearLog();
+	}
+
+	/**
+	 * @deprecated Please use
+	 * {@link org.junit.contrib.java.lang.system.SystemErrRule#getLog()}.
+	 *
+	 * <p>Returns the text written to the standard error stream.
+	 *
+	 * @return the text written to the standard error stream.
+	 */
+	@Deprecated
+	public String getLog() {
+		return systemErrRule.getLog();
+	}
+
+	public Statement apply(Statement base, Description description) {
+		return systemErrRule.apply(base, description);
 	}
 }
