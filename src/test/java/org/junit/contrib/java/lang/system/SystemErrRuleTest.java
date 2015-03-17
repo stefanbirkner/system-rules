@@ -8,6 +8,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isEmptyString;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -67,6 +68,61 @@ public class SystemErrRuleTest {
 			}
 		});
 		assertThat(systemErr, hasToString(isEmptyString()));
+	}
+
+	@Test
+	public void doesNotWriteToSystemErrForSuccessfulTestIfMutedGloballyForSuccessfulTests()
+			throws Throwable{
+		ByteArrayOutputStream systemErr = useReadableSystemErr();
+		SystemErrRule rule = new SystemErrRule().muteForSuccessfulTests();
+		executeRuleWithStatement(rule, writeTextToSystemErr("arbitrary text"));
+		assertThat(systemErr, hasToString(isEmptyString()));
+	}
+
+	@Test
+	public void writesToSystemErrForFailingTestIfMutedGloballyForSuccessfulTests()
+			throws Throwable {
+		ByteArrayOutputStream systemErr = useReadableSystemErr();
+		SystemErrRule rule = new SystemErrRule().muteForSuccessfulTests();
+		executeRuleWithStatement(rule, new Statement() {
+			@Override
+			public void evaluate() throws Throwable {
+				err.print("arbitrary text");
+				fail();
+			}
+		});
+		assertThat(systemErr, hasToString("arbitrary text"));
+	}
+
+	@Test
+	public void doesNotWriteToSystemErrForSuccessfulTestIfMutedLocallyForSuccessfulTests()
+			throws Throwable{
+		ByteArrayOutputStream systemErr = useReadableSystemErr();
+		final SystemErrRule rule = new SystemErrRule();
+		executeRuleWithStatement(rule, new Statement() {
+			@Override
+			public void evaluate() throws Throwable {
+				rule.muteForSuccessfulTests();
+				err.print("arbitrary text");
+			}
+		});
+		assertThat(systemErr, hasToString(isEmptyString()));
+	}
+
+	@Test
+	public void writesToSystemErrForFailingTestIfMutedLocallyForSuccessfulTests()
+			throws Throwable{
+		ByteArrayOutputStream systemErr = useReadableSystemErr();
+		final SystemErrRule rule = new SystemErrRule();
+		executeRuleWithStatement(rule, new Statement() {
+			@Override
+			public void evaluate() throws Throwable {
+				rule.muteForSuccessfulTests();
+				err.print("arbitrary text");
+				fail();
+			}
+		});
+		assertThat(systemErr, hasToString("arbitrary text"));
 	}
 
 	@Test
@@ -134,6 +190,10 @@ public class SystemErrRuleTest {
 
 	private void executeRuleWithStatement(TestRule rule, Statement statement)
 			throws Throwable {
-		rule.apply(statement, null).evaluate();
+		try {
+			rule.apply(statement, null).evaluate();
+		} catch (AssertionError ignored) {
+			//we must ignore the exception in case of a failing statement.
+		}
 	}
 }

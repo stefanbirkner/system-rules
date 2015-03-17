@@ -109,6 +109,27 @@ import org.junit.runners.model.Statement;
  * }
  * </pre>
  *
+ * <p>In case of a failed test it is sometimes helpful to see the output. This
+ * is when the method {@link #muteForSuccessfulTests()} comes into play.
+ *
+ * <pre>
+ * public class SystemErrTest {
+ *   &#064;Rule
+ *   public final SystemErrRule systemErrRule = new SystemErrRule().muteForSuccessfulTests();
+ *
+ *   &#064;Test
+ *   public void testWithSuppressedOutput() {
+ *     System.err.print("some text");
+ *   }
+ *
+ *   &#064;Test
+ *   public void testWithNormalOutput() {
+ *     System.err.print("some text");
+ *     fail();
+ *   }
+ * }
+ * </pre>
+ *
  * <h2>Combine Logging and Muting</h2>
  *
  * <p>Logging and muting can be combined. No output is actually written to
@@ -138,6 +159,17 @@ public class SystemErrRule implements TestRule {
 	 */
 	public SystemErrRule mute() {
 		printStreamRule.mute();
+		return this;
+	}
+
+	/**
+	 * Suppress the output to {@code System.err} for successful tests only.
+	 * The output is still written to {@code System.err} for failing tests.
+	 *
+	 * @return the rule itself.
+	 */
+	public SystemErrRule muteForSuccessfulTests() {
+		printStreamRule.muteForSuccessfulTests();
 		return this;
 	}
 
