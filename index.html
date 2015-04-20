@@ -258,6 +258,42 @@ public class SummarizeTest {
     assertEquals(3, Summarize.sumOfNumbersFromSystemIn());
   }
 }{% endhighlight %}
+
+				<p>In rare cases you need to simulate a user who stops between inputs. (E.g. if you use mutliple Scanners or something else that relies on <code>System.in.read()</code> returning <code>-1</code> after a line break.) In such cases you can provided the consecutive inputs as individual Strings to <code>TextFromStandardInputStream</code>.</p>
+
+				<h4>Class Under Test</h4>
+				{% highlight java %}import java.util.Scanner;
+
+public class Summarize {
+  public static int sumOfNumbersFromSystemIn() {
+    Scanner scanner = new Scanner(System.in);
+    int firstSummand = scanner.nextInt();
+    scanner = new Scanner(System.in);
+    int secondSummand = scanner.nextInt();
+    return firstSummand + secondSummand;
+  }
+}{% endhighlight %}
+
+				<h4>Test</h4>
+				{% highlight java %}import static org.junit.Assert.*;
+import static org.junit.contrib.java.lang.system.TextFromStandardInputStream.*;
+
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.contrib.java.lang.system.TextFromStandardInputStream;
+
+public class SummarizeTest {
+  @Rule
+  public final TextFromStandardInputStream systemInMock
+    = emptyStandardInputStream();
+
+  @Test
+  public void summarizesTwoNumbers() {
+    systemInMock.provideText("1\n", "2\n");
+    assertEquals(3, Summarize.sumOfNumbersFromSystemIn());
+  }
+}{% endhighlight %}
+
 			</section>
 
 			<section id="ExpectedSystemExit">
