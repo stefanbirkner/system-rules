@@ -119,4 +119,9 @@ public class TextFromStandardInputStream extends ExternalResource {
 				currentReader = null;
 		}
 	}
+
+	public void provideLines(String string, String string2) {
+		// TODO Auto-generated method stub
+		
+	}
 }

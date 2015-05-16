@@ -47,7 +47,20 @@ public class TextFromStandardInputStreamTest {
 			}
 		});
 	}
-
+	@Test
+	public void providesMultipleTextsEachWithANewLine() throws Throwable {
+		executeRuleWithStatement(new Statement() {
+			@Override
+			public void evaluate() throws Throwable {
+				systemInMock.provideLines("first text", "second text");
+				Scanner firstScanner = new Scanner(System.in);
+				firstScanner.nextLine();
+				Scanner secondScanner = new Scanner(System.in);
+				String textFromSystemIn = secondScanner.nextLine();
+				assertThat(textFromSystemIn, is(equalTo("second text")));
+			}
+		});
+	}
 	@Test
 	public void doesNotFailForNoProvidedText() throws Throwable {
 		executeRuleWithStatement(new Statement() {
