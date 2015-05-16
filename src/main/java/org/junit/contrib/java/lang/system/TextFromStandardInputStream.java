@@ -76,7 +76,25 @@ public class TextFromStandardInputStream extends ExternalResource {
 	public void provideText(String... texts) {
 		systemInMock.provideText(asList(texts));
 	}
-
+	
+	/**
+	 * Set the lines that are returned by {@code System.in},
+	 * each in a new line separated by System.lineSeperator().
+	 * You can provide multiple lines. In that case {@code System.in.read()}
+	 * returns -1 once when the end of a single text is reached and
+	 * continues with the next text afterwards.
+	 * @param lines a list of lines.
+	 */
+	public void provideLines(String... lines) {
+		String[] texts = new String[lines.length];
+		
+		for (int index = 0; index < lines.length; index++) {
+			texts[index] = lines[index] + System.lineSeparator();
+		}
+		
+		provideText(texts);
+	}
+	
 	@Override
 	protected void before() throws Throwable {
 		originalIn = in;
@@ -120,8 +138,5 @@ public class TextFromStandardInputStream extends ExternalResource {
 		}
 	}
 
-	public void provideLines(String string, String string2) {
-		// TODO Auto-generated method stub
-		
-	}
+	
 }

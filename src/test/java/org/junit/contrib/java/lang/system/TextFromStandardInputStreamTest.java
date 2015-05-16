@@ -47,6 +47,7 @@ public class TextFromStandardInputStreamTest {
 			}
 		});
 	}
+	
 	@Test
 	public void providesMultipleTextsEachWithANewLine() throws Throwable {
 		executeRuleWithStatement(new Statement() {
@@ -61,6 +62,7 @@ public class TextFromStandardInputStreamTest {
 			}
 		});
 	}
+	
 	@Test
 	public void doesNotFailForNoProvidedText() throws Throwable {
 		executeRuleWithStatement(new Statement() {
