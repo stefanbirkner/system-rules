@@ -36,21 +36,23 @@ description: A collection of JUnit rules for testing code that uses java.lang.Sy
     	<div class="row">
 	    	<div class="col-md-4">
 					<h2>System.err</h2>
-					<p>Use the <a href="#StandardErrorStreamLog">StandardErrorStreamLog</a> rule
-					to capture and verify the text, that your test writes to <code>System.err.</code></p>
-				</div>
+					<p>Use the <a href="#SystemErrRule">SystemErrRule</a> rule to mute
+					<code>System.err</code> or capture and verify the text, that your
+					test writes to <code>System.err.</code></p>
+		</div>
 	    	<div class="col-md-4">
 					<h2>System.in</h2>
 					<p>Use the <a href="#TextFromStandardInputStream">TextFromStandardInputStream</a> rule
 					to provide text, that your test reads from <code>System.in.</code></p>
-				</div>
+		</div>
 	    	<div class="col-md-4">
 					<h2>System.out</h2>
-					<p>Use the <a href="#StandardErrorStreamLog">StandardOutputStreamLog</a> rule
-					to capture and verify the text, that your test writes to <code>System.out.</code></p>
-				</div>
+					<p>Use the <a href="#SystemOutRule">SystemOutRule</a> rule to mute
+					<code>System.out</code> or capture and verify the text, that your
+					test writes to <code>System.out.</code></p>
+		</div>
 	    </div>
-		</section>
+</section>
 
 		<section id="getProperty">
 			<div class="page-header">
@@ -149,73 +151,85 @@ public final ProvideSystemProperty properties
 }{% endhighlight %}
 			</section>
     
-			<section id="StandardErrorStreamLog">
-				<h3>System.err and System.out</h3>
-				<p>The <code>StandardErrorStreamLog</code> and
-				<code>StandardOutputStreamLog</code> rules help you to create tests
-				for classes that write to <code>System.err</code> or
-				<code>System.out</code>. They are recording everything written to
-				<code>System.err</code> or <code>System.out</code>. The text is
-				available by calling getLog().</p>
-				{% highlight java %}public void MyTest {
+<section id="SystemErrRule">
+	<h3>System.err and System.out</h3>
+	<p>The <code>SystemErrRule</code> and the <code>SystemOutRule</code>
+	help you to create tests for classes that write to
+	<code>System.err</code> or <code>System.out</code>. They can record
+	everything written to <code>System.err</code> or <code>System.out</code>.
+	The text is available by calling <code>getLog()</code>.</p>
+	{% highlight java %}public void MyTest {
 	@Rule
-	public final StandardErrorStreamLog log = new StandardErrorStreamLog();
+	public final SystemErrRule systemErrRule = new SystemErrRule().enableLog();
 
 	@Test
 	public void writesTextToSystemErr() {
 		System.err.print("hello world");
-		assertEquals("hello world", log.getLog());
+		assertEquals("hello world", systemErrRule.getLog());
 	}
 }{% endhighlight %}
 
-    		{% highlight java %}public void MyTest {
+    	{% highlight java %}public void MyTest {
 	@Rule
-	public final StandardOutputStreamLog log = new StandardOutputStreamLog();
+	public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();
 
 	@Test
 	public void writesTextToSystemOut() {
 		System.out.print("hello world");
-		assertEquals("hello world", log.getLog());
+		assertEquals("hello world", systemOutRule.getLog());
 	}
 }{% endhighlight %}
-				<p>The log can be cleared if you want to discard some text that has
-				been written to the log.</p>
-				{% highlight java %}public void MyTest {
+	<p>The log can be cleared if you want to discard some text that has been
+	written to the log.</p>
+	{% highlight java %}public void MyTest {
 	@Rule
-	public final StandardErrorStreamLog log = new StandardErrorStreamLog();
+	public final SystemErrRule systemErrRule = new SystemErrRule().enableLog();
 
 	@Test
 	public void writesTextToSystemErr() {
 		System.err.print("hello world");
-		log.clear().
+		systemErrRule.clear().
 		System.err.print("foo");
-		assertEquals("foo", log.getLog());
+		assertEquals("foo", systemErrRule.getLog());
 	}
 }{% endhighlight %}
 
-    		{% highlight java %}public void MyTest {
+    	{% highlight java %}public void MyTest {
 	@Rule
-	public final StandardOutputStreamLog log = new StandardOutputStreamLog();
+	public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();
 
 	@Test
 	public void writesTextToSystemOut() {
 		System.out.print("hello world");
-		log.clear().
+		systemOutRule.clear().
 		System.out.print("foo");
-		assertEquals("foo", log.getLog());
+		assertEquals("foo", systemOutRule.getLog());
 	}
 }{% endhighlight %}
-				<p>The output is still written to <code>System.err</code> and
-				<code>System.out</code>. In general this is not necessary. Avoiding
-				the output may speed up the test and reduce the clutter on the
-				commandline. You can disable the output by creating the rules with
-				the flag `LOG_ONLY`.</p>
-				{% highlight java %}@Rule
-public final StandardErrorStreamLog log = new StandardErrorStreamLog(LOG_ONLY);{% endhighlight %}
+	<p>The output is still written to <code>System.err</code> and
+	<code>System.out</code>. In general this is not necessary. Avoiding
+	the output may speed up the test and reduce the clutter on the
+	commandline. You can disable the output by calling <code>mute()</code>.
+	{% highlight java %}@Rule
+public final SystemErrRule systemErrRule = new SystemErrRule().mute();{% endhighlight %}
 
 				{% highlight java %}@Rule
-public final StandardOutputStreamLog log = new StandardOutputStreamLog(LOG_ONLY);{% endhighlight %}
-			</section>
+public final SystemOutRule systemOutRule = new SystemOutRule().mute();{% endhighlight %}
+	<p>Muting and logging can be combined.</p>
+	{% highlight java %}@Rule
+public final SystemErrRule systemErrRule = new SystemErrRule().enableLog().mute();{% endhighlight %}
+
+				{% highlight java %}@Rule
+public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().mute();{% endhighlight %}
+	<p>In case of a failed test it is sometimes helpful to see the output.
+	This is when the method <code>muteForSuccessfulTests()</code> comes
+	into play.</p>
+	{% highlight java %}@Rule
+public final SystemErrRule systemErrRule = new SystemErrRule().muteForSuccessfulTests();{% endhighlight %}
+
+				{% highlight java %}@Rule
+public final SystemOutRule systemOutRule = new SystemOutRule().muteForSuccessfulTests();{% endhighlight %}
+</section>
 
 			<section id="TextFromStandardInputStream">
 				<h3>System.in</h3>
