@@ -92,10 +92,8 @@ public class PrintStreamRule implements TestRule {
 				ByteArrayOutputStream log, MutableOutputStream muteableLog)
 				throws UnsupportedEncodingException {
 			super(new TeeOutputStream(
-					new PrintStream(muteableOriginalStream),
-					new TeeOutputStream(
-						new PrintStream(muteableFailureLog),
-						new PrintStream(muteableLog))),
+					muteableOriginalStream,
+					new TeeOutputStream(muteableFailureLog, muteableLog)),
 				!AUTO_FLUSH, ENCODING);
 			this.failureLog = failureLog;
 			this.log = log;
