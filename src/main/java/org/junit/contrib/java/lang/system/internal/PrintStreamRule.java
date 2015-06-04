@@ -11,6 +11,7 @@ import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
+import static java.lang.System.getProperty;
 import static org.apache.commons.io.IOUtils.write;
 
 public class PrintStreamRule implements TestRule {
@@ -68,8 +69,6 @@ public class PrintStreamRule implements TestRule {
 	}
 
 	private static class MuteableLogStream extends PrintStream {
-		private static final boolean AUTO_FLUSH = true;
-		private static final String ENCODING = "UTF-8";
 		private final ByteArrayOutputStream failureLog;
 		private final ByteArrayOutputStream log;
 		private final MutableOutputStream muteableOriginalStream;
@@ -93,8 +92,7 @@ public class PrintStreamRule implements TestRule {
 				throws UnsupportedEncodingException {
 			super(new TeeOutputStream(
 					muteableOriginalStream,
-					new TeeOutputStream(muteableFailureLog, muteableLog)),
-				!AUTO_FLUSH, ENCODING);
+					new TeeOutputStream(muteableFailureLog, muteableLog)));
 			this.failureLog = failureLog;
 			this.log = log;
 			this.muteableOriginalStream = muteableOriginalStream;
@@ -129,8 +127,15 @@ public class PrintStreamRule implements TestRule {
 		}
 
 		String getLog(ByteArrayOutputStream os) {
+			/* The MuteableLogStream is created with the default encoding
+			 * because it writes to System.out or System.err if not muted and
+			 * System.out/System.err uses the default encoding. As a result all
+			 * other streams receive input that is encoded with the default
+			 * encoding.
+			 */
+			String encoding = getProperty("file.encoding");
 			try {
-				return os.toString(ENCODING);
+				return os.toString(encoding);
 			} catch (UnsupportedEncodingException e) {
 				throw new RuntimeException(e);
 			}
