@@ -1,5 +1,6 @@
 package org.junit.contrib.java.lang.system;
 
+import static java.lang.System.getProperty;
 import static java.lang.System.in;
 import static java.lang.System.setIn;
 import static java.util.Arrays.asList;
@@ -45,6 +46,21 @@ import org.junit.rules.ExternalResource;
  *     assertEquals("bar", scanner.nextLine());
  *   }
  * </pre>
+ *
+ * <p>If every text is a single line then you can use the method
+ * {@link #provideLines(String...)} that appends the end of line
+ * characters according to {@code System.getProperty("line.separator")}
+ * to each text.
+ * <pre>
+ *   &#064;Test
+ *   public void readTextFromStandardInputStream() {
+ *     systemInMock.provideLines("foo", "bar");
+ *     Scanner firstScanner = new Scanner(System.in);
+ *     scanner.nextLine();
+ *     Scanner secondScanner = new Scanner(System.in);
+ *     assertEquals("bar", scanner.nextLine());
+ *   }
+ * </pre>
  */
 public class TextFromStandardInputStream extends ExternalResource {
 	private final SystemInMock systemInMock = new SystemInMock();
@@ -79,20 +95,24 @@ public class TextFromStandardInputStream extends ExternalResource {
 	}
 
 	/**
-	 * Set the lines that are returned by {@code System.in},
-	 * each in a new line separated by System.getProperty("line.separator").
-	 * You can provide multiple lines. In that case {@code System.in.read()}
-	 * returns -1 once when the end of a single text is reached and
-	 * continues with the next text afterwards.
+	 * Set the lines that are returned by {@code System.in}.
+	 * {@code System.getProperty("line.separator")} is used for the end
+	 * of line. {@code System.in.read()} returns -1 once when the end
+	 * of a single line is reached and continues with the next line
+	 * afterwards.
 	 *
 	 * @param lines a list of lines.
 	 */
 	public void provideLines(String... lines) {
-		String[] texts = new String[lines.length];
-		for (int index = 0; index < lines.length; index++) {
-			texts[index] = lines[index] + System.getProperty("line.separator");
-		}
+		String[] texts = appendEndOfLineToLines(lines);
 		provideText(texts);
+	}
+
+	private String[] appendEndOfLineToLines(String[] lines) {
+		String[] texts = new String[lines.length];
+		for (int index = 0; index < lines.length; ++index)
+			texts[index] = lines[index] + getProperty("line.separator");
+		return texts;
 	}
 
 	@Override

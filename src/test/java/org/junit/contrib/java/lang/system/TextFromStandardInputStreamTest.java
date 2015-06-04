@@ -49,7 +49,19 @@ public class TextFromStandardInputStreamTest {
 	}
 
 	@Test
-	public void providesMultipleTextsEachWithANewLine() throws Throwable {
+	public void doesNotFailForNoProvidedText() throws Throwable {
+		executeRuleWithStatement(new Statement() {
+			@Override
+			public void evaluate() throws Throwable {
+				systemInMock.provideText();
+				int character = System.in.read();
+				assertThat(character, is(-1));
+			}
+		});
+	}
+
+	@Test
+	public void providesMultipleLines() throws Throwable {
 		executeRuleWithStatement(new Statement() {
 			@Override
 			public void evaluate() throws Throwable {
@@ -64,11 +76,11 @@ public class TextFromStandardInputStreamTest {
 	}
 
 	@Test
-	public void doesNotFailForNoProvidedText() throws Throwable {
+	public void doesNotFailForNoProvidedLine() throws Throwable {
 		executeRuleWithStatement(new Statement() {
 			@Override
 			public void evaluate() throws Throwable {
-				systemInMock.provideText();
+				systemInMock.provideLines();
 				int character = System.in.read();
 				assertThat(character, is(-1));
 			}
