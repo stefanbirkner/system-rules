@@ -25,7 +25,7 @@ import org.junit.rules.ExternalResource;
  *
  *     &#064;Test
  *     public void readTextFromStandardInputStream() {
- *       systemInMock.provide("foo");
+ *       systemInMock.provideText("foo");
  *       Scanner scanner = new Scanner(System.in);
  *       assertEquals("foo", scanner.nextLine());
  *     }
@@ -38,7 +38,7 @@ import org.junit.rules.ExternalResource;
  * <pre>
  *   &#064;Test
  *   public void readTextFromStandardInputStream() {
- *     systemInMock.provide("foo\n", "bar\n");
+ *     systemInMock.provideText("foo\n", "bar\n");
  *     Scanner firstScanner = new Scanner(System.in);
  *     scanner.nextLine();
  *     Scanner secondScanner = new Scanner(System.in);
@@ -71,6 +71,7 @@ public class TextFromStandardInputStream extends ExternalResource {
 	 * provide multiple texts. In that case {@code System.in.read()}
 	 * returns -1 once when the end of a single text is reached and
 	 * continues with the next text afterwards.
+	 *
 	 * @param texts a list of texts.
 	 */
 	public void provideText(String... texts) {
