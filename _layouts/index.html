@@ -2,7 +2,8 @@
 <html>
 <head>
   {% include basicHead.html %}
-  <link rel="stylesheet" href="bootstrap-theme.min.css" />
+  <link rel="stylesheet" href="bootstrap-theme.min.css">
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
   <style>
     #overview h2 {font-weight:200;}
     .col-md-4 {margin-bottom:2em;}
@@ -14,7 +15,7 @@
     <div class="container">
       <h1>{{ page.title }}</h1>
       <p>{{ page.description }}</p>
-      <p><a class="btn btn-primary btn-lg" href="download.html">Get {{ page.title }}</a></p>
+      <p><a class="btn btn-primary" href="download.html">Get {{ page.title }}</a> · <a class="btn btn-default" href="{{ site.github.repository_url }}"><i class="fa fa-github fa-lg"></i> GitHub</a></p>
     </div>
   </header>
   <div class="container">
