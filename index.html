@@ -36,7 +36,7 @@ description: A collection of JUnit rules for testing code that uses java.lang.Sy
     	<div class="row">
 	    	<div class="col-md-4">
 					<h2>System.err</h2>
-					<p>Use the <a href="#SystemErrRule">SystemErrRule</a> rule to mute
+					<p>Use the <a href="#SystemErrAndOutRule">SystemErrRule</a> rule to mute
 					<code>System.err</code> or capture and verify the text, that your
 					test writes to <code>System.err.</code></p>
 		</div>
@@ -47,7 +47,7 @@ description: A collection of JUnit rules for testing code that uses java.lang.Sy
 		</div>
 	    	<div class="col-md-4">
 					<h2>System.out</h2>
-					<p>Use the <a href="#SystemOutRule">SystemOutRule</a> rule to mute
+					<p>Use the <a href="#SystemErrAndOutRule">SystemOutRule</a> rule to mute
 					<code>System.out</code> or capture and verify the text, that your
 					test writes to <code>System.out.</code></p>
 		</div>
@@ -151,7 +151,7 @@ public final ProvideSystemProperty properties
 }{% endhighlight %}
 			</section>
     
-<section id="SystemErrRule">
+<section id="SystemErrAndOutRule">
 	<h3>System.err and System.out</h3>
 	<p>The <code>SystemErrRule</code> and the <code>SystemOutRule</code>
 	help you to create tests for classes that write to
