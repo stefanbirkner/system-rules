@@ -4,57 +4,40 @@ title: System Rules
 description: A collection of JUnit rules for testing code that uses java.lang.System.
 ---
 <section id="overview">
-    	<div class="row">
-	    	<div class="col-md-4">
-					<h2>System.getProperty(…)</h2>
-					<p>When your test reads a system property, you have to set it before the test and
-					restore its original value afterwards. Use the 
-					<a href="#ClearSystemProperty">ClearSystemProperty</a> and
-					<a href="#ProvideSystemProperty">ProvideSystemProperty</a> rules for this
-					purpose.
-				</div>
-	    	<div class="col-md-4">
-					<h2>System.setProperty(…)</h2>
-					<p>When your test changes a system property, you should restore its original value
-					after the test. The <a href="#RestoreSystemProperties">RestoreSystemProperties</a>
-					rule does this for you.</p>
-				</div>
-	    	<div class="col-md-4">
-					<h2>System.exit(…)</h2>
-					<p>Use the <a href="#ExpectedSystemExit">ExpectedSystemExit</a> rule to test code that calls <code>System.exit(…).</code> Verify that
-					<code>System.exit(…)</code> is called, verify the status code of this call or check assertions afterwards.</p>
-				</div>
-	    </div>
-    	<div class="row">
-	    	<div class="col-md-4">
-					<h2>System.getSecurityManager()</h2>
-					<p>Use the <a href="#ProvideSecurityManager">ProvideSecurityManager</a> rule to
-					provide a special security manager for your test. The system's security manager is
-					restored after the test.</p>
-				</div>
-	    </div>
-    	<div class="row">
-	    	<div class="col-md-4">
-					<h2>System.err</h2>
-					<p>Use the <a href="#SystemErrAndOutRule">SystemErrRule</a> rule to mute
-					<code>System.err</code> or capture and verify the text, that your
-					test writes to <code>System.err.</code></p>
-		</div>
-	    	<div class="col-md-4">
-					<h2>System.in</h2>
-					<p>Use the <a href="#TextFromStandardInputStream">TextFromStandardInputStream</a> rule
-					to provide text, that your test reads from <code>System.in.</code></p>
-		</div>
-	    	<div class="col-md-4">
-					<h2>System.out</h2>
-					<p>Use the <a href="#SystemErrAndOutRule">SystemOutRule</a> rule to mute
-					<code>System.out</code> or capture and verify the text, that your
-					test writes to <code>System.out.</code></p>
-		</div>
-	    </div>
-</section>
+  <p>The scope of System Rules is divided into four sections.</p>
+  <div class="row">
+    <div class="col-md-3">
+      <h2>Command-Line Applications</h2>
+      <p>A command-line applications reads from the command-line and writes to
+      it. Use <a href="#SystemErrAndOutRule">SystemErrRule</a>,
+      <a href="#SystemErrAndOutRule">SystemOutRule</a> and
+      <a href="#TextFromStandardInputStream">TextFromStandardInputStream</a> to
+      provide the input text and verify the output.</p>
+    </div>
+    <div class="col-md-3">
+      <h2>System.exit</h2>
+      <p>Use the <a href="#ExpectedSystemExit">ExpectedSystemExit</a> rule to
+      test code that calls <code>System.exit(…).</code> Verify that
+      <code>System.exit(…)</code> is called, verify the status code of this
+      call or check assertions the application terminated.</p>
+    </div>
+    <div class="col-md-3">
+      <h2>System Properties</h2>
+      <p>If your test deals with system properties, you have to set them and
+      restore them after the test. Use the
+      <a href="#ClearSystemProperty">ClearSystemProperty</a>,
+      <a href="#ProvideSystemProperty">ProvideSystemProperty</a> and
+      <a href="#RestoreSystemProperties">RestoreSystemProperties</a> rules for
+      this purpose.
+    </div>
+    <div class="col-md-3">
+      <h2>Security Managers</h2>
+      <p>Use the <a href="#ProvideSecurityManager">ProvideSecurityManager</a>
+      rule to provide a specific security manager for your test. The system's
+      security manager is restored after the test.</p>
+    </div>
+  </div>
 
-		<section id="getProperty">
 			<div class="page-header">
 				<h1>Usage</h1>
 			</div>
