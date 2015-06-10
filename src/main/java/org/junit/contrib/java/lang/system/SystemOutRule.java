@@ -30,6 +30,25 @@ import org.junit.runners.model.Statement;
  * }
  * </pre>
  *
+ * <p>If your code under test writes the correct new line characters to
+ * {@code System.out} then the test output is different at different systems.
+ * {@link #getLogWithNormalizedLineSeparator()} provides a log that always uses
+ * {@code \n} as line separator. This makes it easy to write appropriate
+ * assertions that work on all systems.
+ *
+ * <pre>
+ * public class SystemOutTest {
+ *   &#064;Rule
+ *   public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();
+ *
+ *   &#064;Test
+ *   public void test() {
+ *     System.out.print(String.format("some text%n"));
+ *     assertEquals("some text\n", systemOutRule.getLogWithNormalizedLineSeparator());
+ *   }
+ * }
+ * </pre>
+ *
  * <p>You don't have to enable logging for every test. It can be enabled for
  * specific tests only.
  *
@@ -182,13 +201,24 @@ public class SystemOutRule implements TestRule {
 
 	/**
 	 * Returns the text that is written to {@code System.out} since
-	 * {@link #enableLog} (respectively {@link #clearLog()} has been called.
+	 * {@link #enableLog()} (respectively {@link #clearLog()} has been called.
 	 *
 	 * @return the text that is written to {@code System.out} since
-	 * {@link #enableLog} (respectively {@link #clearLog()} has been called.
+	 * {@link #enableLog()} (respectively {@link #clearLog()} has been called.
 	 */
 	public String getLog() {
 		return printStreamRule.getLog();
+	}
+
+	/**
+	 * Returns the text that is written to {@code System.out} since
+	 * {@link #enableLog()} (respectively {@link #clearLog()} has been called.
+	 * New line characters are replaced with a single {@code \n}.
+	 *
+	 * @return the normalized log.
+	 */
+	public String getLogWithNormalizedLineSeparator() {
+		return printStreamRule.getLogWithNormalizedLineSeparator();
 	}
 
 	/**

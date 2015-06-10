@@ -1,7 +1,9 @@
 package org.junit.contrib.java.lang.system;
 
+import static java.lang.String.format;
 import static java.lang.System.err;
 import static java.lang.System.setErr;
+import static java.lang.System.setProperty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.is;
@@ -14,12 +16,16 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
 import org.junit.After;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
 import org.junit.runners.model.Statement;
 
 public class SystemErrRuleTest {
 	private final PrintStream originalErr = err;
+
+	@Rule
+	public TestRule restoreSystemProperties = new RestoreSystemProperties();
 
 	@After
 	public void restoreSystemErr() {
@@ -171,6 +177,14 @@ public class SystemErrRuleTest {
 		SystemErrRule rule = new SystemErrRule().enableLog().mute();
 		executeRuleWithStatement(rule, writeTextToSystemErr("arbitrary text"));
 		assertThat(rule.getLog(), is(equalTo("arbitrary text")));
+	}
+
+	@Test
+	public void providesLogWithNormalizedNewLineCharacters() throws Throwable {
+		setProperty("line.separator", "\r\n");
+		SystemErrRule rule = new SystemErrRule().enableLog();
+		executeRuleWithStatement(rule, writeTextToSystemErr(format("arbitrary%ntext%n")));
+		assertThat(rule.getLogWithNormalizedLineSeparator(), is(equalTo("arbitrary\ntext\n")));
 	}
 
 	private ByteArrayOutputStream useReadableSystemErr() {

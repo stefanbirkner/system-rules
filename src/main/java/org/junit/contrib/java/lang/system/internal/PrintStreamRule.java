@@ -59,6 +59,11 @@ public class PrintStreamRule implements TestRule {
 		return muteableLogStream.getLog();
 	}
 
+	public String getLogWithNormalizedLineSeparator() {
+		String lineSeparator = getProperty("line.separator");
+		return getLog().replace(lineSeparator, "\n");
+	}
+
 	public void mute() {
 		muteableLogStream.mute();
 	}
