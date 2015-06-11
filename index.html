@@ -291,6 +291,26 @@ public class SummarizeTest {
   }
 }{% endhighlight %}
 
+				<p>Using <code>\n</code> as line separator lets your test fail on systems that hava a different line separator (e.g. Windows). This problem can be avoided by using the method <code>provideLines</code> that is similar to <code>provideText</code> but appends the correct line separator to each text.</p>
+
+				{% highlight java %}import static org.junit.Assert.*;
+import static org.junit.contrib.java.lang.system.TextFromStandardInputStream.*;
+
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.contrib.java.lang.system.TextFromStandardInputStream;
+
+public class SummarizeTest {
+  @Rule
+  public final TextFromStandardInputStream systemInMock
+    = emptyStandardInputStream();
+
+  @Test
+  public void summarizesTwoNumbers() {
+    systemInMock.provideLines("1", "2");
+    assertEquals(3, Summarize.sumOfNumbersFromSystemIn());
+  }
+}{% endhighlight %}
 			</section>
 
 			<section id="ExpectedSystemExit">
