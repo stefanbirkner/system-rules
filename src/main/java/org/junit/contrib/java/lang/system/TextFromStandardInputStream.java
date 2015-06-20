@@ -61,6 +61,16 @@ import org.junit.rules.ExternalResource;
  *     assertEquals("bar", scanner.nextLine());
  *   }
  * </pre>
+ *
+ * <h3>Throwing Exceptions</h3>
+ * <p>{@code TextFromStandardInputStream} can also simulate a {@code System.in}
+ * that throws an {@code IOException} or {@code RuntimeException}. Use
+ * <pre>   systemInMock.{@link #throwExceptionOnInputEnd(IOException)}</pre>
+ * <p>or
+ * <pre>   systemInMock.{@link #throwExceptionOnInputEnd(RuntimeException)}</pre>
+ * <p>If you call {@link #provideLines(String...)} or
+ * {@link #provideText(String...)} in addition then the exception is thrown
+ * after the text has been read from {@code System.in}.
  */
 public class TextFromStandardInputStream extends ExternalResource {
 	private final SystemInMock systemInMock = new SystemInMock();
@@ -108,6 +118,36 @@ public class TextFromStandardInputStream extends ExternalResource {
 		provideText(texts);
 	}
 
+	/**
+	 * Specify an {@code IOException} that is thrown by {@code System.in}. If
+	 * you call {@link #provideLines(String...)} or
+	 * {@link #provideText(String...)} in addition then the exception is thrown
+	 * after the text has been read from {@code System.in}.
+	 *
+	 * @param exception the {@code IOException} that is thrown.
+	 * @see #throwExceptionOnInputEnd(RuntimeException)
+	 * @throws IllegalStateException if
+	 * {@link #throwExceptionOnInputEnd(RuntimeException)} has been called before.
+     */
+	public void throwExceptionOnInputEnd(IOException exception) {
+		systemInMock.throwExceptionOnInputEnd(exception);
+	}
+
+	/**
+	 * Specify a {@code RuntimeException} that is thrown by {@code System.in}.
+	 * If you call {@link #provideLines(String...)} or
+	 * {@link #provideText(String...)} in addition then the exception is thrown
+	 * after the text has been read from {@code System.in}.
+	 *
+	 * @param exception the {@code RuntimeException} that is thrown.
+	 * @see #throwExceptionOnInputEnd(IOException)
+	 * @throws IllegalStateException if
+	 * {@link #throwExceptionOnInputEnd(IOException)} has been called before.
+	 */
+	public void throwExceptionOnInputEnd(RuntimeException exception) {
+		systemInMock.throwExceptionOnInputEnd(exception);
+	}
+
 	private String[] appendEndOfLineToLines(String[] lines) {
 		String[] texts = new String[lines.length];
 		for (int index = 0; index < lines.length; ++index)
@@ -129,32 +169,52 @@ public class TextFromStandardInputStream extends ExternalResource {
 	private static class SystemInMock extends InputStream {
 		private Iterator<String> texts;
 		private StringReader currentReader;
+		private IOException ioException;
+		private RuntimeException runtimeException;
 
-		public void provideText(List<String> texts) {
+		void provideText(List<String> texts) {
 			this.texts = texts.iterator();
-			optionallyCreateReaderForNextText();
+			updateReader();
+		}
+
+		void throwExceptionOnInputEnd(IOException exception) {
+			if (runtimeException != null)
+				throw new IllegalStateException("You cannot call"
+					+ " throwExceptionOnInputEnd(IOException) because"
+					+ " throwExceptionOnInputEnd(RuntimeException) has already"
+					+ " been called.");
+			ioException = exception;
+		}
+
+		void throwExceptionOnInputEnd(RuntimeException exception) {
+			if (ioException != null)
+				throw new IllegalStateException("You cannot call"
+					+ " throwExceptionOnInputEnd(RuntimeException) because"
+					+ " throwExceptionOnInputEnd(IOException) has already"
+					+ " been called.");
+			runtimeException = exception;
 		}
 
 		@Override
 		public int read() throws IOException {
-			if (currentReader == null)
-				return -1;
-			else
-				return readFromExistingReader();
-		}
-
-		private int readFromExistingReader() throws IOException {
 			int character = currentReader.read();
 			if (character == -1)
-				optionallyCreateReaderForNextText();
+				handleEmptyReader();
 			return character;
 		}
 
-		private void optionallyCreateReaderForNextText() {
+		private void handleEmptyReader() throws IOException {
+			if (texts.hasNext())
+				updateReader();
+			else if (ioException != null)
+				throw ioException;
+			else if (runtimeException != null)
+				throw runtimeException;
+		}
+
+		private void updateReader() {
 			if (texts.hasNext())
 				currentReader = new StringReader(texts.next());
-			else
-				currentReader = null;
 		}
 	}
 }

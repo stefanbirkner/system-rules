@@ -1,11 +1,14 @@
 package org.junit.contrib.java.lang.system;
 
+import static com.github.stefanbirkner.fishbowl.Fishbowl.exceptionThrownBy;
 import static java.lang.System.in;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.contrib.java.lang.system.Executor.exceptionThrownWhenTestIsExecutedWithRule;
 import static org.junit.contrib.java.lang.system.Executor.executeTestWithRule;
 import static org.junit.contrib.java.lang.system.Statements.SUCCESSFUL_TEST;
 import static org.junit.contrib.java.lang.system.TextFromStandardInputStream.emptyStandardInputStream;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Scanner;
 
@@ -15,6 +18,15 @@ import org.junit.rules.Timeout;
 import org.junit.runners.model.Statement;
 
 public class TextFromStandardInputStreamTest {
+	private static final IOException DUMMY_IO_EXCEPTION = new IOException();
+	private static final RuntimeException DUMMY_RUNTIME_EXCEPTION = new RuntimeException();
+	private static final com.github.stefanbirkner.fishbowl.Statement READ_NEXT_BYTE
+		= new com.github.stefanbirkner.fishbowl.Statement() {
+			public void evaluate() throws Throwable {
+				System.in.read();
+			}
+		};
+
 	@Rule
 	public final Timeout timeout = new Timeout(1000);
 
@@ -88,9 +100,101 @@ public class TextFromStandardInputStreamTest {
 	}
 
 	@Test
+	public void system_in_provides_specified_text_and_throws_requested_IOException_afterwards() {
+		executeTestWithRule(new Statement() {
+			@Override
+			public void evaluate() throws Throwable {
+				systemInMock.provideText("arbitrary text");
+				systemInMock.throwExceptionOnInputEnd(DUMMY_IO_EXCEPTION);
+				assertSystemInProvidesText("arbitrary text");
+				Throwable exception = exceptionThrownBy(READ_NEXT_BYTE);
+				assertThat(exception).isSameAs(DUMMY_IO_EXCEPTION);
+			}
+		}, systemInMock);
+	}
+
+	@Test
+	public void system_in_throws_requested_IOException_on_first_read_if_no_text_has_been_specified() {
+		executeTestWithRule(new Statement() {
+			@Override
+			public void evaluate() throws Throwable {
+				systemInMock.throwExceptionOnInputEnd(DUMMY_IO_EXCEPTION);
+				Throwable exception = exceptionThrownBy(READ_NEXT_BYTE);
+				assertThat(exception).isSameAs(DUMMY_IO_EXCEPTION);
+			}
+		}, systemInMock);
+	}
+
+	@Test
+	public void system_in_provides_specified_text_and_throws_requested_RuntimeException_afterwards() {
+		executeTestWithRule(new Statement() {
+			@Override
+			public void evaluate() throws Throwable {
+				systemInMock.provideText("arbitrary text");
+				systemInMock.throwExceptionOnInputEnd(DUMMY_RUNTIME_EXCEPTION);
+				assertSystemInProvidesText("arbitrary text");
+				Throwable exception = exceptionThrownBy(READ_NEXT_BYTE);
+				assertThat(exception).isSameAs(DUMMY_RUNTIME_EXCEPTION);
+			}
+		}, systemInMock);
+	}
+
+	@Test
+	public void system_in_throws_requested_RuntimeException_on_first_read_if_no_text_has_been_specified() {
+		executeTestWithRule(new Statement() {
+			@Override
+			public void evaluate() throws Throwable {
+				systemInMock.throwExceptionOnInputEnd(DUMMY_RUNTIME_EXCEPTION);
+				Throwable exception = exceptionThrownBy(READ_NEXT_BYTE);
+				assertThat(exception).isSameAs(DUMMY_RUNTIME_EXCEPTION);
+			}
+		}, systemInMock);
+	}
+
+	@Test
+	public void an_IOException_cannot_be_requested_if_a_RuntimeException_has_already_been_requested() {
+		Throwable exception = exceptionThrownWhenTestIsExecutedWithRule(
+			new Statement() {
+				@Override
+				public void evaluate() throws Throwable {
+					systemInMock.throwExceptionOnInputEnd(DUMMY_RUNTIME_EXCEPTION);
+					systemInMock.throwExceptionOnInputEnd(DUMMY_IO_EXCEPTION);
+				}
+			}, systemInMock);
+		assertThat(exception)
+			.isInstanceOf(IllegalStateException.class)
+			.hasMessage("You cannot call throwExceptionOnInputEnd(IOException)"
+				+ " because throwExceptionOnInputEnd(RuntimeException) has"
+				+ " already been called.");
+	}
+
+	@Test
+	public void a_RuntimeException_cannot_be_requested_if_an_IOException_has_already_been_requested() {
+		Throwable exception = exceptionThrownWhenTestIsExecutedWithRule(
+			new Statement() {
+				@Override
+				public void evaluate() throws Throwable {
+					systemInMock.throwExceptionOnInputEnd(DUMMY_IO_EXCEPTION);
+					systemInMock.throwExceptionOnInputEnd(DUMMY_RUNTIME_EXCEPTION);
+				}
+			}, systemInMock);
+		assertThat(exception)
+			.isInstanceOf(IllegalStateException.class)
+			.hasMessage("You cannot call"
+				+ " throwExceptionOnInputEnd(RuntimeException) because"
+				+ " throwExceptionOnInputEnd(IOException) has already been"
+				+ " called.");
+	}
+
+	@Test
 	public void after_the_test_system_in_is_same_as_before() {
 		InputStream originalSystemIn = in;
 		executeTestWithRule(SUCCESSFUL_TEST, systemInMock);
 		assertThat(in).isSameAs(originalSystemIn);
+	}
+
+	private void assertSystemInProvidesText(String text) throws IOException {
+		for (char c : text.toCharArray())
+			assertThat((char) System.in.read()).isSameAs(c);
 	}
 }
