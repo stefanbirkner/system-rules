@@ -162,6 +162,32 @@ public final ProvideSystemProperty properties
 		assertEquals("hello world", systemOutRule.getLog());
 	}
 }{% endhighlight %}
+	<p>If you verify logs that contain line separators than the separators
+	are different (e.g. Linux: <code>\n</code>, Windows: <code>\r\n</code>).
+	Use <code>getLogWithNormalizedLineSeparator()</code> for a log that
+	always has the line separator <code>\n</code>.</p>
+	{% highlight java %}public void MyTest {
+	@Rule
+	public final SystemErrRule systemErrRule = new SystemErrRule().enableLog();
+
+	@Test
+	public void writesTextToSystemErr() {
+		System.err.print(String.format("hello world%n)");
+		assertEquals("hello world\n", systemErrRule.getLog());
+	}
+}{% endhighlight %}
+
+    	{% highlight java %}public void MyTest {
+	@Rule
+	public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();
+
+	@Test
+	public void writesTextToSystemOut() {
+		System.out.print(String.format("hello world%n)");
+		assertEquals("hello world\n", systemOutRule.getLog());
+	}
+}{% endhighlight %}
+	
 	<p>The log can be cleared if you want to discard some text that has been
 	written to the log.</p>
 	{% highlight java %}public void MyTest {
