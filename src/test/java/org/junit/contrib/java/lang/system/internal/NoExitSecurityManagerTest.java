@@ -32,7 +32,7 @@ public class NoExitSecurityManagerTest {
 	private final NoExitSecurityManager managerWithoutOriginal = new NoExitSecurityManager(null);
 
 	@Test
-	public void throwExceptionWhenCheckExitIsCalled() {
+	public void an_exception_with_the_status_is_thrown_when_checkExit_is_called() {
 		Throwable exception = exceptionThrownBy(new Statement() {
 			public void evaluate() throws Throwable {
 				managerWithOriginal.checkExit(DUMMY_STATUS);
@@ -44,43 +44,43 @@ public class NoExitSecurityManagerTest {
 	}
 
 	@Test
-	public void delegateGetInCheck() {
+	public void getInCheck_is_delegated_to_original_security_manager() {
 		when(originalSecurityManager.getInCheck()).thenReturn(true);
 		assertThat(managerWithOriginal.getInCheck(), is(true));
 	}
 
 	@Test
-	public void isNeverInCheckWithoutParent() {
+	public void getInCheck_returns_false_without_original_security_manager() {
 		assertThat(managerWithoutOriginal.getInCheck(), is(false));
 	}
 
 	@Test
-	public void provideSecurityContextOfOriginalSecurityManager() {
+	public void security_context_of_original_security_manager_is_provided() {
 		Object context = new Object();
 		when(originalSecurityManager.getSecurityContext()).thenReturn(context);
 		assertThat(managerWithOriginal.getSecurityContext(), is(context));
 	}
 
 	@Test
-	public void dontFailWithoutParentForGetSecurityContext() {
+	public void getSecurityContext_may_be_called_without_original_security_manager() {
 		managerWithoutOriginal.getSecurityContext();
 	}
 
 	@Test
-	public void delegateCheckPermission_Permission() {
+	public void checkPermission_without_context_is_delegated_to_original_security_manager() {
 		Permission permission = mock(Permission.class);
 		managerWithOriginal.checkPermission(permission);
 		verify(originalSecurityManager).checkPermission(permission);
 	}
 
 	@Test
-	public void dontFailWithoutParentForCheckPermission_Permission() {
+	public void checkPermission_without_context_may_be_called_without_original_security_manager() {
 		Permission permission = mock(Permission.class);
 		managerWithoutOriginal.checkPermission(permission);
 	}
 
 	@Test
-	public void delegateCheckPermission_Permission_Object() {
+	public void checkPermission_with_context_is_delegated_to_original_security_manager() {
 		Permission permission = mock(Permission.class);
 		Object context = new Object();
 		managerWithOriginal.checkPermission(permission, context);
@@ -88,158 +88,158 @@ public class NoExitSecurityManagerTest {
 	}
 
 	@Test
-	public void dontFailWithoutParentForCheckPermission_Permission_Object() {
+	public void checkPermission_with_context_may_be_called_without_original_security_manager() {
 		Permission permission = mock(Permission.class);
 		Object context = new Object();
 		managerWithoutOriginal.checkPermission(permission, context);
 	}
 
 	@Test
-	public void delegateCheckCreateClassLoader() {
+	public void checkCreateClassLoader_is_delegated_to_original_security_manager() {
 		managerWithOriginal.checkCreateClassLoader();
 		verify(originalSecurityManager).checkCreateClassLoader();
 	}
 
 	@Test
-	public void dontFailWithoutParentForCheckCreateClassLoader() {
+	public void checkCreateClassLoader_may_be_called_without_original_security_manager() {
 		managerWithoutOriginal.checkCreateClassLoader();
 	}
 
 	@Test
-	public void delegateCheckAccess_Thread() {
+	public void checkAccess_for_thread_is_delegated_to_original_security_manager() {
 		Thread thread = mock(Thread.class);
 		managerWithOriginal.checkAccess(thread);
 		verify(originalSecurityManager).checkAccess(thread);
 	}
 
 	@Test
-	public void dontFailWithoutParentForCheckAccess_Thread() {
+	public void checkAccess_for_thread_may_be_called_without_original_security_manager() {
 		Thread thread = mock(Thread.class);
 		managerWithoutOriginal.checkAccess(thread);
 	}
 
 	@Test
-	public void delegateCheckAccess_ThreadGroup() {
+	public void checkAccess_for_thread_group_is_delegated_to_original_security_manager() {
 		ThreadGroup threadGroup = mock(ThreadGroup.class);
 		managerWithOriginal.checkAccess(threadGroup);
 		verify(originalSecurityManager).checkAccess(threadGroup);
 	}
 
 	@Test
-	public void dontFailWithoutParentForCheckAccess_ThreadGroup() {
+	public void checkAccess_for_thread_group_may_be_called_without_original_security_manager() {
 		ThreadGroup threadGroup = mock(ThreadGroup.class);
 		managerWithoutOriginal.checkAccess(threadGroup);
 	}
 
 	@Test
-	public void delegateCheckExec() {
+	public void checkExec_is_delegated_to_original_security_manager() {
 		managerWithOriginal.checkExec("arbitrary cmd");
 		verify(originalSecurityManager).checkExec("arbitrary cmd");
 	}
 
 	@Test
-	public void dontFailWithoutParentForCheckExec() {
+	public void checkExec_may_be_called_without_original_security_manager() {
 		managerWithoutOriginal.checkExec("dummy cmd");
 	}
 
 	@Test
-	public void delegateCheckLink() {
+	public void checkLink_is_delegated_to_original_security_manager() {
 		managerWithOriginal.checkLink("arbitrary lib");
 		verify(originalSecurityManager).checkLink("arbitrary lib");
 	}
 
 	@Test
-	public void dontFailWithoutParentForCheckLink() {
+	public void checkLink_may_be_called_without_original_security_manager() {
 		managerWithoutOriginal.checkLink("dummy lib");
 	}
 
 	@Test
-	public void delegateCheckRead_FileDescriptor() {
+	public void checkRead_for_file_descriptor_is_delegated_to_original_security_manager() {
 		FileDescriptor fileDescriptor = new FileDescriptor();
 		managerWithOriginal.checkRead(fileDescriptor);
 		verify(originalSecurityManager).checkRead(fileDescriptor);
 	}
 
 	@Test
-	public void dontFailWithoutParentForCheckRead_FileDescriptor() {
+	public void checkRead_for_file_descriptor_may_be_called_without_original_security_manager() {
 		FileDescriptor fileDescriptor = new FileDescriptor();
 		managerWithoutOriginal.checkRead(fileDescriptor);
 	}
 
 	@Test
-	public void delegateCheckRead_String() {
+	public void checkRead_for_filename_without_context_is_delegated_to_original_security_manager() {
 		managerWithOriginal.checkRead("arbitrary file");
 		verify(originalSecurityManager).checkRead("arbitrary file");
 	}
 
 	@Test
-	public void dontFailWithoutParentForCheckRead_String() {
+	public void checkRead_for_filename_without_context_may_be_called_without_original_security_manager() {
 		managerWithoutOriginal.checkRead("dummy file");
 	}
 
 	@Test
-	public void delegateCheckRead_String_Context() {
+	public void checkRead_for_filename_with_context_is_delegated_to_original_security_manager() {
 		Object context = new Object();
 		managerWithOriginal.checkRead("arbitrary file", context);
 		verify(originalSecurityManager).checkRead("arbitrary file", context);
 	}
 
 	@Test
-	public void dontFailWithoutParentForCheckRead_String_Context() {
+	public void checkRead_for_fukebane_with_context_may_be_called_without_original_security_manager() {
 		Object context = new Object();
 		managerWithoutOriginal.checkRead("dummy file", context);
 	}
 
 	@Test
-	public void delegateCheckWrite_FileDescriptor() {
+	public void checkWrite_of_file_descriptor_is_delegated_to_original_security_manager() {
 		FileDescriptor fileDescriptor = new FileDescriptor();
 		managerWithOriginal.checkWrite(fileDescriptor);
 		verify(originalSecurityManager).checkWrite(fileDescriptor);
 	}
 
 	@Test
-	public void dontFailWithoutParentForCheckWrite_FileDescriptor() {
+	public void checkWrite_of_file_descriptor_may_be_called_without_original_security_manager() {
 		FileDescriptor fileDescriptor = new FileDescriptor();
 		managerWithoutOriginal.checkWrite(fileDescriptor);
 	}
 
 	@Test
-	public void delegateCheckWrite_String() {
+	public void checkWrite_of_filename_is_delegated_to_original_security_manager() {
 		managerWithOriginal.checkWrite("arbitrary file");
 		verify(originalSecurityManager).checkWrite("arbitrary file");
 	}
 
 	@Test
-	public void dontFailWithoutParentForCheckWrite_String() {
+	public void checkWrite_of_filename_may_be_called_without_original_security_manager() {
 		managerWithoutOriginal.checkWrite("dummy file");
 	}
 
 	@Test
-	public void delegateCheckDelete() {
+	public void checkDelete_is_delegated_to_original_security_manager() {
 		managerWithOriginal.checkDelete("arbitrary file");
 		verify(originalSecurityManager).checkDelete("arbitrary file");
 	}
 
 	@Test
-	public void dontFailWithoutParentForCheckDelete() {
+	public void checkDelete_may_be_called_without_original_security_manager() {
 		managerWithoutOriginal.checkDelete("dummy file");
 	}
 
 	@Test
-	public void delegateCheckConnect() {
+	public void checkConnect_without_context_is_delegated_to_original_security_manager() {
 		int port = 234;
 		managerWithOriginal.checkConnect("host", port);
 		verify(originalSecurityManager).checkConnect("host", port);
 	}
 
 	@Test
-	public void dontFailWithoutParentForCheckConnect() {
+	public void checkConnect_without_context_may_be_called_without_original_security_manager() {
 		int port = 234;
 		managerWithoutOriginal.checkConnect("host", port);
 	}
 
 	@Test
-	public void delegateCheckConnectWithContext() {
+	public void checkConnect_with_context_is_delegated_to_original_security_manager() {
 		int port = 234;
 		Object context = new Object();
 		managerWithOriginal.checkConnect("host", port, context);
@@ -247,53 +247,53 @@ public class NoExitSecurityManagerTest {
 	}
 
 	@Test
-	public void dontFailWithoutParentForCheckConnectWithContext() {
+	public void checkConnect_with_context_may_be_called_without_original_security_manager() {
 		int port = 234;
 		Object context = new Object();
 		managerWithoutOriginal.checkConnect("host", port, context);
 	}
 
 	@Test
-	public void delegateCheckListen() {
+	public void checkListen_is_delegated_to_original_security_manager() {
 		int port = 234;
 		managerWithOriginal.checkListen(port);
 		verify(originalSecurityManager).checkListen(port);
 	}
 
 	@Test
-	public void dontFailWithoutParentForCheckListen() {
+	public void checkListen_may_be_called_without_original_security_manager() {
 		int port = 234;
 		managerWithoutOriginal.checkListen(port);
 	}
 
 	@Test
-	public void delegateCheckAccept() {
+	public void checkAccept_is_delegated_to_original_security_manager() {
 		int port = 234;
 		managerWithOriginal.checkAccept("host", port);
 		verify(originalSecurityManager).checkAccept("host", port);
 	}
 
 	@Test
-	public void dontFailWithoutParentForCheckAccept() {
+	public void checkAccept_may_be_called_without_original_security_manager() {
 		int port = 234;
 		managerWithoutOriginal.checkAccept("host", port);
 	}
 
 	@Test
-	public void delegateCheckMulticast() {
+	public void checkMulticast_without_TTL_is_delegated_to_original_security_manager() {
 		InetAddress inetAddress = mock(InetAddress.class);
 		managerWithOriginal.checkMulticast(inetAddress);
 		verify(originalSecurityManager).checkMulticast(inetAddress);
 	}
 
 	@Test
-	public void dontFailWithoutParentForCheckMulticast() {
+	public void checkMulticast_without_TTL_may_be_called_without_original_security_manager() {
 		InetAddress inetAddress = mock(InetAddress.class);
 		managerWithoutOriginal.checkMulticast(inetAddress);
 	}
 
 	@Test
-	public void delegateCheckMulticastWithTtl() {
+	public void checkMulticast_with_TTL_is_delegated_to_original_security_manager() {
 		InetAddress inetAddress = mock(InetAddress.class);
 		byte ttl = 24;
 		managerWithOriginal.checkMulticast(inetAddress, ttl);
@@ -301,115 +301,115 @@ public class NoExitSecurityManagerTest {
 	}
 
 	@Test
-	public void dontFailWithoutParentForCheckMulticastWithTtl() {
+	public void checkMulticast_with_TTL_may_be_called_without_original_security_manager() {
 		InetAddress inetAddress = mock(InetAddress.class);
 		byte ttl = 24;
 		managerWithoutOriginal.checkMulticast(inetAddress, ttl);
 	}
 
 	@Test
-	public void delegateCheckPropertiesAccess() {
+	public void checkPropertiesAccess_is_delegated_to_original_security_manager() {
 		managerWithOriginal.checkPropertiesAccess();
 		verify(originalSecurityManager).checkPropertiesAccess();
 	}
 
 	@Test
-	public void dontFailWithoutParentForCheckPropertiesAccess() {
+	public void checkPropertiesAccess_may_be_called_without_original_security_manager() {
 		managerWithoutOriginal.checkPropertiesAccess();
 	}
 
 	@Test
-	public void delegateCheckPropertyAccess() {
+	public void checkPropertyAccess_is_delegated_to_original_security_manager() {
 		managerWithOriginal.checkPropertyAccess("arbitrary key");
 		verify(originalSecurityManager).checkPropertyAccess("arbitrary key");
 	}
 
 	@Test
-	public void dontFailWithoutParentForCheckPropertyAccess() {
+	public void checkPropertyAccess_may_be_called_without_original_security_manager() {
 		managerWithoutOriginal.checkPropertyAccess("dummy key");
 	}
 
 	@Test
-	public void delegateCheckTopLevelWindow() {
+	public void checkTopLevelWindow_is_delegated_to_original_security_manager() {
 		Object window = new Object();
 		when(originalSecurityManager.checkTopLevelWindow(window)).thenReturn(true);
 		assertThat(managerWithOriginal.checkTopLevelWindow(window), is(true));
 	}
 
 	@Test
-	public void dontFailWithoutParentForCheckTopLevelWindow() {
+	public void checkTopLevelWindow_may_be_called_without_original_security_manager() {
 		Object window = new Object();
 		managerWithoutOriginal.checkTopLevelWindow(window);
 	}
 
 	@Test
-	public void delegateCheckPrintJobAccess() {
+	public void checkPrintJobAccess_is_delegated_to_original_security_manager() {
 		managerWithOriginal.checkPrintJobAccess();
 		verify(originalSecurityManager).checkPrintJobAccess();
 	}
 
 	@Test
-	public void dontFailWithoutParentForCheckPrintJobAccess() {
+	public void checkPrintJobAccess_may_be_called_without_original_security_manager() {
 		managerWithoutOriginal.checkPrintJobAccess();
 	}
 
 	@Test
-	public void delegateCheckSystemClipboardAccess() {
+	public void checkSystemClipboardAccess_is_delegated_to_original_security_manager() {
 		managerWithOriginal.checkSystemClipboardAccess();
 		verify(originalSecurityManager).checkSystemClipboardAccess();
 	}
 
 	@Test
-	public void dontFailWithoutParentForCheckSystemClipboardAccess() {
+	public void checkSystemClipboardAccess_may_be_called_without_original_security_manager() {
 		managerWithoutOriginal.checkSystemClipboardAccess();
 	}
 
 	@Test
-	public void delegateCheckAwtEventQueueAccess() {
+	public void checkAwtEventQueueAccess_is_delegated_to_original_security_manager() {
 		managerWithOriginal.checkAwtEventQueueAccess();
 		verify(originalSecurityManager).checkAwtEventQueueAccess();
 	}
 
 	@Test
-	public void dontFailWithoutParentForCheckAwtEventQueueAccess() {
+	public void checkAwtEventQueueAccess_may_be_called_without_original_security_manager() {
 		managerWithoutOriginal.checkAwtEventQueueAccess();
 	}
 
 	@Test
-	public void delegateCheckPackageAccess() {
+	public void checkPackageAccess_is_delegated_to_original_security_manager() {
 		managerWithOriginal.checkPackageAccess("arbitrary package");
 		verify(originalSecurityManager).checkPackageAccess("arbitrary package");
 	}
 
 	@Test
-	public void dontFailWithoutParentForCheckPackageAccess() {
+	public void checkPackageAccess_may_be_called_without_original_security_manager() {
 		managerWithoutOriginal.checkPackageAccess("dummy package");
 	}
 
 	@Test
-	public void delegateCheckPackageDefinition() {
+	public void checkPackageDefinition_is_delegated_to_original_security_manager() {
 		managerWithOriginal.checkPackageDefinition("arbitrary package");
 		verify(originalSecurityManager).checkPackageDefinition("arbitrary package");
 	}
 
 	@Test
-	public void dontFailWithoutParentForCheckPackageDefinition() {
+	public void checkPackageDefinition_may_be_called_without_original_security_manager() {
 		managerWithoutOriginal.checkPackageDefinition("dummy package");
 	}
 
 	@Test
-	public void delegateCheckSetFactory() {
+	public void checkSetFactory_is_delegated_to_original_security_manager() {
 		managerWithOriginal.checkSetFactory();
 		verify(originalSecurityManager).checkSetFactory();
 	}
 
 	@Test
-	public void dontFailWithoutParentForCheckSetFactory() {
+	public void checkSetFactory_may_be_called_without_original_security_manager() {
 		managerWithoutOriginal.checkSetFactory();
 	}
 
 	@Test
-	public void delegateCheckMemberAccess() {
+	public void checkMemberAccess_is_delegated_to_original_security_manager() {
 		Class<?> arbitraryClass = Integer.class;
 		int which = 394;
 		managerWithOriginal.checkMemberAccess(arbitraryClass, which);
@@ -417,48 +417,48 @@ public class NoExitSecurityManagerTest {
 	}
 
 	@Test
-	public void dontFailWithoutParentForCheckMemberAccess() {
+	public void checkMemberAccess_may_be_called_without_original_security_manager() {
 		Class<?> arbitraryClass = Integer.class;
 		int which = 394;
 		managerWithoutOriginal.checkMemberAccess(arbitraryClass, which);
 	}
 
 	@Test
-	public void delegateCheckSecurityAccess() {
+	public void checkSecurityAccess_is_delegated_to_original_security_manager() {
 		managerWithOriginal.checkSecurityAccess("arbitrary target");
 		verify(originalSecurityManager).checkSecurityAccess("arbitrary target");
 	}
 
 	@Test
-	public void dontFailWithoutParentForCheckSecurityAccess() {
+	public void checkSecurityAccess_may_be_called_without_original_security_manager() {
 		managerWithoutOriginal.checkSecurityAccess("arbitrary target");
 	}
 
 	@Test
-	public void provideThreadGroupOfOriginalSecurityManager() {
+	public void thread_group_of_original_security_manager_is_provided() {
 		ThreadGroup threadGroup = new ThreadGroup("dummy name");
 		when(originalSecurityManager.getThreadGroup()).thenReturn(threadGroup);
 		assertThat(managerWithOriginal.getThreadGroup(), is(threadGroup));
 	}
 
 	@Test
-	public void dontFailWithoutParentForGetThreadGroup() {
+	public void getThreadGroup_may_be_called_without_original_security_manager() {
 		managerWithoutOriginal.getThreadGroup();
 	}
 
 	@Test
-	public void provideInformationThatCheckExitHasNotBeenCalled() {
+	public void information_about_a_missing_checkExit_call_is_available() {
 		assertThat(managerWithOriginal, hasProperty("checkExitCalled", is(false)));
 	}
 
 	@Test
-	public void provideInformationThatCheckExitHasBeenCalled() {
+	public void information_about_a_checkExit_call_is_available() {
 		safeCallCheckExitWithStatus(DUMMY_STATUS);
 		assertThat(managerWithOriginal, hasProperty("checkExitCalled", is(true)));
 	}
 
 	@Test
-	public void providesStatusOfFirstCheckExitCall() {
+	public void status_of_first_call_of_checkExit_is_available() {
 		safeCallCheckExitWithStatus(DUMMY_STATUS);
 		safeCallCheckExitWithStatus(DUMMY_STATUS + 1);
 		assertThat(
@@ -474,7 +474,7 @@ public class NoExitSecurityManagerTest {
 	}
 
 	@Test
-	public void doesNotProvideStatusOfFirstCheckExitCallWithoutCall() {
+	public void fails_to_provide_status_of_first_checkExit_call_if_this_call_did_not_happen() {
 		Throwable exception = exceptionThrownBy(new Statement() {
 			public void evaluate() throws Throwable {
 				managerWithOriginal.getStatusOfFirstCheckExitCall();

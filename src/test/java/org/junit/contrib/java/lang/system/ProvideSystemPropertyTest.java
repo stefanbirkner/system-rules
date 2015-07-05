@@ -10,6 +10,7 @@ import static org.junit.contrib.java.lang.system.Matchers.hasPropertyWithValue;
 import static org.junit.contrib.java.lang.system.Matchers.notHasProperty;
 import static org.junit.contrib.java.lang.system.ProvideSystemProperty.fromFile;
 import static org.junit.contrib.java.lang.system.ProvideSystemProperty.fromResource;
+import static org.junit.contrib.java.lang.system.Statements.TEST_THAT_DOES_NOTHING;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -24,102 +25,101 @@ import org.junit.runners.model.Statement;
 public class ProvideSystemPropertyTest {
 	private static final String EXAMPLE_PROPERTIES = "example.properties";
 	private static final Description NO_DESCRIPTION = null;
-	private static final String ARBITRARY_NAME = "arbitrary property";
-	private static final String ANOTHER_PROPERTY = "another property";
+	private static final String ARBITRARY_KEY = "arbitrary property";
+	private static final String ANOTHER_KEY = "another property";
 	private static final String ARBITRARY_VALUE = "arbitrary value";
 	private static final String A_DIFFERENT_VALUE = "different value";
 
 	private ProvideSystemProperty rule;
 
 	@Rule
-	public final RestoreSystemProperties restoreSystemProperty = new RestoreSystemProperties(
-		ARBITRARY_NAME, ANOTHER_PROPERTY);
+	public final RestoreSystemProperties restoreSystemProperty
+		= new RestoreSystemProperties();
 
 	@Rule
 	public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
 	@Test
-	public void removeProperty() throws Throwable {
-		setProperty(ARBITRARY_NAME, ARBITRARY_VALUE);
-		TestThatCapturesProperties test = new TestThatCapturesProperties();
-		rule = new ProvideSystemProperty(ARBITRARY_NAME, null);
-		evaluateRuleForStatement(test);
-		assertThat(test.propertiesAtStart, notHasProperty(ARBITRARY_NAME));
-	}
-
-	@Test
-	public void restoreOriginalValue() throws Throwable {
-		setProperty(ARBITRARY_NAME, A_DIFFERENT_VALUE);
-		evaluateStatementWithArbitraryValue();
-		assertThat(getProperty(ARBITRARY_NAME), is(equalTo(A_DIFFERENT_VALUE)));
-	}
-
-	@Test
-	public void removeValueIfNotPresentBefore() throws Throwable {
-		clearProperty(ARBITRARY_NAME);
-		evaluateStatementWithArbitraryValue();
-		assertThat(getProperty(ARBITRARY_NAME), is(nullValue()));
-	}
-
-	@Test
-	public void providesMultipleProperties() throws Throwable {
-		rule = new ProvideSystemProperty(ARBITRARY_NAME, ARBITRARY_VALUE)
-			.and(ANOTHER_PROPERTY, A_DIFFERENT_VALUE);
+	public void provided_property_values_are_present_during_test()
+			throws Throwable {
+		rule = new ProvideSystemProperty(ARBITRARY_KEY, ARBITRARY_VALUE)
+			.and(ANOTHER_KEY, A_DIFFERENT_VALUE);
 		TestThatCapturesProperties test = new TestThatCapturesProperties();
 		evaluateRuleForStatement(test);
 		assertThat(test.propertiesAtStart, allOf(
-			hasPropertyWithValue(ARBITRARY_NAME, ARBITRARY_VALUE),
-			hasPropertyWithValue(ANOTHER_PROPERTY, A_DIFFERENT_VALUE)));
+			hasPropertyWithValue(ARBITRARY_KEY, ARBITRARY_VALUE),
+			hasPropertyWithValue(ANOTHER_KEY, A_DIFFERENT_VALUE)));
 	}
 
 	@Test
-	public void providePropertyFromResource() throws Throwable {
+	public void property_is_null_during_test_if_set_to_null() throws Throwable {
+		setProperty(ARBITRARY_KEY, ARBITRARY_VALUE);
+		rule = new ProvideSystemProperty(ARBITRARY_KEY, null);
+		TestThatCapturesProperties test = new TestThatCapturesProperties();
+		evaluateRuleForStatement(test);
+		assertThat(test.propertiesAtStart, notHasProperty(ARBITRARY_KEY));
+	}
+
+	@Test
+	public void after_test_properties_have_the_same_values_as_before() throws Throwable {
+		setProperty(ARBITRARY_KEY, "value of first property");
+		setProperty(ANOTHER_KEY, "value of second property");
+		rule = new ProvideSystemProperty(ARBITRARY_KEY, "different value")
+			.and(ANOTHER_KEY, "another different value");
+		evaluateRuleForStatement(TEST_THAT_DOES_NOTHING);
+		assertThat(getProperty(ARBITRARY_KEY),
+			is(equalTo("value of first property")));
+		assertThat(getProperty(ANOTHER_KEY),
+			is(equalTo("value of second property")));
+	}
+
+	@Test
+	public void property_that_does_not_exist_before_the_test_does_not_exist_after_the_test()
+			throws Throwable {
+		clearProperty(ARBITRARY_KEY);
+		rule = new ProvideSystemProperty(ARBITRARY_KEY, "other value");
+		evaluateRuleForStatement(TEST_THAT_DOES_NOTHING);
+		assertThat(getProperty(ARBITRARY_KEY), is(nullValue()));
+	}
+
+	@Test
+	public void properties_from_resource_are_present_during_test() throws Throwable {
 		rule = fromResource(EXAMPLE_PROPERTIES);
 		TestThatCapturesProperties test = new TestThatCapturesProperties();
 		evaluateRuleForStatement(test);
 		assertThat(test.propertiesAtStart,
-			hasPropertyWithValue(ARBITRARY_NAME, ARBITRARY_VALUE));
+			hasPropertyWithValue(ARBITRARY_KEY, ARBITRARY_VALUE));
 	}
 
 	@Test
-	public void providePropertyFromFile() throws Throwable {
+	public void properties_from_file_are_present_during_test() throws Throwable {
 		File file = temporaryFolder.newFile();
 		copyResourceToFile(EXAMPLE_PROPERTIES, file);
 		rule = fromFile(file.getAbsolutePath());
 		TestThatCapturesProperties test = new TestThatCapturesProperties();
 		evaluateRuleForStatement(test);
 		assertThat(test.propertiesAtStart,
-			hasPropertyWithValue(ARBITRARY_NAME, ARBITRARY_VALUE));
+			hasPropertyWithValue(ARBITRARY_KEY, ARBITRARY_VALUE));
 	}
 
 	@Test
-	public void restoresMultipleProperties() throws Throwable {
-		setProperty(ANOTHER_PROPERTY, ARBITRARY_VALUE);
-
-		rule = new ProvideSystemProperty(ARBITRARY_NAME, ARBITRARY_VALUE)
-			.and(ANOTHER_PROPERTY, A_DIFFERENT_VALUE);
-		evaluateRuleForStatement(new EmptyStatement());
-		assertThat(getProperty(ARBITRARY_NAME), is(nullValue()));
-		assertThat(getProperty(ANOTHER_PROPERTY), is(ARBITRARY_VALUE));
-	}
-
-	@Test
-	public void setsPropertyDuringTestAndRestoresItAfterwards()
-		throws Throwable {
-		setProperty(ARBITRARY_NAME, "value before executing the rule");
+	public void property_has_value_that_is_set_within_the_test_using_the_rule()
+			throws Throwable {
+		setProperty(ARBITRARY_KEY, "value before executing the rule");
 		rule = new ProvideSystemProperty();
-		evaluateRuleForStatement(new SetPropertyAndAssertValue(ARBITRARY_NAME,
+		evaluateRuleForStatement(new SetPropertyAndAssertValue(ARBITRARY_KEY,
 			"dummy value"));
-		assertThat(getProperty(ARBITRARY_NAME),
-			is(equalTo("value before executing the rule")));
 	}
 
-	private void evaluateStatementWithArbitraryValue() throws Throwable {
-		rule = new ProvideSystemProperty(ARBITRARY_NAME, ARBITRARY_VALUE);
-		TestThatCapturesProperties test = new TestThatCapturesProperties();
-		evaluateRuleForStatement(test);
-		assertThat(test.propertiesAtStart,
-			hasPropertyWithValue(ARBITRARY_NAME, ARBITRARY_VALUE));
+	@Test
+	public void after_test_property_has_the_same_values_as_before_if_set_within_test_using_the_rule()
+			throws Throwable {
+		setProperty(ARBITRARY_KEY, "value before executing the rule");
+		rule = new ProvideSystemProperty();
+		evaluateRuleForStatement(
+			new SetProperty(ARBITRARY_KEY, "dummy value"));
+		assertThat(getProperty(ARBITRARY_KEY),
+			is(equalTo("value before executing the rule")));
 	}
 
 	private void evaluateRuleForStatement(Statement statement) throws Throwable {
@@ -146,6 +146,21 @@ public class ProvideSystemPropertyTest {
 		public void evaluate() {
 			rule.setProperty(name, value);
 			assertThat(getProperty(name), is(equalTo(value)));
+		}
+	}
+
+	private class SetProperty extends Statement {
+		final String name;
+		final String value;
+
+		SetProperty(String name, String value) {
+			this.name = name;
+			this.value = value;
+		}
+
+		@Override
+		public void evaluate() {
+			rule.setProperty(name, value);
 		}
 	}
 }

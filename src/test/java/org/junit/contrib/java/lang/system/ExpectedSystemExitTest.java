@@ -11,6 +11,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.contrib.java.lang.system.Statements.TEST_THAT_DOES_NOTHING;
 
 import java.security.Permission;
 
@@ -35,44 +36,44 @@ public class ExpectedSystemExitTest {
 	private final ExpectedSystemExit rule = ExpectedSystemExit.none();
 
 	@Test
-	public void succeedWithoutExit() throws Throwable {
+	public void test_is_not_affected_by_rule_without_expectation() throws Throwable {
 		executeRuleWithoutExitCall();
 	}
 
 	@Test
-	public void succeedOnExitWithArbitraryStatusCode() throws Throwable {
+	public void test_is_successful_if_expected_exit_is_called() throws Throwable {
 		rule.expectSystemExit();
 		executeRuleWithExitStatus0();
 	}
 
 	@Test
-	public void succeedOnExitWithSelectedStatusCode() throws Throwable {
+	public void test_is_successful_exit_is_called_with_expected_status_code() throws Throwable {
 		rule.expectSystemExitWithStatus(0);
 		executeRuleWithExitStatus0();
 	}
 
 	@Test
-	public void failForUnexpectedSystemExit() throws Throwable {
+	public void test_fails_if_exit_is_called_but_not_expected() throws Throwable {
 		Throwable exception = exceptionThrownByRuleForStatement(new SystemExit0());
 		assertThat(exception, hasMessage("Unexpected call of System.exit(0)."));
 	}
 
 	@Test
-	public void failBecauseOfMissingSystemExitCall() throws Throwable {
+	public void test_fails_if_exit_is_expected_but_not_called() throws Throwable {
 		rule.expectSystemExit();
-		Throwable exception = exceptionThrownByRuleForStatement(new EmptyStatement());
+		Throwable exception = exceptionThrownByRuleForStatement(TEST_THAT_DOES_NOTHING);
 		assertThat(exception, hasMessage("System.exit has not been called."));
 	}
 
 	@Test
-	public void failForWrongStatus() throws Throwable {
+	public void test_fails_if_exit_is_called_with_wrong_status_code() throws Throwable {
 		rule.expectSystemExitWithStatus(1);
 		Throwable exception = exceptionThrownByRuleForStatement(new SystemExit0());
 		assertThat(exception, hasMessage("Wrong exit status expected:<1> but was:<0>"));
 	}
 
 	@Test
-	public void succeedOnExitWithValidAssertion() throws Throwable {
+	public void test_is_successful_if_assertion_is_met_after_exit_has_been_called() throws Throwable {
 		rule.expectSystemExit();
 		rule.checkAssertionAfterwards(new Assertion() {
 			public void checkAssertion() throws Exception {
@@ -83,7 +84,7 @@ public class ExpectedSystemExitTest {
 	}
 
 	@Test
-	public void failsOnExitWithInvalidAssertion() throws Throwable {
+	public void test_fails_if_assertion_is_not_met_after_exit_has_been_called() throws Throwable {
 		rule.expectSystemExit();
 		rule.checkAssertionAfterwards(INVALID_ASSERTION);
 		Throwable exception = exceptionThrownByRuleForStatement(new SystemExit0());
@@ -91,23 +92,24 @@ public class ExpectedSystemExitTest {
 	}
 
 	@Test
-	public void failsOnFirstOfTwoAssertions() throws Throwable {
+	public void test_fails_if_first_of_two_assertions_is_not_met() throws Throwable {
 		rule.checkAssertionAfterwards(INVALID_ASSERTION);
 		rule.checkAssertionAfterwards(VALID_ASSERTION);
-		Throwable exception = exceptionThrownByRuleForStatement(new EmptyStatement());
+		Throwable exception = exceptionThrownByRuleForStatement(TEST_THAT_DOES_NOTHING);
 		assertThat(exception, hasMessage("Assertion failed."));
 	}
 
 	@Test
-	public void failsOnSecondOfTwoAssertions() throws Throwable {
+	public void test_fails_if_second_of_two_assertions_is_not_met() throws Throwable {
 		rule.checkAssertionAfterwards(VALID_ASSERTION);
 		rule.checkAssertionAfterwards(INVALID_ASSERTION);
-		Throwable exception = exceptionThrownByRuleForStatement(new EmptyStatement());
+		Throwable exception = exceptionThrownByRuleForStatement(TEST_THAT_DOES_NOTHING);
 		assertThat(exception, hasMessage("Assertion failed."));
 	}
 
 	@Test
-	public void restoreOldSecurityManager() throws Throwable {
+	public void after_test_security_manager_is_the_same_as_before()
+			throws Throwable {
 		SecurityManager manager = new ArbitrarySecurityManager();
 		setSecurityManager(manager);
 		executeRuleWithoutExitCall();
@@ -115,14 +117,16 @@ public class ExpectedSystemExitTest {
 	}
 
 	@Test
-	public void delegateToOldSecurityManager() throws Throwable {
+	public void current_security_manager_is_used_for_anything_else_than_system_exit()
+		throws Throwable {
 		SecurityManager manager = new ArbitrarySecurityManager();
 		setSecurityManager(manager);
 		executeRuleWithStatement(new CheckContext());
 	}
 
 	@Test
-	public void succeedsOnExitInThread() throws Throwable {
+	public void test_is_successful_if_expected_exit_is_called_in_a_thread()
+		throws Throwable {
 		rule.expectSystemExitWithStatus(ARBITRARY_EXIT_STATUS);
 		executeRuleWithStatement(new SystemExitInThread());
 	}
@@ -136,7 +140,7 @@ public class ExpectedSystemExitTest {
 	}
 
 	private void executeRuleWithoutExitCall() throws Throwable {
-		executeRuleWithStatement(new EmptyStatement());
+		executeRuleWithStatement(TEST_THAT_DOES_NOTHING);
 	}
 
 	private void executeRuleWithExitStatus0() throws Throwable {

@@ -28,59 +28,37 @@ public class RestoreSystemPropertiesTest {
 		if (propertiesOriginalValue == null)
 			clearProperty(PROPERTY_KEY);
 		else
-			setPropertyValue(propertiesOriginalValue);
+			System.setProperty(PROPERTY_KEY, propertiesOriginalValue);
 	}
 
 	@Test
-	public void restoresExistingProperty() throws Throwable {
-		setPropertyValue("dummy value");
-		evaluateRuleThatWrapsStatementThatSetsThePropertyValue();
-		assertThat(getPropertyValue(), is(equalTo("dummy value")));
+	public void after_test_properties_have_the_same_values_as_before() throws Throwable {
+		System.setProperty(PROPERTY_KEY, "dummy value");
+		evaluateRuleForStatement(
+			Statements.setProperty(PROPERTY_KEY, "another value"));
+		assertThat(getProperty(PROPERTY_KEY), is(equalTo("dummy value")));
 	}
 
 	@Test
-	public void clearsMissingProperty() throws Throwable {
+	public void property_that_does_not_exist_before_the_test_does_not_exist_after_the_test()
+			throws Throwable {
 		clearProperty(PROPERTY_KEY);
-		evaluateRuleThatWrapsStatementThatSetsThePropertyValue();
-		assertThat(getPropertyValue(), is(nullValue()));
+		evaluateRuleForStatement(
+			Statements.setProperty(PROPERTY_KEY, "another value"));
+		assertThat(getProperty(PROPERTY_KEY), is(nullValue()));
 	}
 
 	@Test
-	public void providesPropertyToExecutedStatement() throws Throwable {
-		setProperty(PROPERTY_KEY, "dummy value");
+	public void property_value_is_unchanged_at_start_of_test()
+			throws Throwable {
+		System.setProperty(PROPERTY_KEY, "dummy value");
 		TestThatCapturesProperties test = new TestThatCapturesProperties();
-		evaluateRuleThatWrapsStatement(test);
+		evaluateRuleForStatement(test);
 		assertThat(test.propertiesAtStart,
 			hasPropertyWithValue(PROPERTY_KEY, "dummy value"));
 	}
 
-	private String getPropertyValue() {
-		return getProperty("dummy property");
-	}
-
-	private void setPropertyValue(String value) {
-		setProperty(PROPERTY_KEY, value);
-	}
-
-	private void evaluateRuleThatWrapsStatement(Statement statement) throws Throwable {
+	private void evaluateRuleForStatement(Statement statement) throws Throwable {
 		rule.apply(statement, NO_DESCRIPTION).evaluate();
-	}
-
-	private void evaluateRuleThatWrapsStatementThatSetsThePropertyValue() throws Throwable {
-		Statement setValueOfProperty = new SetValueOfProperty(PROPERTY_KEY);
-		evaluateRuleThatWrapsStatement(setValueOfProperty);
-	}
-
-	private class SetValueOfProperty extends Statement {
-		private final String name;
-
-		SetValueOfProperty(String name) {
-			this.name = name;
-		}
-
-		@Override
-		public void evaluate() throws Throwable {
-			setProperty(name, "value set by statement");
-		}
 	}
 }

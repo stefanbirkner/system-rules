@@ -1,74 +1,88 @@
 package org.junit.contrib.java.lang.system;
 
-import static java.lang.System.clearProperty;
-import static java.lang.System.getProperty;
-import static java.lang.System.setProperty;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
+import static java.lang.System.*;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
+import static org.junit.contrib.java.lang.system.Matchers.hasPropertyWithValue;
 import static org.junit.contrib.java.lang.system.Matchers.notHasProperty;
+import static org.junit.contrib.java.lang.system.Statements.SUCCESSFUL_TEST;
 
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
+import java.util.Map;
+
 public class ClearSystemPropertiesTest {
-	private static final String FIRST_ARBITRARY_NAME = "first arbitrary property";
-	private static final String SECOND_ARBITRARY_NAME = "second arbitrary property";
-	private static final String ARBITRARY_VALUE = "arbitrary value";
+	private static final Description DUMMY_DESCRIPTION = null;
 
 	@Rule
-	public final RestoreSystemProperties restore = new RestoreSystemProperties(
-		SECOND_ARBITRARY_NAME);
-
-	private final ClearSystemProperties rule = new ClearSystemProperties(
-		FIRST_ARBITRARY_NAME, SECOND_ARBITRARY_NAME);
+	public final RestoreSystemProperties restore = new RestoreSystemProperties();
 
 	@Test
-	public void restoresOriginalValueOfSecondProperty() throws Throwable {
-		setProperty(SECOND_ARBITRARY_NAME, ARBITRARY_VALUE);
+	public void properties_are_cleared_at_start_of_test() {
+		setProperty("first property", "dummy value");
+		setProperty("second property", "another dummy value");
+		ClearSystemProperties rule = new ClearSystemProperties(
+			"first property", "second property");
 		TestThatCapturesProperties test = new TestThatCapturesProperties();
-		applyRuleToStatement(test);
-		assertThat(test.propertiesAtStart, notHasProperty(SECOND_ARBITRARY_NAME));
-		assertThat(getProperty(SECOND_ARBITRARY_NAME),
-			is(equalTo(ARBITRARY_VALUE)));
+		runTestWithRule(test, rule);
+		assertThat(test.propertiesAtStart, allOf(
+			notHasProperty("first property"),
+			notHasProperty("second property")));
 	}
 
 	@Test
-	public void originallyUnsetPropertyRemainsUnset() throws Throwable {
-		clearProperty(SECOND_ARBITRARY_NAME);
-		TestThatCapturesProperties test = new TestThatCapturesProperties();
-		applyRuleToStatement(test);
-		assertThat(test.propertiesAtStart, notHasProperty(SECOND_ARBITRARY_NAME));
-		assertThat(getProperty(SECOND_ARBITRARY_NAME),
-			is(nullValue(String.class)));
+	public void property_is_cleared_after_added_to_rule_within_test() {
+		setProperty("property", "dummy value");
+		ClearSystemProperties rule = new ClearSystemProperties();
+		TestThatAddsProperty test = new TestThatAddsProperty("property", rule);
+		runTestWithRule(test, rule);
+		assertThat(test.propertiesAfterAddingProperty,
+			notHasProperty("property"));
 	}
 
 	@Test
-	public void clearsPropertyDuringTestAndRestoresItAfterwards()
-		throws Throwable {
-		setProperty("another property", "dummy value");
-		applyRuleToStatement(new ClearPropertyAndVerifyThatItIsCleared(
-			"another property"));
-		assertThat(getProperty("another property"), is("dummy value"));
+	public void after_test_properties_have_the_same_values_as_before() {
+		setProperty("first property", "dummy value");
+		setProperty("second property", "another dummy value");
+		setProperty("third property", "another dummy value");
+		ClearSystemProperties rule = new ClearSystemProperties(
+			"first property", "second property");
+		runTestWithRule(new TestThatAddsProperty("third property", rule), rule);
+		assertThat(getProperties(), allOf(
+			hasPropertyWithValue("first property", "dummy value"),
+			hasPropertyWithValue("second property", "another dummy value"),
+			hasPropertyWithValue("third property", "another dummy value")));
 	}
 
-	private void applyRuleToStatement(Statement statement) throws Throwable {
-		rule.apply(statement, null).evaluate();
+	@Test
+	public void property_that_is_not_present_does_not_cause_failure() {
+		clearProperty("property");
+		ClearSystemProperties rule = new ClearSystemProperties("property");
+		runTestWithRule(SUCCESSFUL_TEST, rule);
+		//everything is fine if no exception is thrown
 	}
 
-	private class ClearPropertyAndVerifyThatItIsCleared extends Statement {
+	private void runTestWithRule(Statement test, ClearSystemProperties rule) {
+		rule.apply(test, DUMMY_DESCRIPTION);
+	}
+
+	private class TestThatAddsProperty extends Statement {
 		private final String property;
+		private ClearSystemProperties rule;
+		Map<Object, Object> propertiesAfterAddingProperty;
 
-		ClearPropertyAndVerifyThatItIsCleared(String property) {
+		TestThatAddsProperty(String property, ClearSystemProperties rule) {
 			this.property = property;
+			this.rule = rule;
 		}
 
 		@Override
 		public void evaluate() throws Throwable {
 			rule.clearProperty(property);
-			assertThat(getProperty(property), is(nullValue(String.class)));
+			propertiesAfterAddingProperty = getProperties();
 		}
 	}
 }

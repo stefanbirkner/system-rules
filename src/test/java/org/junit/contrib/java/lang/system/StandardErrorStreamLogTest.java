@@ -5,6 +5,7 @@ import static java.lang.System.err;
 import static java.lang.System.setErr;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
+import static org.junit.contrib.java.lang.system.Statements.writeTextToSystemErr;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -14,45 +15,46 @@ import org.junit.rules.TestRule;
 import org.junit.runners.model.Statement;
 
 public class StandardErrorStreamLogTest {
-	private static final String ARBITRARY_TEXT = "arbitrary text";
-
 	@Test
-	public void logWriting() throws Throwable {
-		StandardErrorStreamLog log = createLogWithoutSpecificMode();
-		executeRuleWithStatement(log, new WriteTextToStandardErrorStream());
-		assertThat(log.getLog(), is(equalTo(ARBITRARY_TEXT)));
+	public void log_contains_text_that_has_been_written_to_system_err()
+			throws Throwable {
+		StandardErrorStreamLog rule = createLogWithoutSpecificMode();
+		executeRuleWithStatement(rule, writeTextToSystemErr("dummy text"));
+		assertThat(rule.getLog(), is(equalTo("dummy text")));
 	}
 
 	@Test
-	public void restoreSystemErrorStream() throws Throwable {
-		StandardErrorStreamLog log = createLogWithoutSpecificMode();
+	public void after_the_test_system_err_is_same_as_before() throws Throwable {
+		StandardErrorStreamLog rule = createLogWithoutSpecificMode();
 		PrintStream originalStream = err;
-		executeRuleWithStatement(log, new WriteTextToStandardErrorStream());
+		executeRuleWithStatement(rule, writeTextToSystemErr("dummy text"));
 		assertThat(originalStream, is(sameInstance(err)));
 	}
 
 	@Test
-	public void stillWritesToSystemErrorStreamIfNoLogModeHasBeenSpecified() throws Throwable {
+	public void text_is_still_written_to_system_err_if_no_log_mode_is_specified()
+			throws Throwable {
 		PrintStream originalStream = err;
 		try {
 			ByteArrayOutputStream captureErrorStream = new ByteArrayOutputStream();
 			setErr(new PrintStream(captureErrorStream));
-			StandardErrorStreamLog log = createLogWithoutSpecificMode();
-			executeRuleWithStatement(log, new WriteTextToStandardErrorStream());
-			assertThat(captureErrorStream, hasToString(equalTo(ARBITRARY_TEXT)));
+			StandardErrorStreamLog rule = createLogWithoutSpecificMode();
+			executeRuleWithStatement(rule, writeTextToSystemErr("dummy text"));
+			assertThat(captureErrorStream, hasToString(equalTo("dummy text")));
 		} finally {
 			setErr(originalStream);
 		}
 	}
 
 	@Test
-	public void doesNotWriteToSystemErrorStreamForLogOnlyMode() throws Throwable {
-		StandardErrorStreamLog log = new StandardErrorStreamLog(LogMode.LOG_ONLY);
+	public void no_text_is_written_to_system_err_if_log_mode_is_log_only()
+			throws Throwable {
 		PrintStream originalStream = err;
 		try {
 			ByteArrayOutputStream captureErrorStream = new ByteArrayOutputStream();
 			setErr(new PrintStream(captureErrorStream));
-			executeRuleWithStatement(log, new WriteTextToStandardErrorStream());
+			StandardErrorStreamLog rule = new StandardErrorStreamLog(LogMode.LOG_ONLY);
+			executeRuleWithStatement(rule, writeTextToSystemErr("dummy text"));
 			assertThat(captureErrorStream, hasToString(isEmptyString()));
 		} finally {
 			setErr(originalStream);
@@ -60,14 +62,15 @@ public class StandardErrorStreamLogTest {
 	}
 
 	@Test
-	public void collectsLogAfterClearing() throws Throwable {
+	public void log_contains_only_text_that_has_been_written_after_log_was_cleared()
+			throws Throwable {
 		StandardErrorStreamLog log = createLogWithoutSpecificMode();
-		executeRuleWithStatement(log, new ClearLogWhileWritingTextToStandardErrorStream(log));
-		assertThat(log.getLog(), is(equalTo(ARBITRARY_TEXT)));
+		executeRuleWithStatement(log, new ClearLogDuringTest(log));
+		assertThat(log.getLog(), is(equalTo(ClearLogDuringTest.TEXT)));
 	}
 
 	@Test
-	public void cannotBeCreatedWithoutLogMode() {
+	public void rule_cannot_be_created_without_log_mode() {
 		Throwable exception = exceptionThrownBy(
 			new com.github.stefanbirkner.fishbowl.Statement() {
 				public void evaluate() throws Throwable {
@@ -87,25 +90,19 @@ public class StandardErrorStreamLogTest {
 		rule.apply(statement, null).evaluate();
 	}
 
-	private class WriteTextToStandardErrorStream extends Statement {
-		@Override
-		public void evaluate() throws Throwable {
-			err.print(ARBITRARY_TEXT);
-		}
-	}
-
-	private class ClearLogWhileWritingTextToStandardErrorStream extends Statement {
+	private class ClearLogDuringTest extends Statement {
+		private static final String TEXT = "arbitrary text";
 		private final StandardErrorStreamLog log;
 
-		private ClearLogWhileWritingTextToStandardErrorStream(StandardErrorStreamLog log) {
+		private ClearLogDuringTest(StandardErrorStreamLog log) {
 			this.log = log;
 		}
 
 		@Override
 		public void evaluate() throws Throwable {
-			err.print(ARBITRARY_TEXT);
+			err.print(TEXT);
 			log.clear();
-			err.print(ARBITRARY_TEXT);
+			err.print(TEXT);
 		}
 	}
 }

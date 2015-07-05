@@ -1,9 +1,11 @@
 package org.junit.contrib.java.lang.system;
 
+import static java.lang.System.in;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertThat;
+import static org.junit.contrib.java.lang.system.Statements.SUCCESSFUL_TEST;
 import static org.junit.contrib.java.lang.system.TextFromStandardInputStream.emptyStandardInputStream;
 
 import java.io.InputStream;
@@ -21,12 +23,12 @@ public class TextFromStandardInputStreamTest {
 	private final TextFromStandardInputStream systemInMock = emptyStandardInputStream();
 
 	@Test
-	public void provideText() throws Throwable {
+	public void provided_text_is_available_from_system_in() throws Throwable {
 		executeRuleWithStatement(new Statement() {
 			@Override
 			public void evaluate() throws Throwable {
 				systemInMock.provideText("arbitrary text");
-				Scanner scanner = new Scanner(System.in);
+				Scanner scanner = new Scanner(in);
 				String textFromSystemIn = scanner.nextLine();
 				assertThat(textFromSystemIn, is(equalTo("arbitrary text")));
 			}
@@ -34,14 +36,15 @@ public class TextFromStandardInputStreamTest {
 	}
 
 	@Test
-	public void providesMultipleTexts() throws Throwable {
+	public void specified_texts_are_available_from_system_in()
+			throws Throwable {
 		executeRuleWithStatement(new Statement() {
 			@Override
 			public void evaluate() throws Throwable {
 				systemInMock.provideText("first text\n", "second text\n");
-				Scanner firstScanner = new Scanner(System.in);
+				Scanner firstScanner = new Scanner(in);
 				firstScanner.nextLine();
-				Scanner secondScanner = new Scanner(System.in);
+				Scanner secondScanner = new Scanner(in);
 				String textFromSystemIn = secondScanner.nextLine();
 				assertThat(textFromSystemIn, is(equalTo("second text")));
 			}
@@ -49,26 +52,27 @@ public class TextFromStandardInputStreamTest {
 	}
 
 	@Test
-	public void doesNotFailForNoProvidedText() throws Throwable {
+	public void no_text_is_available_from_system_in_if_no_text_has_been_provided()
+			throws Throwable {
 		executeRuleWithStatement(new Statement() {
 			@Override
 			public void evaluate() throws Throwable {
 				systemInMock.provideText();
-				int character = System.in.read();
+				int character = in.read();
 				assertThat(character, is(-1));
 			}
 		});
 	}
 
 	@Test
-	public void providesMultipleLines() throws Throwable {
+	public void specified_lines_are_available_from_system_in() throws Throwable {
 		executeRuleWithStatement(new Statement() {
 			@Override
 			public void evaluate() throws Throwable {
 				systemInMock.provideLines("first text", "second text");
-				Scanner firstScanner = new Scanner(System.in);
+				Scanner firstScanner = new Scanner(in);
 				firstScanner.nextLine();
-				Scanner secondScanner = new Scanner(System.in);
+				Scanner secondScanner = new Scanner(in);
 				String textFromSystemIn = secondScanner.nextLine();
 				assertThat(textFromSystemIn, is(equalTo("second text")));
 			}
@@ -76,22 +80,23 @@ public class TextFromStandardInputStreamTest {
 	}
 
 	@Test
-	public void doesNotFailForNoProvidedLine() throws Throwable {
+	public void no_text_is_available_from_system_in_if_no_line_has_been_provided()
+			throws Throwable {
 		executeRuleWithStatement(new Statement() {
 			@Override
 			public void evaluate() throws Throwable {
 				systemInMock.provideLines();
-				int character = System.in.read();
+				int character = in.read();
 				assertThat(character, is(-1));
 			}
 		});
 	}
 
 	@Test
-	public void restoreSystemIn() throws Throwable {
-		InputStream originalSystemIn = System.in;
-		executeRuleWithStatement(new EmptyStatement());
-		assertThat(System.in, is(sameInstance(originalSystemIn)));
+	public void after_the_test_system_in_is_same_as_before() throws Throwable {
+		InputStream originalSystemIn = in;
+		executeRuleWithStatement(SUCCESSFUL_TEST);
+		assertThat(in, is(sameInstance(originalSystemIn)));
 	}
 
 	private void executeRuleWithStatement(Statement statement) throws Throwable {

@@ -1,10 +1,10 @@
 package org.junit.contrib.java.lang.system;
 
 import static com.github.stefanbirkner.fishbowl.Fishbowl.exceptionThrownBy;
-import static java.lang.System.out;
-import static java.lang.System.setOut;
+import static java.lang.System.*;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
+import static org.junit.contrib.java.lang.system.Statements.writeTextToSystemOut;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -14,46 +14,46 @@ import org.junit.rules.TestRule;
 import org.junit.runners.model.Statement;
 
 public class StandardOutputStreamLogTest {
-	private static final String ARBITRARY_TEXT = "arbitrary text";
-
 	@Test
-	public void logWriting() throws Throwable {
-		StandardOutputStreamLog log = createLogWithoutSpecificMode();
-		executeRuleWithStatement(log, new WriteTextToStandardOutputStream());
-		assertThat(log.getLog(), is(equalTo(ARBITRARY_TEXT)));
+	public void log_contains_text_that_has_been_written_to_system_out()
+		throws Throwable {
+		StandardOutputStreamLog rule = createLogWithoutSpecificMode();
+		executeRuleWithStatement(rule, writeTextToSystemOut("dummy text"));
+		assertThat(rule.getLog(), is(equalTo("dummy text")));
 	}
 
 	@Test
-	public void restoreSystemOutputStream() throws Throwable {
-		StandardOutputStreamLog log = createLogWithoutSpecificMode();
+	public void after_the_test_system_out_is_same_as_before() throws Throwable {
+		StandardOutputStreamLog rule = createLogWithoutSpecificMode();
 		PrintStream originalStream = out;
-		executeRuleWithStatement(log, new WriteTextToStandardOutputStream());
+		executeRuleWithStatement(rule, writeTextToSystemOut("dummy text"));
 		assertThat(originalStream, is(sameInstance(out)));
 	}
 
 	@Test
-	public void stillWritesToSystemOutputStreamIfNoLogModeHasBeenSpecified() throws Throwable {
+	public void text_is_still_written_to_system_out_if_no_log_mode_is_specified()
+		throws Throwable {
 		PrintStream originalStream = out;
 		try {
 			ByteArrayOutputStream captureOutputStream = new ByteArrayOutputStream();
 			setOut(new PrintStream(captureOutputStream));
-			StandardOutputStreamLog log = createLogWithoutSpecificMode();
-			executeRuleWithStatement(log, new WriteTextToStandardOutputStream());
-			assertThat(captureOutputStream,
-				hasToString(equalTo(ARBITRARY_TEXT)));
+			StandardOutputStreamLog rule = createLogWithoutSpecificMode();
+			executeRuleWithStatement(rule, writeTextToSystemOut("dummy text"));
+			assertThat(captureOutputStream, hasToString(equalTo("dummy text")));
 		} finally {
 			setOut(originalStream);
 		}
 	}
 
 	@Test
-	public void doesNotWriteToSystemOutputStreamForLogOnlyMode() throws Throwable {
-		StandardOutputStreamLog log = new StandardOutputStreamLog(LogMode.LOG_ONLY);
+	public void no_text_is_written_to_system_out_if_log_mode_is_log_only()
+		throws Throwable {
 		PrintStream originalStream = out;
 		try {
 			ByteArrayOutputStream captureOutputStream = new ByteArrayOutputStream();
 			setOut(new PrintStream(captureOutputStream));
-			executeRuleWithStatement(log, new WriteTextToStandardOutputStream());
+			StandardOutputStreamLog rule = new StandardOutputStreamLog(LogMode.LOG_ONLY);
+			executeRuleWithStatement(rule, writeTextToSystemOut("dummy text"));
 			assertThat(captureOutputStream, hasToString(isEmptyString()));
 		} finally {
 			setOut(originalStream);
@@ -61,14 +61,15 @@ public class StandardOutputStreamLogTest {
 	}
 
 	@Test
-	public void collectsLogAfterClearing() throws Throwable {
+	public void log_contains_only_text_that_has_been_written_after_log_was_cleared()
+		throws Throwable {
 		StandardOutputStreamLog log = createLogWithoutSpecificMode();
-		executeRuleWithStatement(log, new ClearLogWhileWritingTextToStandardOutputStream(log));
-		assertThat(log.getLog(), is(equalTo(ARBITRARY_TEXT)));
+		executeRuleWithStatement(log, new ClearLogDuringTest(log));
+		assertThat(log.getLog(), is(equalTo(ClearLogDuringTest.TEXT)));
 	}
 
 	@Test
-	public void cannotBeCreatedWithoutLogMode() {
+	public void rule_cannot_be_created_without_log_mode() {
 		Throwable exception = exceptionThrownBy(
 			new com.github.stefanbirkner.fishbowl.Statement() {
 				public void evaluate() throws Throwable {
@@ -88,25 +89,19 @@ public class StandardOutputStreamLogTest {
 		rule.apply(statement, null).evaluate();
 	}
 
-	private class WriteTextToStandardOutputStream extends Statement {
-		@Override
-		public void evaluate() throws Throwable {
-			out.print(ARBITRARY_TEXT);
-		}
-	}
-
-	private class ClearLogWhileWritingTextToStandardOutputStream extends Statement {
+	private class ClearLogDuringTest extends Statement {
+		private static final String TEXT = "arbitrary text";
 		private final StandardOutputStreamLog log;
 
-		private ClearLogWhileWritingTextToStandardOutputStream(StandardOutputStreamLog log) {
+		private ClearLogDuringTest(StandardOutputStreamLog log) {
 			this.log = log;
 		}
 
 		@Override
 		public void evaluate() throws Throwable {
-			out.print(ARBITRARY_TEXT);
+			out.print(TEXT);
 			log.clear();
-			out.print(ARBITRARY_TEXT);
+			out.print(TEXT);
 		}
 	}
 }
