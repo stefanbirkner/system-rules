@@ -25,7 +25,7 @@ description: A collection of JUnit rules for testing code that uses java.lang.Sy
       <h2>System Properties</h2>
       <p>If your test deals with system properties, you have to set them and
       restore them after the test. Use the
-      <a href="#ClearSystemProperty">ClearSystemProperty</a>,
+      <a href="#ClearSystemProperties">ClearSystemProperties</a>,
       <a href="#ProvideSystemProperty">ProvideSystemProperty</a> and
       <a href="#RestoreSystemProperties">RestoreSystemProperties</a> rules for
       this purpose.
@@ -53,15 +53,15 @@ description: A collection of JUnit rules for testing code that uses java.lang.Sy
 		annotation, too.</p>
 	</section>
 
-			<section id="ClearSystemProperty">
+			<section id="ClearSystemProperties">
 				<h3>Clear Properties</h3>
-				<p>The ClearSystemProperty rule deletes the property before the test
+				<p>The ClearSystemProperties rule deletes the property before the test
 				and restores the original value of the property when the test is
 				finished.</p>
 				{% highlight java %}public void MyTest {
 	@Rule
-	public final ClearSystemProperty myPropertyIsCleared
-	 = new ClearSystemProperty("MyProperty");
+	public final ClearSystemProperties myPropertyIsCleared
+	 = new ClearSystemProperties("MyProperty");
 
 	@Test
 	public void overrideProperty() {
