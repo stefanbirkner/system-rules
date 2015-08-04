@@ -7,6 +7,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
+import static org.junit.contrib.java.lang.system.Matchers.hasPropertyWithValue;
 
 import org.junit.After;
 import org.junit.Test;
@@ -46,14 +47,11 @@ public class RestoreSystemPropertiesTest {
 
 	@Test
 	public void providesPropertyToExecutedStatement() throws Throwable {
-		setPropertyValue("dummy value");
-		Statement verifyProperty = new Statement() {
-			@Override
-			public void evaluate() throws Throwable {
-				assertThat(getPropertyValue(), is(equalTo("dummy value")));
-			}
-		};
-		evaluateRuleThatWrapsStatement(verifyProperty);
+		setProperty(PROPERTY_KEY, "dummy value");
+		TestThatCapturesProperties test = new TestThatCapturesProperties();
+		evaluateRuleThatWrapsStatement(test);
+		assertThat(test.propertiesAtStart,
+			hasPropertyWithValue(PROPERTY_KEY, "dummy value"));
 	}
 
 	private String getPropertyValue() {
@@ -64,8 +62,8 @@ public class RestoreSystemPropertiesTest {
 		setProperty(PROPERTY_KEY, value);
 	}
 
-	private void evaluateRuleThatWrapsStatement(Statement setValueOfProperty) throws Throwable {
-		rule.apply(setValueOfProperty, NO_DESCRIPTION).evaluate();
+	private void evaluateRuleThatWrapsStatement(Statement statement) throws Throwable {
+		rule.apply(statement, NO_DESCRIPTION).evaluate();
 	}
 
 	private void evaluateRuleThatWrapsStatementThatSetsThePropertyValue() throws Throwable {

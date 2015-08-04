@@ -7,6 +7,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
+import static org.junit.contrib.java.lang.system.Matchers.notHasProperty;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -27,7 +28,9 @@ public class ClearSystemPropertiesTest {
 	@Test
 	public void restoresOriginalValueOfSecondProperty() throws Throwable {
 		setProperty(SECOND_ARBITRARY_NAME, ARBITRARY_VALUE);
-		applyRuleToStatement(new VerifyValueIsCleared());
+		TestThatCapturesProperties test = new TestThatCapturesProperties();
+		applyRuleToStatement(test);
+		assertThat(test.propertiesAtStart, notHasProperty(SECOND_ARBITRARY_NAME));
 		assertThat(getProperty(SECOND_ARBITRARY_NAME),
 			is(equalTo(ARBITRARY_VALUE)));
 	}
@@ -35,7 +38,9 @@ public class ClearSystemPropertiesTest {
 	@Test
 	public void originallyUnsetPropertyRemainsUnset() throws Throwable {
 		clearProperty(SECOND_ARBITRARY_NAME);
-		applyRuleToStatement(new VerifyValueIsCleared());
+		TestThatCapturesProperties test = new TestThatCapturesProperties();
+		applyRuleToStatement(test);
+		assertThat(test.propertiesAtStart, notHasProperty(SECOND_ARBITRARY_NAME));
 		assertThat(getProperty(SECOND_ARBITRARY_NAME),
 			is(nullValue(String.class)));
 	}
@@ -51,14 +56,6 @@ public class ClearSystemPropertiesTest {
 
 	private void applyRuleToStatement(Statement statement) throws Throwable {
 		rule.apply(statement, null).evaluate();
-	}
-
-	private class VerifyValueIsCleared extends Statement {
-		@Override
-		public void evaluate() throws Throwable {
-			assertThat(getProperty(SECOND_ARBITRARY_NAME),
-				is(nullValue(String.class)));
-		}
 	}
 
 	private class ClearPropertyAndVerifyThatItIsCleared extends Statement {

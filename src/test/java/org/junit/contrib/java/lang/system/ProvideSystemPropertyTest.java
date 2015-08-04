@@ -4,10 +4,10 @@ import static java.lang.System.clearProperty;
 import static java.lang.System.getProperty;
 import static java.lang.System.setProperty;
 import static org.apache.commons.io.IOUtils.copy;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
+import static org.junit.contrib.java.lang.system.Matchers.hasPropertyWithValue;
+import static org.junit.contrib.java.lang.system.Matchers.notHasProperty;
 import static org.junit.contrib.java.lang.system.ProvideSystemProperty.fromFile;
 import static org.junit.contrib.java.lang.system.ProvideSystemProperty.fromResource;
 
@@ -41,8 +41,10 @@ public class ProvideSystemPropertyTest {
 	@Test
 	public void removeProperty() throws Throwable {
 		setProperty(ARBITRARY_NAME, ARBITRARY_VALUE);
+		TestThatCapturesProperties test = new TestThatCapturesProperties();
 		rule = new ProvideSystemProperty(ARBITRARY_NAME, null);
-		evaluateAssertPropertyWithNameAndValue(ARBITRARY_NAME, null);
+		evaluateRuleForStatement(test);
+		assertThat(test.propertiesAtStart, notHasProperty(ARBITRARY_NAME));
 	}
 
 	@Test
@@ -61,17 +63,22 @@ public class ProvideSystemPropertyTest {
 
 	@Test
 	public void providesMultipleProperties() throws Throwable {
-		rule = new ProvideSystemProperty(ARBITRARY_NAME, ARBITRARY_VALUE).and(
-			ANOTHER_PROPERTY, A_DIFFERENT_VALUE);
-		evaluateAssertPropertyWithNameAndValue(ARBITRARY_NAME, ARBITRARY_VALUE);
-		evaluateAssertPropertyWithNameAndValue(ANOTHER_PROPERTY,
-			A_DIFFERENT_VALUE);
+		rule = new ProvideSystemProperty(ARBITRARY_NAME, ARBITRARY_VALUE)
+			.and(ANOTHER_PROPERTY, A_DIFFERENT_VALUE);
+		TestThatCapturesProperties test = new TestThatCapturesProperties();
+		evaluateRuleForStatement(test);
+		assertThat(test.propertiesAtStart, allOf(
+			hasPropertyWithValue(ARBITRARY_NAME, ARBITRARY_VALUE),
+			hasPropertyWithValue(ANOTHER_PROPERTY, A_DIFFERENT_VALUE)));
 	}
 
 	@Test
 	public void providePropertyFromResource() throws Throwable {
 		rule = fromResource(EXAMPLE_PROPERTIES);
-		evaluateAssertPropertyWithNameAndValue(ARBITRARY_NAME, ARBITRARY_VALUE);
+		TestThatCapturesProperties test = new TestThatCapturesProperties();
+		evaluateRuleForStatement(test);
+		assertThat(test.propertiesAtStart,
+			hasPropertyWithValue(ARBITRARY_NAME, ARBITRARY_VALUE));
 	}
 
 	@Test
@@ -79,18 +86,19 @@ public class ProvideSystemPropertyTest {
 		File file = temporaryFolder.newFile();
 		copyResourceToFile(EXAMPLE_PROPERTIES, file);
 		rule = fromFile(file.getAbsolutePath());
-		evaluateAssertPropertyWithNameAndValue(ARBITRARY_NAME, ARBITRARY_VALUE);
+		TestThatCapturesProperties test = new TestThatCapturesProperties();
+		evaluateRuleForStatement(test);
+		assertThat(test.propertiesAtStart,
+			hasPropertyWithValue(ARBITRARY_NAME, ARBITRARY_VALUE));
 	}
 
 	@Test
 	public void restoresMultipleProperties() throws Throwable {
 		setProperty(ANOTHER_PROPERTY, ARBITRARY_VALUE);
 
-		rule = new ProvideSystemProperty(ARBITRARY_NAME, ARBITRARY_VALUE).and(
-			ANOTHER_PROPERTY, A_DIFFERENT_VALUE);
-		evaluateAssertPropertyWithNameAndValue(ANOTHER_PROPERTY,
-			A_DIFFERENT_VALUE);
-
+		rule = new ProvideSystemProperty(ARBITRARY_NAME, ARBITRARY_VALUE)
+			.and(ANOTHER_PROPERTY, A_DIFFERENT_VALUE);
+		evaluateRuleForStatement(new EmptyStatement());
 		assertThat(getProperty(ARBITRARY_NAME), is(nullValue()));
 		assertThat(getProperty(ANOTHER_PROPERTY), is(ARBITRARY_VALUE));
 	}
@@ -108,13 +116,10 @@ public class ProvideSystemPropertyTest {
 
 	private void evaluateStatementWithArbitraryValue() throws Throwable {
 		rule = new ProvideSystemProperty(ARBITRARY_NAME, ARBITRARY_VALUE);
-		evaluateAssertPropertyWithNameAndValue(ARBITRARY_NAME, ARBITRARY_VALUE);
-	}
-
-	private void evaluateAssertPropertyWithNameAndValue(String name,
-														String value) throws Throwable {
-		AssertValue assertValue = new AssertValue(name, value);
-		evaluateRuleForStatement(assertValue);
+		TestThatCapturesProperties test = new TestThatCapturesProperties();
+		evaluateRuleForStatement(test);
+		assertThat(test.propertiesAtStart,
+			hasPropertyWithValue(ARBITRARY_NAME, ARBITRARY_VALUE));
 	}
 
 	private void evaluateRuleForStatement(Statement statement) throws Throwable {
@@ -126,21 +131,6 @@ public class ProvideSystemPropertyTest {
 		FileOutputStream fos = new FileOutputStream(file);
 		InputStream is = getClass().getResourceAsStream(name);
 		copy(is, fos);
-	}
-
-	private static class AssertValue extends Statement {
-		final String name;
-		final String value;
-
-		AssertValue(String name, String value) {
-			this.name = name;
-			this.value = value;
-		}
-
-		@Override
-		public void evaluate() {
-			assertThat(getProperty(name), is(equalTo(value)));
-		}
 	}
 
 	private class SetPropertyAndAssertValue extends Statement {
