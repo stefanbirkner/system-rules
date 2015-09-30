@@ -2,6 +2,7 @@ package org.junit.contrib.java.lang.system;
 
 import static java.lang.System.getSecurityManager;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.contrib.java.lang.system.Executor.executeTestWithRule;
 import static org.junit.contrib.java.lang.system.Statements.TEST_THAT_DOES_NOTHING;
 
 import java.security.Permission;
@@ -20,22 +21,17 @@ public class ProvideSecurityManagerTest {
 	public ProvideSecurityManager rule = new ProvideSecurityManager(MANAGER);
 
 	@Test
-	public void provided_security_manager_is_present_during_test() throws Throwable {
+	public void provided_security_manager_is_present_during_test() {
 		CaptureSecurityManager test = new CaptureSecurityManager();
-		evaluateRuleWithTest(test);
+		executeTestWithRule(test, rule);
 		assertThat(test.securityManagerDuringTest).isSameAs(MANAGER);
 	}
 
 	@Test
-	public void after_test_security_manager_is_the_same_as_before()
-			throws Throwable {
+	public void after_test_security_manager_is_the_same_as_before() {
 		SecurityManager originalManager = getSecurityManager();
-		evaluateRuleWithTest(TEST_THAT_DOES_NOTHING);
+		executeTestWithRule(TEST_THAT_DOES_NOTHING, rule);
 		assertThat(getSecurityManager()).isSameAs(originalManager);
-	}
-
-	private void evaluateRuleWithTest(Statement statement) throws Throwable {
-		rule.apply(statement, null).evaluate();
 	}
 
 	private static class CaptureSecurityManager extends Statement {
