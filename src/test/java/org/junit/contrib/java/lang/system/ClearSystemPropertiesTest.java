@@ -13,6 +13,7 @@ import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
 import java.util.Map;
+import java.util.Properties;
 
 public class ClearSystemPropertiesTest {
 	private static final Description DUMMY_DESCRIPTION = null;
@@ -21,7 +22,7 @@ public class ClearSystemPropertiesTest {
 	public final RestoreSystemProperties restore = new RestoreSystemProperties();
 
 	@Test
-	public void properties_are_cleared_at_start_of_test() {
+	public void properties_are_cleared_at_start_of_test() throws Throwable {
 		setProperty("first property", "dummy value");
 		setProperty("second property", "another dummy value");
 		ClearSystemProperties rule = new ClearSystemProperties(
@@ -34,7 +35,7 @@ public class ClearSystemPropertiesTest {
 	}
 
 	@Test
-	public void property_is_cleared_after_added_to_rule_within_test() {
+	public void property_is_cleared_after_added_to_rule_within_test() throws Throwable {
 		setProperty("property", "dummy value");
 		ClearSystemProperties rule = new ClearSystemProperties();
 		TestThatAddsProperty test = new TestThatAddsProperty("property", rule);
@@ -44,7 +45,7 @@ public class ClearSystemPropertiesTest {
 	}
 
 	@Test
-	public void after_test_properties_have_the_same_values_as_before() {
+	public void after_test_properties_have_the_same_values_as_before() throws Throwable {
 		setProperty("first property", "dummy value");
 		setProperty("second property", "another dummy value");
 		setProperty("third property", "another dummy value");
@@ -58,15 +59,15 @@ public class ClearSystemPropertiesTest {
 	}
 
 	@Test
-	public void property_that_is_not_present_does_not_cause_failure() {
+	public void property_that_is_not_present_does_not_cause_failure() throws Throwable {
 		clearProperty("property");
 		ClearSystemProperties rule = new ClearSystemProperties("property");
 		runTestWithRule(SUCCESSFUL_TEST, rule);
 		//everything is fine if no exception is thrown
 	}
 
-	private void runTestWithRule(Statement test, ClearSystemProperties rule) {
-		rule.apply(test, DUMMY_DESCRIPTION);
+	private void runTestWithRule(Statement test, ClearSystemProperties rule) throws Throwable {
+		rule.apply(test, DUMMY_DESCRIPTION).evaluate();
 	}
 
 	private class TestThatAddsProperty extends Statement {
@@ -82,7 +83,7 @@ public class ClearSystemPropertiesTest {
 		@Override
 		public void evaluate() throws Throwable {
 			rule.clearProperty(property);
-			propertiesAfterAddingProperty = getProperties();
+			propertiesAfterAddingProperty = new Properties(getProperties());
 		}
 	}
 }
