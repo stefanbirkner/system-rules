@@ -337,6 +337,13 @@ public class SummarizeTest {
     assertEquals(3, Summarize.sumOfNumbersFromSystemIn());
   }
 }{% endhighlight %}
+
+				<p>If you want to test that your class under test handles exception correctly then you can tell <code>TextFromStandardInputStream</code> to throw an exception after all characters have been read.</p>
+
+				{% highlight java %}systemInMock.throwExceptionOnInputEnd(new IOException());{% endhighlight %}
+				<p>or</p>
+
+				{% highlight java %}systemInMock.throwExceptionOnInputEnd(new RuntimeException());{% endhighlight %}				
 			</section>
 
 			<section id="ExpectedSystemExit">
