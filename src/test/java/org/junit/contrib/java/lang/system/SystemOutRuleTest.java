@@ -24,7 +24,7 @@ public class SystemOutRuleTest {
 	public TestRule restoreSystemProperties = new RestoreSystemProperties();
 
 	@After
-	public void restoreSystemErr() {
+	public void restoreSystemOut() {
 		setOut(originalOut);
 	}
 
