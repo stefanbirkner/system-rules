@@ -5,10 +5,11 @@ import static java.lang.System.out;
 import static java.lang.System.setErr;
 import static java.lang.System.setOut;
 
+import java.io.OutputStream;
 import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 
-import org.junit.rules.TestRule;
-import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
 public enum PrintStreamHandler {
@@ -19,7 +20,7 @@ public enum PrintStreamHandler {
 		}
 
 		@Override
-		void replaceCurrentStreamWithStream(PrintStream stream) {
+		void replaceCurrentStreamWithPrintStream(PrintStream stream) {
 			setOut(stream);
 		}
 	},
@@ -30,10 +31,13 @@ public enum PrintStreamHandler {
 		}
 
 		@Override
-		void replaceCurrentStreamWithStream(PrintStream stream) {
+		void replaceCurrentStreamWithPrintStream(PrintStream stream) {
 			setErr(stream);
 		}
 	};
+
+	private static final boolean AUTO_FLUSH = true;
+	private static final String DEFAULT_ENCODING = Charset.defaultCharset().name();
 
 	Statement createRestoreStatement(final Statement base) {
 		return new Statement() {
@@ -43,13 +47,20 @@ public enum PrintStreamHandler {
 				try {
 					base.evaluate();
 				} finally {
-					replaceCurrentStreamWithStream(originalStream);
+					replaceCurrentStreamWithPrintStream(originalStream);
 				}
 			}
 		};
 	}
 
+	void replaceCurrentStreamWithOutputStream(OutputStream outputStream)
+			throws UnsupportedEncodingException {
+		PrintStream printStream = new PrintStream(
+			outputStream, AUTO_FLUSH, DEFAULT_ENCODING);
+		replaceCurrentStreamWithPrintStream(printStream);
+	}
+
 	abstract PrintStream getStream();
 
-	abstract void replaceCurrentStreamWithStream(PrintStream stream);
+	abstract void replaceCurrentStreamWithPrintStream(PrintStream stream);
 }

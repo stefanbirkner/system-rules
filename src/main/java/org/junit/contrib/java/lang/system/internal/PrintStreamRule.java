@@ -3,7 +3,6 @@ package org.junit.contrib.java.lang.system.internal;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 
 import org.apache.commons.io.output.TeeOutputStream;
@@ -20,11 +19,7 @@ public class PrintStreamRule implements TestRule {
 
 	public PrintStreamRule(PrintStreamHandler printStreamHandler) {
 		this.printStreamHandler = printStreamHandler;
-		try {
-			this.muteableLogStream = new MuteableLogStream(printStreamHandler.getStream());
-		} catch (UnsupportedEncodingException e) {
-			throw new RuntimeException(e);
-		}
+		this.muteableLogStream = new MuteableLogStream(printStreamHandler.getStream());
 	}
 
 	public Statement apply(final Statement base, final Description description) {
@@ -35,7 +30,7 @@ public class PrintStreamRule implements TestRule {
 					printStreamHandler.createRestoreStatement(new Statement() {
 						@Override
 						public void evaluate() throws Throwable {
-							printStreamHandler.replaceCurrentStreamWithStream(muteableLogStream);
+							printStreamHandler.replaceCurrentStreamWithOutputStream(muteableLogStream);
 							base.evaluate();
 						}
 					}).evaluate();
@@ -73,19 +68,19 @@ public class PrintStreamRule implements TestRule {
 		muteableLogStream.enableFailureLog();
 	}
 
-	private static class MuteableLogStream extends PrintStream {
+	private static class MuteableLogStream extends TeeOutputStream {
 		private final ByteArrayOutputStream failureLog;
 		private final ByteArrayOutputStream log;
 		private final MutableOutputStream muteableOriginalStream;
 		private final MutableOutputStream muteableFailureLog;
 		private final MutableOutputStream muteableLog;
 
-		MuteableLogStream(OutputStream out) throws UnsupportedEncodingException {
+		MuteableLogStream(OutputStream out) {
 			this(out, new ByteArrayOutputStream(), new ByteArrayOutputStream());
 		}
 
 		MuteableLogStream(OutputStream out, ByteArrayOutputStream failureLog,
-				ByteArrayOutputStream log) throws UnsupportedEncodingException {
+				ByteArrayOutputStream log) {
 			this(new MutableOutputStream(out),
 				failureLog, new MutableOutputStream(failureLog),
 				log, new MutableOutputStream(log));
@@ -93,11 +88,9 @@ public class PrintStreamRule implements TestRule {
 
 		MuteableLogStream(MutableOutputStream muteableOriginalStream,
 				ByteArrayOutputStream failureLog, MutableOutputStream muteableFailureLog,
-				ByteArrayOutputStream log, MutableOutputStream muteableLog)
-				throws UnsupportedEncodingException {
-			super(new TeeOutputStream(
-					muteableOriginalStream,
-					new TeeOutputStream(muteableFailureLog, muteableLog)));
+				ByteArrayOutputStream log, MutableOutputStream muteableLog) {
+			super(muteableOriginalStream,
+				new TeeOutputStream(muteableFailureLog, muteableLog));
 			this.failureLog = failureLog;
 			this.log = log;
 			this.muteableOriginalStream = muteableOriginalStream;
