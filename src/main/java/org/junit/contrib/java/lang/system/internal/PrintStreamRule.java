@@ -11,7 +11,6 @@ import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
 import static java.lang.System.getProperty;
-import static org.apache.commons.io.IOUtils.write;
 
 public class PrintStreamRule implements TestRule {
 	private final PrintStreamHandler printStreamHandler;
@@ -35,7 +34,7 @@ public class PrintStreamRule implements TestRule {
 						}
 					}).evaluate();
 				} catch (Throwable e) {
-					write(muteableLogStream.getFailureLog(), printStreamHandler.getStream());
+					muteableLogStream.failureLog.writeTo(printStreamHandler.getStream());
 					throw e;
 				}
 			}
@@ -113,18 +112,6 @@ public class PrintStreamRule implements TestRule {
 		}
 
 		String getLog() {
-			return getLog(log);
-		}
-
-		void enableFailureLog() {
-			muteableFailureLog.turnOutputOn();
-		}
-
-		String getFailureLog() {
-			return getLog(failureLog);
-		}
-
-		String getLog(ByteArrayOutputStream os) {
 			/* The MuteableLogStream is created with the default encoding
 			 * because it writes to System.out or System.err if not muted and
 			 * System.out/System.err uses the default encoding. As a result all
@@ -133,10 +120,14 @@ public class PrintStreamRule implements TestRule {
 			 */
 			String encoding = getProperty("file.encoding");
 			try {
-				return os.toString(encoding);
+				return log.toString(encoding);
 			} catch (UnsupportedEncodingException e) {
 				throw new RuntimeException(e);
 			}
+		}
+
+		void enableFailureLog() {
+			muteableFailureLog.turnOutputOn();
 		}
 	}
 
