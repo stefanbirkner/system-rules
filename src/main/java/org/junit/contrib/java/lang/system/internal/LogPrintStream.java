@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 
-import org.apache.commons.io.output.TeeOutputStream;
 import org.junit.runners.model.Statement;
 
 import static java.lang.System.getProperty;
@@ -40,11 +39,11 @@ public class LogPrintStream {
 	}
 
 	public void clearLog() {
-		muteableLogStream.clearLog();
+		muteableLogStream.log.reset();
 	}
 
 	public void enableLog() {
-		muteableLogStream.enableLog();
+		muteableLogStream.logMuted = false;
 	}
 
 	public String getLog() {
@@ -68,83 +67,46 @@ public class LogPrintStream {
 	}
 
 	public void mute() {
-		muteableLogStream.mute();
+		muteableLogStream.originalStreamMuted = true;
 	}
 
 	public void muteForSuccessfulTests() {
 		mute();
-		muteableLogStream.enableFailureLog();
+		muteableLogStream.failureLogMuted = false;
 	}
 
-	private static class MuteableLogStream extends TeeOutputStream {
-		private final ByteArrayOutputStream failureLog;
-		private final ByteArrayOutputStream log;
-		private final MutableOutputStream muteableOriginalStream;
-		private final MutableOutputStream muteableFailureLog;
-		private final MutableOutputStream muteableLog;
+	private static class MuteableLogStream extends OutputStream {
+		final OutputStream originalStream;
+		final ByteArrayOutputStream failureLog = new ByteArrayOutputStream();
+		final ByteArrayOutputStream log = new ByteArrayOutputStream();
+		boolean originalStreamMuted = false;
+		boolean failureLogMuted = true;
+		boolean logMuted = true;
 
-		MuteableLogStream(OutputStream out) {
-			this(out, new ByteArrayOutputStream(), new ByteArrayOutputStream());
-		}
-
-		MuteableLogStream(OutputStream out, ByteArrayOutputStream failureLog,
-				ByteArrayOutputStream log) {
-			this(new MutableOutputStream(out),
-				failureLog, new MutableOutputStream(failureLog),
-				log, new MutableOutputStream(log));
-		}
-
-		MuteableLogStream(MutableOutputStream muteableOriginalStream,
-				ByteArrayOutputStream failureLog, MutableOutputStream muteableFailureLog,
-				ByteArrayOutputStream log, MutableOutputStream muteableLog) {
-			super(muteableOriginalStream,
-				new TeeOutputStream(muteableFailureLog, muteableLog));
-			this.failureLog = failureLog;
-			this.log = log;
-			this.muteableOriginalStream = muteableOriginalStream;
-			this.muteableFailureLog = muteableFailureLog;
-			this.muteableFailureLog.mute();
-			this.muteableLog = muteableLog;
-			this.muteableLog.mute();
-		}
-
-		void mute() {
-			muteableOriginalStream.mute();
-		}
-
-		void clearLog() {
-			log.reset();
-		}
-
-		void enableLog() {
-			muteableLog.turnOutputOn();
-		}
-
-		void enableFailureLog() {
-			muteableFailureLog.turnOutputOn();
-		}
-	}
-
-	private static class MutableOutputStream extends OutputStream {
-		private final OutputStream originalStream;
-		private boolean mute = false;
-
-		MutableOutputStream(OutputStream originalStream) {
+		MuteableLogStream(OutputStream originalStream) {
 			this.originalStream = originalStream;
-		}
-
-		void mute() {
-			mute = true;
-		}
-
-		void turnOutputOn() {
-			mute = false;
 		}
 
 		@Override
 		public void write(int b) throws IOException {
-			if (!mute)
+			if (!originalStreamMuted)
 				originalStream.write(b);
+			if (!failureLogMuted)
+				failureLog.write(b);
+			if (!logMuted)
+				log.write(b);
+		}
+
+		@Override
+		public void flush() throws IOException {
+			originalStream.flush();
+			//ByteArrayOutputStreams don't have to be closed
+		}
+
+		@Override
+		public void close() throws IOException {
+			originalStream.close();
+			//ByteArrayOutputStreams don't have to be closed
 		}
 	}
 }
