@@ -50,7 +50,18 @@ public class PrintStreamRule implements TestRule {
 	}
 
 	public String getLog() {
-		return muteableLogStream.getLog();
+		/* The MuteableLogStream is created with the default encoding
+		 * because it writes to System.out or System.err if not muted and
+		 * System.out/System.err uses the default encoding. As a result all
+		 * other streams receive input that is encoded with the default
+		 * encoding.
+		 */
+		String encoding = getProperty("file.encoding");
+		try {
+			return muteableLogStream.log.toString(encoding);
+		} catch (UnsupportedEncodingException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public String getLogWithNormalizedLineSeparator() {
@@ -109,21 +120,6 @@ public class PrintStreamRule implements TestRule {
 
 		void enableLog() {
 			muteableLog.turnOutputOn();
-		}
-
-		String getLog() {
-			/* The MuteableLogStream is created with the default encoding
-			 * because it writes to System.out or System.err if not muted and
-			 * System.out/System.err uses the default encoding. As a result all
-			 * other streams receive input that is encoded with the default
-			 * encoding.
-			 */
-			String encoding = getProperty("file.encoding");
-			try {
-				return log.toString(encoding);
-			} catch (UnsupportedEncodingException e) {
-				throw new RuntimeException(e);
-			}
 		}
 
 		void enableFailureLog() {
