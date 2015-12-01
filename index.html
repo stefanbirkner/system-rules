@@ -7,12 +7,16 @@ description: A collection of JUnit rules for testing code that uses java.lang.Sy
   <p>The scope of System Rules is divided into four sections.</p>
   <div class="row">
     <div class="col-md-3">
-      <h2>Command-Line Applications</h2>
+      <h2>Systen.out, System.err and System.in</h2>
       <p>Command-line applications read from the command-line and write to
       it. Use <a href="#SystemErrAndOutRule">SystemErrRule</a>,
       <a href="#SystemErrAndOutRule">SystemOutRule</a> and
       <a href="#TextFromStandardInputStream">TextFromStandardInputStream</a> to
       provide the input text and verify the output.</p>
+      <p>Applications sometimes unintentionally write to <code>System.out</code>
+      or <code>System.err</code>. Ensure that this does not happen by using
+      <a href="#disallow-write">DisallowWriteToSystemOut</a> and
+      and <a href="#disallow-write">DisallowWriteToSystemErr</a>.
     </div>
     <div class="col-md-3">
       <h2>System.exit</h2>
@@ -347,6 +351,36 @@ public class SummarizeTest {
 				{% highlight java %}systemInMock.throwExceptionOnInputEnd(new RuntimeException());{% endhighlight %}				
 			</section>
 
+<section id="disallow-write">
+  <h3>Disallow write to System.out and System.err</h3>
+  <p>The rules <code>DisallowWriteToSystemErr</code> and
+  <code>DisallowWriteToSystemOut</code> let tests fail if they try to write to
+  <code>System.err</code> or <code>System.out</code>. The rules are a nice
+  replacement for static code analysis because they cover external libraries,
+  too.</p>
+  
+  {% highlight java %}public class MyTest {
+  @Rule
+  public final DisallowWriteToSystemErr disallowWriteToSystemErr
+    = new DisallowWriteToSystemErr();
+  
+  @Test
+  public void this_test_fails() {
+    System.err.println("some text");
+  }
+}{% endhighlight %}
+
+  {% highlight java %}public class MyTest {
+  @Rule
+  public final DisallowWriteToSystemOut disallowWriteToSystemOut
+    = new DisallowWriteToSystemOut();
+  
+  @Test
+  public void this_test_fails() {
+    System.out.println("some text");
+  }
+}{% endhighlight %}
+</section>
 			<section id="ExpectedSystemExit">
 				<h3>System.exit()</h3>
 				<p>If your code calls <code>System.exit(),</code> then your test
