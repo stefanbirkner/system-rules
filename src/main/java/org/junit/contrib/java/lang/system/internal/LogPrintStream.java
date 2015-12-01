@@ -6,22 +6,20 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 
 import org.apache.commons.io.output.TeeOutputStream;
-import org.junit.rules.TestRule;
-import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
 import static java.lang.System.getProperty;
 
-public class PrintStreamRule implements TestRule {
+public class LogPrintStream {
 	private final PrintStreamHandler printStreamHandler;
 	private final MuteableLogStream muteableLogStream;
 
-	public PrintStreamRule(PrintStreamHandler printStreamHandler) {
+	public LogPrintStream(PrintStreamHandler printStreamHandler) {
 		this.printStreamHandler = printStreamHandler;
 		this.muteableLogStream = new MuteableLogStream(printStreamHandler.getStream());
 	}
 
-	public Statement apply(final Statement base, final Description description) {
+	public Statement createStatement(final Statement base) {
 		return new Statement() {
 			@Override
 			public void evaluate() throws Throwable {

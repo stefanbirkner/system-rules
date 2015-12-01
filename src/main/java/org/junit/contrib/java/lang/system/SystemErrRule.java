@@ -2,7 +2,7 @@ package org.junit.contrib.java.lang.system;
 
 import static org.junit.contrib.java.lang.system.internal.PrintStreamHandler.SYSTEM_ERR;
 
-import org.junit.contrib.java.lang.system.internal.PrintStreamRule;
+import org.junit.contrib.java.lang.system.internal.LogPrintStream;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
@@ -169,7 +169,7 @@ import org.junit.runners.model.Statement;
  * </pre>
  */
 public class SystemErrRule implements TestRule {
-	private PrintStreamRule printStreamRule = new PrintStreamRule(SYSTEM_ERR);
+	private LogPrintStream logPrintStream = new LogPrintStream(SYSTEM_ERR);
 
 	/**
 	 * Suppress the output to {@code System.err}.
@@ -177,7 +177,7 @@ public class SystemErrRule implements TestRule {
 	 * @return the rule itself.
 	 */
 	public SystemErrRule mute() {
-		printStreamRule.mute();
+		logPrintStream.mute();
 		return this;
 	}
 
@@ -188,7 +188,7 @@ public class SystemErrRule implements TestRule {
 	 * @return the rule itself.
 	 */
 	public SystemErrRule muteForSuccessfulTests() {
-		printStreamRule.muteForSuccessfulTests();
+		logPrintStream.muteForSuccessfulTests();
 		return this;
 	}
 
@@ -196,7 +196,7 @@ public class SystemErrRule implements TestRule {
 	 * Clears the current log.
 	 */
 	public void clearLog() {
-		printStreamRule.clearLog();
+		logPrintStream.clearLog();
 	}
 
 	/**
@@ -207,7 +207,7 @@ public class SystemErrRule implements TestRule {
 	 * {@link #enableLog} (respectively {@link #clearLog()} has been called.
 	 */
 	public String getLog() {
-		return printStreamRule.getLog();
+		return logPrintStream.getLog();
 	}
 
 	/**
@@ -218,7 +218,7 @@ public class SystemErrRule implements TestRule {
 	 * @return the normalized log.
 	 */
 	public String getLogWithNormalizedLineSeparator() {
-		return printStreamRule.getLogWithNormalizedLineSeparator();
+		return logPrintStream.getLogWithNormalizedLineSeparator();
 	}
 
 	/**
@@ -227,11 +227,11 @@ public class SystemErrRule implements TestRule {
 	 * @return the rule itself.
 	 */
 	public SystemErrRule enableLog() {
-		printStreamRule.enableLog();
+		logPrintStream.enableLog();
 		return this;
 	}
 
 	public Statement apply(Statement base, Description description) {
-		return printStreamRule.apply(base, description);
+		return logPrintStream.createStatement(base);
 	}
 }
