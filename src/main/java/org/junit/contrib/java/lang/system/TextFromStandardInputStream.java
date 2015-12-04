@@ -3,13 +3,11 @@ package org.junit.contrib.java.lang.system;
 import static java.lang.System.getProperty;
 import static java.lang.System.in;
 import static java.lang.System.setIn;
-import static java.util.Arrays.asList;
+import static java.nio.charset.Charset.defaultCharset;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
-import java.util.Iterator;
-import java.util.List;
 
 import org.junit.rules.ExternalResource;
 
@@ -26,39 +24,11 @@ import org.junit.rules.ExternalResource;
  *
  *     &#064;Test
  *     public void readTextFromStandardInputStream() {
- *       systemInMock.provideText("foo");
+ *       systemInMock.provideLines("foo", "bar");
  *       Scanner scanner = new Scanner(System.in);
- *       assertEquals("foo", scanner.nextLine());
+ *       scanner.nextLine();
+ *       assertEquals("bar", scanner.nextLine());
  *     }
- *   }
- * </pre>
- *
- * <h3>Multiple Texts</h3>
- * You can simulate a user that stops typing and continues afterwards
- * by providing multiple texts.
- * <pre>
- *   &#064;Test
- *   public void readTextFromStandardInputStream() {
- *     systemInMock.provideText("foo\n", "bar\n");
- *     Scanner firstScanner = new Scanner(System.in);
- *     scanner.nextLine();
- *     Scanner secondScanner = new Scanner(System.in);
- *     assertEquals("bar", scanner.nextLine());
- *   }
- * </pre>
- *
- * <p>If every text is a single line then you can use the method
- * {@link #provideLines(String...)} that appends the end of line
- * characters according to {@code System.getProperty("line.separator")}
- * to each text.
- * <pre>
- *   &#064;Test
- *   public void readTextFromStandardInputStream() {
- *     systemInMock.provideLines("foo", "bar");
- *     Scanner firstScanner = new Scanner(System.in);
- *     scanner.nextLine();
- *     Scanner secondScanner = new Scanner(System.in);
- *     assertEquals("bar", scanner.nextLine());
  *   }
  * </pre>
  *
@@ -68,9 +38,8 @@ import org.junit.rules.ExternalResource;
  * <pre>   systemInMock.{@link #throwExceptionOnInputEnd(IOException)}</pre>
  * <p>or
  * <pre>   systemInMock.{@link #throwExceptionOnInputEnd(RuntimeException)}</pre>
- * <p>If you call {@link #provideLines(String...)} or
- * {@link #provideText(String...)} in addition then the exception is thrown
- * after the text has been read from {@code System.in}.
+ * <p>If you call {@link #provideLines(String...)} in addition then the
+ * exception is thrown after the text has been read from {@code System.in}.
  */
 public class TextFromStandardInputStream extends ExternalResource {
 	private final SystemInMock systemInMock = new SystemInMock();
@@ -85,7 +54,7 @@ public class TextFromStandardInputStream extends ExternalResource {
 	 * specified text.
 	 *
 	 * @param text this text is return by {@code System.in}.
-	 * @deprecated use {@link #provideText(String...)}
+	 * @deprecated use {@link #provideLines(String...)}
 	 */
 	@Deprecated
 	public TextFromStandardInputStream(String text) {
@@ -94,28 +63,25 @@ public class TextFromStandardInputStream extends ExternalResource {
 
 	/**
 	 * Set the text that is returned by {@code System.in}. You can
-	 * provide multiple texts. In that case {@code System.in.read()}
-	 * returns -1 once when the end of a single text is reached and
-	 * continues with the next text afterwards.
+	 * provide multiple texts. In that case the texts are concatenated.
 	 *
 	 * @param texts a list of texts.
+	 * @deprecated please use {@link #provideLines(String...)}
 	 */
+	@Deprecated
 	public void provideText(String... texts) {
-		systemInMock.provideText(asList(texts));
+		systemInMock.provideText(join(texts));
 	}
 
 	/**
 	 * Set the lines that are returned by {@code System.in}.
 	 * {@code System.getProperty("line.separator")} is used for the end
-	 * of line. {@code System.in.read()} returns -1 once when the end
-	 * of a single line is reached and continues with the next line
-	 * afterwards.
+	 * of line.
 	 *
 	 * @param lines a list of lines.
 	 */
 	public void provideLines(String... lines) {
-		String[] texts = appendEndOfLineToLines(lines);
-		provideText(texts);
+		systemInMock.provideText(joinLines(lines));
 	}
 
 	/**
@@ -148,11 +114,18 @@ public class TextFromStandardInputStream extends ExternalResource {
 		systemInMock.throwExceptionOnInputEnd(exception);
 	}
 
-	private String[] appendEndOfLineToLines(String[] lines) {
-		String[] texts = new String[lines.length];
-		for (int index = 0; index < lines.length; ++index)
-			texts[index] = lines[index] + getProperty("line.separator");
-		return texts;
+	private String join(String[] texts) {
+		StringBuilder sb = new StringBuilder();
+		for (String text: texts)
+			sb.append(text);
+		return sb.toString();
+	}
+
+	private String joinLines(String[] lines) {
+		StringBuilder sb = new StringBuilder();
+		for (String line: lines)
+			sb.append(line).append(getProperty("line.separator"));
+		return sb.toString();
 	}
 
 	@Override
@@ -167,14 +140,12 @@ public class TextFromStandardInputStream extends ExternalResource {
 	}
 
 	private static class SystemInMock extends InputStream {
-		private Iterator<String> texts;
 		private StringReader currentReader;
 		private IOException ioException;
 		private RuntimeException runtimeException;
 
-		void provideText(List<String> texts) {
-			this.texts = texts.iterator();
-			updateReader();
+		void provideText(String text) {
+			currentReader = new StringReader(text);
 		}
 
 		void throwExceptionOnInputEnd(IOException exception) {
@@ -204,17 +175,57 @@ public class TextFromStandardInputStream extends ExternalResource {
 		}
 
 		private void handleEmptyReader() throws IOException {
-			if (texts.hasNext())
-				updateReader();
-			else if (ioException != null)
+			if (ioException != null)
 				throw ioException;
 			else if (runtimeException != null)
 				throw runtimeException;
 		}
 
-		private void updateReader() {
-			if (texts.hasNext())
-				currentReader = new StringReader(texts.next());
+		@Override
+		public int read(byte[] buffer, int offset, int len) throws IOException {
+			if (buffer == null)
+				throw new NullPointerException();
+			else if (offset < 0 || len < 0 || len > buffer.length - offset)
+				throw new IndexOutOfBoundsException();
+			else if (len == 0)
+				return 0;
+			else
+				return readNextLine(buffer, offset, len);
+		}
+
+		private int readNextLine(byte[] buffer, int offset, int len)
+				throws IOException {
+			int c = read();
+			if (c == -1)
+				return -1;
+			buffer[offset] = (byte) c;
+
+			int i = 1;
+			for (; (i < len) && !isCompleteLineWritten(buffer, i - 1); ++i) {
+				byte read = (byte) read();
+				if (read == -1)
+					break;
+				else
+					buffer[offset + i] = read;
+			}
+			return i;
+		}
+
+		private boolean isCompleteLineWritten(byte[] buffer,
+				int indexLastByteWritten) {
+			byte[] separator = getProperty("line.separator")
+				.getBytes(defaultCharset());
+			int indexFirstByteOfSeparator = indexLastByteWritten
+				- separator.length + 1;
+			return indexFirstByteOfSeparator >= 0
+				&& contains(buffer, separator, indexFirstByteOfSeparator);
+		}
+
+		private boolean contains(byte[] array, byte[] pattern, int indexStart) {
+			for (int i = 0; i < pattern.length; ++i)
+                if (array[indexStart + i] != pattern[i])
+                    return false;
+			return true;
 		}
 	}
 }

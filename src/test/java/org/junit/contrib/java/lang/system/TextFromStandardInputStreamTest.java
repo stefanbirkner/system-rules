@@ -1,6 +1,7 @@
 package org.junit.contrib.java.lang.system;
 
 import static com.github.stefanbirkner.fishbowl.Fishbowl.exceptionThrownBy;
+import static java.lang.System.getProperty;
 import static java.lang.System.in;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.contrib.java.lang.system.Executor.exceptionThrownWhenTestIsExecutedWithRule;
@@ -12,12 +13,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Scanner;
 
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.Timeout;
 import org.junit.runners.model.Statement;
 
 public class TextFromStandardInputStreamTest {
+	private static final byte[] DUMMY_ARRAY = new byte[1024];
+	private static final int VALID_OFFSET = 2;
+	private static final int VALID_READ_LENGTH = 100;
 	private static final IOException DUMMY_IO_EXCEPTION = new IOException();
 	private static final RuntimeException DUMMY_RUNTIME_EXCEPTION = new RuntimeException();
 	private static final com.github.stefanbirkner.fishbowl.Statement READ_NEXT_BYTE
@@ -31,6 +36,13 @@ public class TextFromStandardInputStreamTest {
 	public final Timeout timeout = new Timeout(1000);
 
 	private final TextFromStandardInputStream systemInMock = emptyStandardInputStream();
+
+	@BeforeClass
+	public static void checkArrayConstants() {
+		assertThat(VALID_OFFSET).isBetween(0, DUMMY_ARRAY.length);
+		assertThat(VALID_READ_LENGTH)
+			.isBetween(0, DUMMY_ARRAY.length - VALID_OFFSET);
+	}
 
 	@Test
 	public void provided_text_is_available_from_system_in() {
@@ -50,7 +62,9 @@ public class TextFromStandardInputStreamTest {
 		executeTestWithRule(new Statement() {
 			@Override
 			public void evaluate() {
-				systemInMock.provideText("first text\n", "second text\n");
+				String lineSeparator = getProperty("line.separator");
+				systemInMock.provideText("first text" + lineSeparator,
+					"second text" + lineSeparator);
 				Scanner firstScanner = new Scanner(in);
 				firstScanner.nextLine();
 				Scanner secondScanner = new Scanner(in);
@@ -191,6 +205,107 @@ public class TextFromStandardInputStreamTest {
 		InputStream originalSystemIn = in;
 		executeTestWithRule(SUCCESSFUL_TEST, systemInMock);
 		assertThat(in).isSameAs(originalSystemIn);
+	}
+
+	@Test
+	public void system_in_throws_NullPointerException_when_read_is_called_with_null_array() {
+		//this is default behaviour of an InputStream according to its JavaDoc
+		Throwable exception = exceptionThrownWhenTestIsExecutedWithRule(
+			new Statement() {
+				@Override
+				public void evaluate() throws Throwable {
+					System.in.read(null);
+				}
+			}, systemInMock);
+		assertThat(exception).isInstanceOf(NullPointerException.class);
+	}
+
+	@Test
+	public void system_in_throws_IndexOutOfBoundsException_when_read_is_called_with_negative_offset() {
+		//this is default behaviour of an InputStream according to its JavaDoc
+		Throwable exception = exceptionThrownWhenTestIsExecutedWithRule(
+			new Statement() {
+				@Override
+				public void evaluate() throws Throwable {
+					System.in.read(DUMMY_ARRAY, -1, VALID_READ_LENGTH);
+				}
+			}, systemInMock);
+		assertThat(exception).isInstanceOf(IndexOutOfBoundsException.class);
+	}
+
+	@Test
+	public void system_in_throws_IndexOutOfBoundsException_when_read_is_called_with_negative_length() {
+		//this is default behaviour of an InputStream according to its JavaDoc
+		Throwable exception = exceptionThrownWhenTestIsExecutedWithRule(
+			new Statement() {
+				@Override
+				public void evaluate() throws Throwable {
+					System.in.read(DUMMY_ARRAY, VALID_OFFSET, -1);
+				}
+			}, systemInMock);
+		assertThat(exception).isInstanceOf(IndexOutOfBoundsException.class);
+	}
+
+	@Test
+	public void system_in_throws_IndexOutOfBoundsException_when_read_is_called_with_oversized_length() {
+		//this is default behaviour of an InputStream according to its JavaDoc
+		Throwable exception = exceptionThrownWhenTestIsExecutedWithRule(
+			new Statement() {
+				@Override
+				public void evaluate() throws Throwable {
+					int oversizedLength = DUMMY_ARRAY.length - VALID_OFFSET + 1;
+					System.in.read(DUMMY_ARRAY, VALID_OFFSET, oversizedLength);
+				}
+			}, systemInMock);
+		assertThat(exception).isInstanceOf(IndexOutOfBoundsException.class);
+	}
+
+	@Test
+	public void system_in_reads_zero_bytes_even_if_mock_should_throw_IOException_on_input_end() {
+		executeTestWithRule(new Statement() {
+			@Override
+			public void evaluate() throws Throwable {
+				systemInMock.throwExceptionOnInputEnd(DUMMY_IO_EXCEPTION);
+				int numBytesRead = System.in.read(DUMMY_ARRAY, VALID_OFFSET, 0);
+				assertThat(numBytesRead).isZero();
+			}
+		}, systemInMock);
+	}
+
+	@Test
+	public void system_in_reads_zero_bytes_even_if_mock_should_throw_RuntimeException_on_input_end() {
+		executeTestWithRule(new Statement() {
+			@Override
+			public void evaluate() throws Throwable {
+				systemInMock.throwExceptionOnInputEnd(DUMMY_RUNTIME_EXCEPTION);
+				int numBytesRead = System.in.read(DUMMY_ARRAY, VALID_OFFSET, 0);
+				assertThat(numBytesRead).isZero();
+			}
+		}, systemInMock);
+	}
+
+	@Test
+	public void system_in_read_bytes_throws_specified_IOException_on_input_end() {
+		Throwable exception = exceptionThrownWhenTestIsExecutedWithRule(new Statement() {
+			@Override
+			public void evaluate() throws Throwable {
+				systemInMock.throwExceptionOnInputEnd(DUMMY_IO_EXCEPTION);
+				System.in.read(DUMMY_ARRAY, VALID_OFFSET, VALID_READ_LENGTH);
+			}
+		}, systemInMock);
+		assertThat(exception).isSameAs(DUMMY_IO_EXCEPTION);
+	}
+
+	@Test
+	public void system_in_read_bytes_throws_specified_RuntimeException_on_input_end() {
+		Throwable exception = exceptionThrownWhenTestIsExecutedWithRule(new Statement() {
+			@Override
+			public void evaluate() throws Throwable {
+				systemInMock.throwExceptionOnInputEnd(DUMMY_RUNTIME_EXCEPTION);
+				System.in.read(DUMMY_ARRAY, VALID_OFFSET, VALID_READ_LENGTH);
+			}
+		}, systemInMock);
+		assertThat(exception).isSameAs(DUMMY_RUNTIME_EXCEPTION);
 	}
 
 	private void assertSystemInProvidesText(String text) throws IOException {
