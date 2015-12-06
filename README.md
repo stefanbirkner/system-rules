@@ -1,6 +1,6 @@
 # System Rules
 
-[![Build Status](https://travis-ci.org/stefanbirkner/system-rules.svg?branch=master)](https://travis-ci.org/stefanbirkner/system-rules)
+[![Build Status Linux](https://travis-ci.org/stefanbirkner/system-rules.svg?branch=master)](https://travis-ci.org/stefanbirkner/system-rules) [![Build Status Windows](https://ci.appveyor.com/api/projects/status/vr0c93rssc6mhetl/branch/master?svg=true)](https://ci.appveyor.com/project/stefanbirkner/system-rules)
 
 System Rules is a collection of JUnit rules for testing code which uses
 `java.lang.System`.
@@ -50,9 +50,10 @@ want to contribute code than
 The basic coding style is described in the
 [EditorConfig](http://editorconfig.org/) file `.editorconfig`.
 
-System Rules supports [Travis CI](https://travis-ci.org/) for continuous
-integration. Your pull request will be automatically build by Travis
-CI.
+System Rules supports [Travis CI](https://travis-ci.org/) (Linux) and
+[AppVeyor](http://www.appveyor.com/) (Windows) for continuous
+integration. Your pull request will be automatically build by both CI
+servers.
 
 
 ## Release Guide

@@ -7,6 +7,7 @@ import org.junit.runners.model.Statement;
 import java.io.PrintStream;
 import java.util.Locale;
 
+import static java.lang.System.getProperty;
 import static java.lang.System.out;
 import static java.lang.System.setOut;
 import static java.util.Locale.CANADA;
@@ -268,7 +269,9 @@ public class DisallowWriteToSystemOutTest {
 		}, disallowWrite);
 		assertThat(error)
 			.isInstanceOf(AssertionError.class)
-			.hasMessage("Tried to write '\n' although this is not allowed.");
+			.hasMessage("Tried to write '"
+				+ getProperty("line.separator").substring(0, 1)
+				+ "' although this is not allowed.");
 	}
 
 	@Test
