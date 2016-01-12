@@ -27,6 +27,12 @@ class Executor {
 			AssertionError.class);
 	}
 
+	static void executeTestThatThrowsExceptionWithRule(Statement test, TestRule rule) {
+		ignoreException(
+			executeTestWithRuleRaw(test, rule),
+			Throwable.class);
+	}
+
 	private static com.github.stefanbirkner.fishbowl.Statement executeTestWithRuleRaw(
 			final Statement test, final TestRule rule) {
 		return new com.github.stefanbirkner.fishbowl.Statement() {
