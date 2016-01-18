@@ -5,6 +5,7 @@ import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
 import java.lang.reflect.Field;
+import java.util.HashMap;
 import java.util.Map;
 
 import static java.lang.System.getenv;
@@ -52,7 +53,7 @@ public class EnvironmentVariables implements TestRule {
 
 		@Override
 		public void evaluate() throws Throwable {
-			originalVariables = getenv();
+			originalVariables = new HashMap<String, String>(getenv());
 			try {
 				baseStatement.evaluate();
 			} finally {
