@@ -91,7 +91,7 @@ public class EnvironmentVariables implements TestRule {
 	private static Map<String, String> getEditableMapOfCaseInsensitiveVariables() {
 		try {
 			Class<?> processEnvironment = forName("java.lang.ProcessEnvironment");
-			Field field = processEnvironment.getField("theCaseInsensitiveEnvironment");
+			Field field = processEnvironment.getDeclaredField("theCaseInsensitiveEnvironment");
 			field.setAccessible(true);
 			return (Map<String, String>) field.get(null);
 		} catch (NoSuchFieldException e) {
