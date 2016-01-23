@@ -8,6 +8,7 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
+import static java.lang.Class.forName;
 import static java.lang.System.getenv;
 
 /**
@@ -32,11 +33,17 @@ import static java.lang.System.getenv;
  */
 public class EnvironmentVariables implements TestRule {
 	public void set(String name, String value) {
-		Map<String, String> variables = getEditableMapOfVariables();
-		if (value == null)
-			variables.remove(name);
-		else
-			variables.put(name, value);
+		updateVariable(getEditableMapOfVariables(), name, value);
+		updateVariable(getEditableMapOfCaseInsensitiveVariables(), name, value);
+	}
+
+	private void updateVariable(Map<String, String> variables, String name,
+			String value) {
+		if (variables != null)
+			if (value == null)
+				variables.remove(name);
+			else
+				variables.put(name, value);
 	}
 
 	public Statement apply(final Statement base, Description description) {
@@ -77,6 +84,22 @@ public class EnvironmentVariables implements TestRule {
 		} catch (NoSuchFieldException e) {
 			throw new RuntimeException(e);
 		} catch (IllegalAccessException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	private static Map<String, String> getEditableMapOfCaseInsensitiveVariables() {
+		try {
+			Class<?> processEnvironment = forName("java.lang.ProcessEnvironment");
+			Field field = processEnvironment.getField("theCaseInsensitiveEnvironment");
+			field.setAccessible(true);
+			return (Map<String, String>) field.get(null);
+		} catch (NoSuchFieldException e) {
+			//this field os only available for Windows
+			return null;
+		} catch (IllegalAccessException e) {
+			throw new RuntimeException(e);
+		} catch (ClassNotFoundException e) {
 			throw new RuntimeException(e);
 		}
 	}
