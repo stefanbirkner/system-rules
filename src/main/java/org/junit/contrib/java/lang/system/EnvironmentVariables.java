@@ -39,7 +39,7 @@ public class EnvironmentVariables implements TestRule {
 
 	private void updateVariable(Map<String, String> variables, String name,
 			String value) {
-		if (variables != null)
+		if (variables != null) //theCaseInsensitiveEnvironment may be null
 			if (value == null)
 				variables.remove(name);
 			else
@@ -109,7 +109,7 @@ public class EnvironmentVariables implements TestRule {
 			return getMapOfVariables(
 				processEnvironment, null, "theCaseInsensitiveEnvironment");
 		} catch (NoSuchFieldException e) {
-			//this field os only available for Windows
+			//this field is only available for Windows
 			return null;
 		} catch (ClassNotFoundException e) {
 			throw new RuntimeException(e);
