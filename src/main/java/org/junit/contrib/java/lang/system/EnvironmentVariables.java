@@ -13,10 +13,10 @@ import static java.lang.System.getenv;
 
 /**
  * The {@code EnvironmentVariables} rule allows you to set environment variables
- * from within your test. Any changes to environment variables are reverted
- * after the test.
+ * within your test. Any changes to environment variables are reverted after
+ * the test.
  * <pre>
- * public class SystemOutTest {
+ * public class EnvironmentVariablesTest {
  *   &#064;Rule
  *   public final EnvironmentVariables environmentVariables = new EnvironmentVariables();
  *
@@ -28,10 +28,17 @@ import static java.lang.System.getenv;
  * }
  * </pre>
  * <p><b>Warning:</b> This rule uses reflection for modifying some internals of
- * the class {@code System}. It does not work if your {@code SecurityManager}
- * disallows this.
+ * the environment variables map. It does not work if your
+ * {@code SecurityManager} disallows this.
  */
 public class EnvironmentVariables implements TestRule {
+	/**
+	 * Set the value of an environment variable. You can delete an environment
+	 * variable by setting it to {@code null}.
+	 *
+	 * @param name the environment variable's name.
+	 * @param value the environment variable's new value.
+     */
 	public void set(String name, String value) {
 		updateVariable(getEditableMapOfVariables(), name, value);
 		updateVariable(getEditableMapOfCaseInsensitiveVariables(), name, value);
