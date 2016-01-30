@@ -60,7 +60,6 @@ public class EnvironmentVariables implements TestRule {
 	private static class EnvironmentVariablesStatement extends Statement {
 		final Statement baseStatement;
 		Map<String, String> originalVariables;
-		Map<String, String> originalCaseInsensitiveEnvironment;
 
 		EnvironmentVariablesStatement(Statement baseStatement) {
 			this.baseStatement = baseStatement;
@@ -78,26 +77,19 @@ public class EnvironmentVariables implements TestRule {
 
 		void saveCurrentState() {
 			originalVariables = new HashMap<String, String>(getenv());
-			Map<String, String> theCaseInsensitiveEnvironment
-				= getEditableMapOfCaseInsensitiveVariables();
-			if (theCaseInsensitiveEnvironment != null)
-				originalCaseInsensitiveEnvironment
-					= new HashMap<String, String>(theCaseInsensitiveEnvironment);
 		}
 
 		void restoreOriginalVariables() {
-			restoreVariables(getEditableMapOfVariables(), originalVariables);
+			restoreVariables(getEditableMapOfVariables());
 			Map<String, String> theCaseInsensitiveEnvironment
 				= getEditableMapOfCaseInsensitiveVariables();
 			if (theCaseInsensitiveEnvironment != null)
-				restoreVariables(theCaseInsensitiveEnvironment,
-					originalCaseInsensitiveEnvironment);
+				restoreVariables(theCaseInsensitiveEnvironment);
 		}
 
-		void restoreVariables(Map<String, String> current,
-				Map<String, String> original) {
+		void restoreVariables(Map<String, String> current) {
 			current.clear();
-			current.putAll(original);
+			current.putAll(originalVariables);
 		}
 	}
 
