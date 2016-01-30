@@ -97,10 +97,12 @@ public class EnvironmentVariables implements TestRule {
 		Class<?> classOfMap = getenv().getClass();
 		try {
 			return getMapOfVariables(classOfMap, getenv(), "m");
+		} catch (IllegalAccessException e) {
+			throw new RuntimeException("System Rules cannot access the field"
+				+ " 'm' of the map System.getenv().", e);
 		} catch (NoSuchFieldException e) {
-			throw new RuntimeException(
-				"System Rules expects System.getenv() to have a field 'm' but is hasn't.",
-				e);
+			throw new RuntimeException("System Rules expects System.getenv() to"
+				+ " have a field 'm' but is hasn't.", e);
 		}
 	}
 
@@ -109,22 +111,25 @@ public class EnvironmentVariables implements TestRule {
 			Class<?> processEnvironment = forName("java.lang.ProcessEnvironment");
 			return getMapOfVariables(
 				processEnvironment, null, "theCaseInsensitiveEnvironment");
+		} catch (ClassNotFoundException e) {
+			throw new RuntimeException("System Rules expects the existence of"
+				+ " the class  java.lang.ProcessEnvironment but it does not"
+				+ " exist.", e);
+		} catch (IllegalAccessException e) {
+			throw new RuntimeException("System Rules cannot access the static"
+				+ " field 'theCaseInsensitiveEnvironment' of the class"
+				+ " java.lang.ProcessEnvironment.", e);
 		} catch (NoSuchFieldException e) {
 			//this field is only available for Windows
 			return null;
-		} catch (ClassNotFoundException e) {
-			throw new RuntimeException(e);
 		}
 	}
 
 	private static Map<String, String> getMapOfVariables(Class<?> klass,
-			Object object, String name) throws NoSuchFieldException {
+			Object object, String name)
+			throws NoSuchFieldException, IllegalAccessException {
 		Field field = klass.getDeclaredField(name);
 		field.setAccessible(true);
-		try {
-			return (Map<String, String>) field.get(object);
-		} catch (IllegalAccessException e) {
-			throw new RuntimeException(e);
-		}
+		return (Map<String, String>) field.get(object);
 	}
 }
