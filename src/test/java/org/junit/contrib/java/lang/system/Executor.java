@@ -27,7 +27,8 @@ class Executor {
 			AssertionError.class);
 	}
 
-	static void executeTestThatThrowsExceptionWithRule(Statement test, TestRule rule) {
+	static void executeTestThatThrowsExceptionWithRule(Statement test,
+			TestRule rule) {
 		ignoreException(
 			executeTestWithRuleRaw(test, rule),
 			Throwable.class);
