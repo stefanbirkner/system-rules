@@ -106,7 +106,9 @@ public class EnvironmentVariables implements TestRule {
 		try {
 			return getMapOfVariables(classOfMap, getenv(), "m");
 		} catch (NoSuchFieldException e) {
-			throw new RuntimeException(e);
+			throw new RuntimeException(
+				"System Rules expects System.getenv() to have a field 'm' but is hasn't.",
+				e);
 		}
 	}
 
