@@ -113,7 +113,7 @@ public class EnvironmentVariables implements TestRule {
 				processEnvironment, null, "theCaseInsensitiveEnvironment");
 		} catch (ClassNotFoundException e) {
 			throw new RuntimeException("System Rules expects the existence of"
-				+ " the class  java.lang.ProcessEnvironment but it does not"
+				+ " the class java.lang.ProcessEnvironment but it does not"
 				+ " exist.", e);
 		} catch (IllegalAccessException e) {
 			throw new RuntimeException("System Rules cannot access the static"
