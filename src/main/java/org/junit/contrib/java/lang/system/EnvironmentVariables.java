@@ -40,12 +40,11 @@ public class EnvironmentVariables implements TestRule {
 	 * @param value the environment variable's new value.
      */
 	public void set(String name, String value) {
-		updateVariable(getEditableMapOfVariables(), name, value);
-		updateVariable(getEditableMapOfCaseInsensitiveVariables(), name, value);
+		set(getEditableMapOfVariables(), name, value);
+		set(getEditableMapOfCaseInsensitiveVariables(), name, value);
 	}
 
-	private void updateVariable(Map<String, String> variables, String name,
-			String value) {
+	private void set(Map<String, String> variables, String name, String value) {
 		if (variables != null) //theCaseInsensitiveEnvironment may be null
 			if (value == null)
 				variables.remove(name);
@@ -53,7 +52,7 @@ public class EnvironmentVariables implements TestRule {
 				variables.put(name, value);
 	}
 
-	public Statement apply(final Statement base, Description description) {
+	public Statement apply(Statement base, Description description) {
 		return new EnvironmentVariablesStatement(base);
 	}
 
@@ -102,7 +101,7 @@ public class EnvironmentVariables implements TestRule {
 				+ " 'm' of the map System.getenv().", e);
 		} catch (NoSuchFieldException e) {
 			throw new RuntimeException("System Rules expects System.getenv() to"
-				+ " have a field 'm' but is hasn't.", e);
+				+ " have a field 'm' but it has not.", e);
 		}
 	}
 
