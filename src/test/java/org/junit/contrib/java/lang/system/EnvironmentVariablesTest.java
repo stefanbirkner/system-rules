@@ -15,7 +15,7 @@ import static org.junit.contrib.java.lang.system.Executor.executeTestWithRule;
 public class EnvironmentVariablesTest {
 	@Test
 	public void after_a_successful_test_environment_variables_map_contains_same_values_as_before() {
-		Map<String, String> originalEnviromentVariables = new HashMap<String, String>(getenv());
+		Map<String, String> originalEnvironmentVariables = new HashMap<String, String>(getenv());
 		final EnvironmentVariables environmentVariables = new EnvironmentVariables();
 		executeTestWithRule(new Statement() {
 			@Override
@@ -23,7 +23,7 @@ public class EnvironmentVariablesTest {
 				environmentVariables.set("dummy name", "dummy value");
 			}
 		}, environmentVariables);
-		assertThat(getenv()).isEqualTo(originalEnviromentVariables);
+		assertThat(getenv()).isEqualTo(originalEnvironmentVariables);
 	}
 
 	@Test
@@ -41,7 +41,7 @@ public class EnvironmentVariablesTest {
 
 	@Test
 	public void after_a_test_that_throws_an_exception_environment_variables_map_contains_same_values_as_before() {
-		Map<String, String> originalEnviromentVariables = new HashMap<String, String>(getenv());
+		Map<String, String> originalEnvironmentVariables = new HashMap<String, String>(getenv());
 		final EnvironmentVariables environmentVariables = new EnvironmentVariables();
 		executeTestThatThrowsExceptionWithRule(new Statement() {
 			@Override
@@ -50,7 +50,7 @@ public class EnvironmentVariablesTest {
 				throw new RuntimeException("dummy exception");
 			}
 		}, environmentVariables);
-		assertThat(getenv()).isEqualTo(originalEnviromentVariables);
+		assertThat(getenv()).isEqualTo(originalEnvironmentVariables);
 	}
 
 	@Test

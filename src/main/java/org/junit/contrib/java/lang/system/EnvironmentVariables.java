@@ -27,9 +27,9 @@ import static java.lang.System.getenv;
  *   }
  * }
  * </pre>
- * <p><b>Warning:</b> This rule uses reflection for modifying some internals of
- * the environment variables map. It does not work if your
- * {@code SecurityManager} disallows this.
+ * <p><b>Warning:</b> This rule uses reflection for modifying internals of the
+ * environment variables map. It does not work if your {@code SecurityManager}
+ * disallows this.
  */
 public class EnvironmentVariables implements TestRule {
 	/**
@@ -86,16 +86,16 @@ public class EnvironmentVariables implements TestRule {
 				restoreVariables(theCaseInsensitiveEnvironment);
 		}
 
-		void restoreVariables(Map<String, String> current) {
-			current.clear();
-			current.putAll(originalVariables);
+		void restoreVariables(Map<String, String> variables) {
+			variables.clear();
+			variables.putAll(originalVariables);
 		}
 	}
 
 	private static Map<String, String> getEditableMapOfVariables() {
 		Class<?> classOfMap = getenv().getClass();
 		try {
-			return getMapOfVariables(classOfMap, getenv(), "m");
+			return getFieldValue(classOfMap, getenv(), "m");
 		} catch (IllegalAccessException e) {
 			throw new RuntimeException("System Rules cannot access the field"
 				+ " 'm' of the map System.getenv().", e);
@@ -108,7 +108,7 @@ public class EnvironmentVariables implements TestRule {
 	private static Map<String, String> getEditableMapOfCaseInsensitiveVariables() {
 		try {
 			Class<?> processEnvironment = forName("java.lang.ProcessEnvironment");
-			return getMapOfVariables(
+			return getFieldValue(
 				processEnvironment, null, "theCaseInsensitiveEnvironment");
 		} catch (ClassNotFoundException e) {
 			throw new RuntimeException("System Rules expects the existence of"
@@ -124,7 +124,7 @@ public class EnvironmentVariables implements TestRule {
 		}
 	}
 
-	private static Map<String, String> getMapOfVariables(Class<?> klass,
+	private static Map<String, String> getFieldValue(Class<?> klass,
 			Object object, String name)
 			throws NoSuchFieldException, IllegalAccessException {
 		Field field = klass.getDeclaredField(name);
