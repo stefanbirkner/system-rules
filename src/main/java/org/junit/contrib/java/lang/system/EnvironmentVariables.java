@@ -13,7 +13,7 @@ import static java.lang.System.getenv;
 
 /**
  * The {@code EnvironmentVariables} rule allows you to set environment variables
- * within your test. Any changes to environment variables are reverted after
+ * within your test. All changes to environment variables are reverted after
  * the test.
  * <pre>
  * public class EnvironmentVariablesTest {
@@ -28,8 +28,8 @@ import static java.lang.System.getenv;
  * }
  * </pre>
  * <p><b>Warning:</b> This rule uses reflection for modifying internals of the
- * environment variables map. It does not work if your {@code SecurityManager}
- * disallows this.
+ * environment variables map. It fails if your {@code SecurityManager} forbids
+ * such modifications.
  */
 public class EnvironmentVariables implements TestRule {
 	/**
