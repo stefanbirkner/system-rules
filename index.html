@@ -4,43 +4,41 @@ title: System Rules
 description: A collection of JUnit rules for testing code that uses java.lang.System.
 ---
 <section id="overview">
-  <p>The scope of System Rules is divided into four sections.</p>
-  <div class="row">
-    <div class="col-md-3">
-      <h2>System.out, System.err and System.in</h2>
-      <p>Command-line applications read from the command-line and write to
-      it. Use <a href="#SystemErrAndOutRule">SystemErrRule</a>,
-      <a href="#SystemErrAndOutRule">SystemOutRule</a> and
-      <a href="#TextFromStandardInputStream">TextFromStandardInputStream</a> to
-      provide the input text and verify the output.</p>
-      <p>Applications sometimes unintentionally write to <code>System.out</code>
-      or <code>System.err</code>. Ensure that this does not happen by using
-      <a href="#disallow-write">DisallowWriteToSystemOut</a> and
-      and <a href="#disallow-write">DisallowWriteToSystemErr</a>.
-    </div>
-    <div class="col-md-3">
-      <h2>System.exit</h2>
-      <p>Use the <a href="#ExpectedSystemExit">ExpectedSystemExit</a> rule to
-      test code that calls <code>System.exit(…).</code> Verify that
-      <code>System.exit(…)</code> is called, verify the status code of this
-      call or check assertions the application terminated.</p>
-    </div>
-    <div class="col-md-3">
-      <h2>System Properties</h2>
-      <p>If your test deals with system properties, you have to set them and
-      restore them after the test. Use the
-      <a href="#ClearSystemProperties">ClearSystemProperties</a>,
-      <a href="#ProvideSystemProperty">ProvideSystemProperty</a> and
-      <a href="#RestoreSystemProperties">RestoreSystemProperties</a> rules for
-      this purpose.
-    </div>
-    <div class="col-md-3">
-      <h2>Security Managers</h2>
-      <p>Use the <a href="#ProvideSecurityManager">ProvideSecurityManager</a>
-      rule to provide a specific security manager for your test. The system's
-      security manager is restored after the test.</p>
-    </div>
-  </div>
+  <p>The scope of System Rules is divided into five sections.</p>
+
+  <h2>System.out, System.err and System.in</h2>
+  <p>Command-line applications read from the command-line and write to
+  it. Use <a href="#SystemErrAndOutRule">SystemErrRule</a>,
+  <a href="#SystemErrAndOutRule">SystemOutRule</a> and
+  <a href="#TextFromStandardInputStream">TextFromStandardInputStream</a> to
+  provide the input text and verify the output.</p>
+  <p>Applications sometimes unintentionally write to <code>System.out</code>
+  or <code>System.err</code>. Ensure that this does not happen by using
+  <a href="#disallow-write">DisallowWriteToSystemOut</a> and
+  and <a href="#disallow-write">DisallowWriteToSystemErr</a>.
+
+  <h2>System.exit</h2>
+  <p>Use the <a href="#ExpectedSystemExit">ExpectedSystemExit</a> rule to
+  test code that calls <code>System.exit(…).</code> Verify that
+  <code>System.exit(…)</code> is called, verify the status code of this
+  call or check assertions the application terminated.</p>
+
+  <h2>System Properties</h2>
+  <p>If your test deals with system properties, you have to set them and
+  restore them after the test. Use the
+  <a href="#ClearSystemProperties">ClearSystemProperties</a>,
+  <a href="#ProvideSystemProperty">ProvideSystemProperty</a> and
+  <a href="#RestoreSystemProperties">RestoreSystemProperties</a> rules for
+  this purpose.
+
+  <h2>Environment Variables</h2>
+  <p>If your test needs to set an environment variable then use the
+  <a href="#EnvironmentVariables">EnvironmentVariables</a> rule.</p>
+
+  <h2>Security Managers</h2>
+  <p>Use the <a href="#ProvideSecurityManager">ProvideSecurityManager</a>
+  rule to provide a specific security manager for your test. The system's
+  security manager is restored after the test.</p>
 </section>
 
 			<div class="page-header">
@@ -74,7 +72,7 @@ description: A collection of JUnit rules for testing code that uses java.lang.Sy
 	}
 }{% endhighlight %}
 			</section>
-				
+
 			<section id="ProvideSystemProperty">
 				<h3>Provide Properties</h3>
 				<p>The ProvideSystemProperty rule provides an arbitrary value for a
@@ -138,7 +136,7 @@ public final ProvideSystemProperty properties
 	}
 }{% endhighlight %}
 			</section>
-    
+
 <section id="SystemErrAndOutRule">
 	<h3>System.err and System.out</h3>
 	<p>The <code>SystemErrRule</code> and the <code>SystemOutRule</code>
@@ -192,7 +190,7 @@ public final ProvideSystemProperty properties
 		assertEquals("hello world\n", systemOutRule.getLog());
 	}
 }{% endhighlight %}
-	
+
 	<p>The log can be cleared if you want to discard some text that has been
 	written to the log.</p>
 	{% highlight java %}public void MyTest {
@@ -292,7 +290,7 @@ public class SummarizeTest {
 				{% highlight java %}systemInMock.throwExceptionOnInputEnd(new IOException());{% endhighlight %}
 				<p>or</p>
 
-				{% highlight java %}systemInMock.throwExceptionOnInputEnd(new RuntimeException());{% endhighlight %}				
+				{% highlight java %}systemInMock.throwExceptionOnInputEnd(new RuntimeException());{% endhighlight %}
 			</section>
 
 <section id="disallow-write">
@@ -302,12 +300,12 @@ public class SummarizeTest {
   <code>System.err</code> or <code>System.out</code>. The rules are a nice
   replacement for static code analysis because they cover external libraries,
   too.</p>
-  
+
   {% highlight java %}public class MyTest {
   @Rule
   public final DisallowWriteToSystemErr disallowWriteToSystemErr
     = new DisallowWriteToSystemErr();
-  
+
   @Test
   public void this_test_fails() {
     System.err.println("some text");
@@ -318,7 +316,7 @@ public class SummarizeTest {
   @Rule
   public final DisallowWriteToSystemOut disallowWriteToSystemOut
     = new DisallowWriteToSystemOut();
-  
+
   @Test
   public void this_test_fails() {
     System.out.println("some text");
@@ -347,7 +345,7 @@ public class SummarizeTest {
 
   public static void doSomethingAndExit() {
     message = "exit ...";
-    System.exit(1);		
+    System.exit(1);
   }
 
   public static void doNothing() {
@@ -396,6 +394,24 @@ public class SummarizeTest {
 }{% endhighlight %}
 			</section>
 
+<section id="EnvironmentVariables">
+  <h3>Environment Variables</h3>
+  <p>If you need to set an environment variable then use the
+  <code>EnvironmentVariables</code> rule. It does all the tedious work for
+  setting environment variables and reverts your changes after the test.</p>
+  {% highlight java %}public void EnvironmentVariablesTest {
+  @Rule
+  public final EnvironmentVariables environmentVariables
+    = new EnvironmentVariables();
+
+  @Test
+  public void setEnvironmentVariable() {
+    environmentVariables.set("name", "value");
+    assertEquals("value", System.getenv("name"));
+  }
+}{% endhighlight %}
+</section>
+
 			<section id="ProvideSecurityManager">
 				<h3>Security Manager</h3>
 				<p>If you need a special security manager to test your code, you may
@@ -421,8 +437,8 @@ public class SummarizeTest {
       <p>Marc Philipp (mail@marcphilipp.de)
 <br/>Stefan Birkner (mail@stefan-birkner.de)
 <br/>      </p>
-    
 
-    
+
+
 <h2>Contact</h2>
 <p>Stefan Birkner (mail@stefan-birkner.de)</p>
