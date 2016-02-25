@@ -24,6 +24,7 @@
   <groupId>{{ page.groupId }}</groupId>
   <artifactId>{{ page.artifactId }}</artifactId>
   <version>{{ page.version }}</version>
+  <scope>test</scope>
 </dependency>
 {% endhighlight %}
 
@@ -32,7 +33,7 @@
 
 <h3>Use in Ivy</h3>
 {% highlight xml %}
-<dependency org="{{ page.groupId }}" name="{{ page.artifactId }}" rev="{{ page.version }}">
+<dependency org="{{ page.groupId }}" name="{{ page.artifactId }}" rev="{{ page.version }}" conf="test">
   <artifact name="{{ page.artifactId }}" type="jar"/>
 </dependency>
 {% endhighlight %}
@@ -44,9 +45,9 @@
 )
 {% endhighlight %}
 
-<h3>Use in Grails</h3>
+<h3>Use in Gradle or Grails</h3>
 {% highlight groovy %}
-compile '{{ page.groupId }}:{{ page.artifactId }}:{{ page.version }}'
+testCompile '{{ page.groupId }}:{{ page.artifactId }}:{{ page.version }}'
 {% endhighlight %}
   </div>
   {% include navbar-js.html %}
