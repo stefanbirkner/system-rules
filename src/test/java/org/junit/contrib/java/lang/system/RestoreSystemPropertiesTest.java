@@ -1,6 +1,7 @@
 package org.junit.contrib.java.lang.system;
 
 import static java.lang.System.clearProperty;
+import static java.lang.System.getProperties;
 import static java.lang.System.getProperty;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.contrib.java.lang.system.Executor.executeTestWithRule;
@@ -8,6 +9,9 @@ import static org.junit.contrib.java.lang.system.Executor.executeTestWithRule;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.rules.TestRule;
+import org.junit.runners.model.Statement;
+
+import java.util.Properties;
 
 public class RestoreSystemPropertiesTest {
 	//ensure that every test uses the same property, because this one is restored after the test
@@ -43,11 +47,22 @@ public class RestoreSystemPropertiesTest {
 	}
 
 	@Test
-	public void property_value_is_unchanged_at_start_of_test() {
+	public void at_start_of_a_test_properties_are_equal_to_the_original_properties() {
 		System.setProperty(PROPERTY_KEY, "dummy value");
-		TestThatCapturesProperties test = new TestThatCapturesProperties();
-		executeTestWithRule(test, rule);
-		assertThat(test.propertiesAtStart)
-			.containsEntry(PROPERTY_KEY, "dummy value");
+		Properties originalProperties = getProperties();
+		executeTestWithRule(
+			assertPropertiesAreEqualTo(originalProperties),
+			rule
+		);
+	}
+
+	private Statement assertPropertiesAreEqualTo(
+			final Properties expectedProperties) {
+		return new Statement() {
+			@Override
+			public void evaluate() throws Throwable {
+				assertThat(getProperties()).isEqualTo(expectedProperties);
+			}
+		};
 	}
 }

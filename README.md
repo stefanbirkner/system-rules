@@ -14,7 +14,7 @@ System Rules is available from
     <dependency>
       <groupId>com.github.stefanbirkner</groupId>
       <artifactId>system-rules</artifactId>
-      <version>1.16.0</version>
+      <version>1.16.1</version>
     </dependency>
 
 Please don't forget to add the scope `test` if you're using System

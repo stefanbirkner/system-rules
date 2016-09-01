@@ -67,7 +67,13 @@ public class RestoreSystemProperties extends ExternalResource {
 	@Override
 	protected void before() throws Throwable {
 		originalProperties = getProperties();
-		setProperties(new Properties(originalProperties));
+		setProperties(copyOf(originalProperties));
+	}
+
+	private Properties copyOf(Properties source) {
+		Properties copy = new Properties();
+		copy.putAll(source);
+		return copy;
 	}
 
 	@Override
