@@ -1,19 +1,17 @@
 package org.junit.contrib.java.lang.system.internal;
 
-import static com.github.stefanbirkner.fishbowl.Fishbowl.exceptionThrownBy;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import com.github.stefanbirkner.fishbowl.Statement;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 import java.io.FileDescriptor;
 import java.net.InetAddress;
 import java.security.Permission;
 
-import com.github.stefanbirkner.fishbowl.Statement;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import static com.github.stefanbirkner.fishbowl.Fishbowl.exceptionThrownBy;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
 
 public class NoExitSecurityManagerTest {
 	private static final int DUMMY_STATUS = 1;
@@ -440,18 +438,18 @@ public class NoExitSecurityManagerTest {
 	}
 
 	@Test
-	public void information_about_a_missing_checkExit_call_is_available() {
+	public void information_about_a_missing_checkExit_call_is_available() throws InterruptedException {
 		assertThat(managerWithOriginal.isCheckExitCalled()).isFalse();
 	}
 
 	@Test
-	public void information_about_a_checkExit_call_is_available() {
+	public void information_about_a_checkExit_call_is_available() throws InterruptedException {
 		safeCallCheckExitWithStatus(DUMMY_STATUS);
 		assertThat(managerWithOriginal.isCheckExitCalled()).isTrue();
 	}
 
 	@Test
-	public void status_of_first_call_of_checkExit_is_available() {
+	public void status_of_first_call_of_checkExit_is_available() throws InterruptedException {
 		safeCallCheckExitWithStatus(DUMMY_STATUS);
 		safeCallCheckExitWithStatus(DUMMY_STATUS + 1);
 		assertThat(managerWithOriginal.getStatusOfFirstCheckExitCall())

@@ -3,6 +3,7 @@ package org.junit.contrib.java.lang.system.internal;
 import java.io.FileDescriptor;
 import java.net.InetAddress;
 import java.security.Permission;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * A {@code NoExitSecurityManager} throws a {@link CheckExitCalled} exception
@@ -11,6 +12,7 @@ import java.security.Permission;
  */
 public class NoExitSecurityManager extends SecurityManager {
 	private final SecurityManager originalSecurityManager;
+	private final CountDownLatch synchLatch = new CountDownLatch(1);
 	private Integer statusOfFirstExitCall = null;
 
 	public NoExitSecurityManager(SecurityManager originalSecurityManager) {
@@ -21,19 +23,20 @@ public class NoExitSecurityManager extends SecurityManager {
 	public void checkExit(int status) {
 		if (statusOfFirstExitCall == null)
 			statusOfFirstExitCall = status;
+		synchLatch.countDown();
 		throw new CheckExitCalled(status);
 	}
 
-	public boolean isCheckExitCalled() {
+	public boolean isCheckExitCalled() throws InterruptedException {
+		synchLatch.await();
 		return statusOfFirstExitCall != null;
 	}
 
-	public int getStatusOfFirstCheckExitCall() {
+	public int getStatusOfFirstCheckExitCall() throws InterruptedException {
 		if (isCheckExitCalled())
 			return statusOfFirstExitCall;
 		else
-			throw new IllegalStateException(
-				"checkExit(int) has not been called.");
+			throw new IllegalStateException("checkExit(int) has not been called.");
 	}
 
 	@Override
