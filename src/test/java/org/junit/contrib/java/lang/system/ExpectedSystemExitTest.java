@@ -1,20 +1,18 @@
 package org.junit.contrib.java.lang.system;
 
+import org.junit.Test;
+import org.junit.runners.model.Statement;
+
+import java.security.Permission;
+
 import static java.lang.System.getSecurityManager;
 import static java.lang.System.setSecurityManager;
 import static java.lang.Thread.sleep;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 import static org.junit.contrib.java.lang.system.Executor.exceptionThrownWhenTestIsExecutedWithRule;
 import static org.junit.contrib.java.lang.system.Executor.executeTestWithRule;
 import static org.junit.contrib.java.lang.system.Statements.TEST_THAT_DOES_NOTHING;
-
-import java.security.Permission;
-
-import org.junit.Test;
-import org.junit.runners.model.Statement;
 
 
 public class ExpectedSystemExitTest {
@@ -128,7 +126,7 @@ public class ExpectedSystemExitTest {
 	@Test
 	public void test_is_successful_if_expected_exit_is_called_in_a_thread() {
 		rule.expectSystemExitWithStatus(ARBITRARY_EXIT_STATUS);
-		executeTestWithRule(new SystemExitInThread(), rule);
+		executeTestWithRule(new SystemExitInSeparateThread(), rule);
 	}
 
 	private static class SystemExit0 extends Statement {
@@ -145,17 +143,21 @@ public class ExpectedSystemExitTest {
 		}
 	}
 
-	private static class SystemExitInThread extends Statement {
+	private static class SystemExitInSeparateThread extends Statement {
 		@Override
 		public void evaluate() throws Throwable {
-			Runnable callSystemExit = new Runnable() {
-				public void run() {
+			new Thread(new LongExecutionBeforeExitCall()).start();
+		}
+
+		private static class LongExecutionBeforeExitCall implements Runnable {
+			public void run() {
+				try {
+					sleep(1000);
 					System.exit(ARBITRARY_EXIT_STATUS);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
 				}
-			};
-			Thread thread = new Thread(callSystemExit);
-			thread.start();
-			sleep(1000); // wait until the thread exits
+			}
 		}
 	}
 
