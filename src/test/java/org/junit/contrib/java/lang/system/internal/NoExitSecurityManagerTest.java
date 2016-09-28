@@ -20,8 +20,7 @@ public class NoExitSecurityManagerTest {
 	public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
 	private final SecurityManager originalSecurityManager = mock(SecurityManager.class);
-	private final NoExitSecurityManager managerWithOriginal = new NoExitSecurityManager(
-		originalSecurityManager);
+	private final NoExitSecurityManager managerWithOriginal = new NoExitSecurityManager(originalSecurityManager);
 	private final NoExitSecurityManager managerWithoutOriginal = new NoExitSecurityManager(null);
 
 	@Test

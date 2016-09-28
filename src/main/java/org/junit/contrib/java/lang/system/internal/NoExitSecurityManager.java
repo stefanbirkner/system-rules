@@ -4,6 +4,7 @@ import java.io.FileDescriptor;
 import java.net.InetAddress;
 import java.security.Permission;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A {@code NoExitSecurityManager} throws a {@link CheckExitCalled} exception
@@ -11,12 +12,20 @@ import java.util.concurrent.CountDownLatch;
  * delegated to the original security manager.
  */
 public class NoExitSecurityManager extends SecurityManager {
+
 	private final SecurityManager originalSecurityManager;
+	private final long timeout;
+
 	private final CountDownLatch synchLatch = new CountDownLatch(1);
 	private Integer statusOfFirstExitCall = null;
 
 	public NoExitSecurityManager(SecurityManager originalSecurityManager) {
+		this(originalSecurityManager, 0);
+	}
+
+	public NoExitSecurityManager(SecurityManager originalSecurityManager, long timeout) {
 		this.originalSecurityManager = originalSecurityManager;
+		this.timeout = timeout;
 	}
 
 	@Override
@@ -28,7 +37,8 @@ public class NoExitSecurityManager extends SecurityManager {
 	}
 
 	public boolean isCheckExitCalled() throws InterruptedException {
-		synchLatch.await();
+		if (timeout > 0)
+			synchLatch.await(timeout, TimeUnit.MILLISECONDS);
 		return statusOfFirstExitCall != null;
 	}
 

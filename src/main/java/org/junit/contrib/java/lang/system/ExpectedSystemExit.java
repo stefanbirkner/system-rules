@@ -93,6 +93,7 @@ public class ExpectedSystemExit implements TestRule {
 	private final Collection<Assertion> assertions = new ArrayList<Assertion>();
 	private boolean expectExit = false;
 	private Integer expectedStatus = null;
+	private long timeout = 0;
 
 	private ExpectedSystemExit() {
 	}
@@ -106,6 +107,10 @@ public class ExpectedSystemExit implements TestRule {
 		expectExit = true;
 	}
 
+	public void timeout(long timeout) {
+		this.timeout = timeout;
+	}
+
 	public void checkAssertionAfterwards(Assertion assertion) {
 		assertions.add(assertion);
 	}
@@ -117,8 +122,7 @@ public class ExpectedSystemExit implements TestRule {
 	}
 
 	private ProvideSecurityManager createNoExitSecurityManagerRule() {
-		NoExitSecurityManager noExitSecurityManager = new NoExitSecurityManager(
-			getSecurityManager());
+		SecurityManager noExitSecurityManager = new NoExitSecurityManager(getSecurityManager(), timeout);
 		return new ProvideSecurityManager(noExitSecurityManager);
 	}
 
@@ -144,7 +148,7 @@ public class ExpectedSystemExit implements TestRule {
             else
                 handleMissingSystemExit();
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			fail("Unexpected waiting loop break.");
 		}
 	}
 

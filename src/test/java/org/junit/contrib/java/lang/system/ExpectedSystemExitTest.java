@@ -126,6 +126,7 @@ public class ExpectedSystemExitTest {
 	@Test
 	public void test_is_successful_if_expected_exit_is_called_in_a_thread() {
 		rule.expectSystemExitWithStatus(ARBITRARY_EXIT_STATUS);
+		rule.timeout(1000);
 		executeTestWithRule(new SystemExitInSeparateThread(), rule);
 	}
 
@@ -152,7 +153,7 @@ public class ExpectedSystemExitTest {
 		private static class LongExecutionBeforeExitCall implements Runnable {
 			public void run() {
 				try {
-					sleep(1000);
+					sleep(500);
 					System.exit(ARBITRARY_EXIT_STATUS);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
