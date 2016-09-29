@@ -1,10 +1,12 @@
 package org.junit.contrib.java.lang.system.internal;
 
+import org.junit.contrib.java.lang.system.internal.synch.EmptySynchLatch;
+import org.junit.contrib.java.lang.system.internal.synch.SynchLatch;
+import org.junit.contrib.java.lang.system.internal.synch.SynchLatchWithWainting;
+
 import java.io.FileDescriptor;
 import java.net.InetAddress;
 import java.security.Permission;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 /**
  * A {@code NoExitSecurityManager} throws a {@link CheckExitCalled} exception
@@ -14,31 +16,33 @@ import java.util.concurrent.TimeUnit;
 public class NoExitSecurityManager extends SecurityManager {
 
 	private final SecurityManager originalSecurityManager;
-	private final long timeout;
+	private final SynchLatch latch;
 
-	private final CountDownLatch synchLatch = new CountDownLatch(1);
 	private Integer statusOfFirstExitCall = null;
 
 	public NoExitSecurityManager(SecurityManager originalSecurityManager) {
-		this(originalSecurityManager, 0);
+		this(originalSecurityManager, new EmptySynchLatch());
 	}
 
 	public NoExitSecurityManager(SecurityManager originalSecurityManager, long timeout) {
+		this(originalSecurityManager, new SynchLatchWithWainting(timeout));
+	}
+
+	private NoExitSecurityManager(SecurityManager originalSecurityManager, SynchLatch latch) {
 		this.originalSecurityManager = originalSecurityManager;
-		this.timeout = timeout;
+		this.latch = latch;
 	}
 
 	@Override
 	public void checkExit(int status) {
 		if (statusOfFirstExitCall == null)
 			statusOfFirstExitCall = status;
-		synchLatch.countDown();
+		latch.goAhead();
 		throw new CheckExitCalled(status);
 	}
 
 	public boolean isCheckExitCalled() throws InterruptedException {
-		if (timeout > 0)
-			synchLatch.await(timeout, TimeUnit.MILLISECONDS);
+		latch.await();
 		return statusOfFirstExitCall != null;
 	}
 
