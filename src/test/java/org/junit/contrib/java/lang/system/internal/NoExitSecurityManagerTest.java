@@ -1,17 +1,19 @@
 package org.junit.contrib.java.lang.system.internal;
 
-import com.github.stefanbirkner.fishbowl.Statement;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import static com.github.stefanbirkner.fishbowl.Fishbowl.exceptionThrownBy;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.FileDescriptor;
 import java.net.InetAddress;
 import java.security.Permission;
 
-import static com.github.stefanbirkner.fishbowl.Fishbowl.exceptionThrownBy;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import com.github.stefanbirkner.fishbowl.Statement;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 public class NoExitSecurityManagerTest {
 	private static final int DUMMY_STATUS = 1;
