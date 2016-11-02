@@ -20,8 +20,8 @@ public class NoExitSecurityManagerTest {
 	public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
 	private final SecurityManager originalSecurityManager = mock(SecurityManager.class);
-	private final NoExitSecurityManager managerWithOriginal = new NoExitSecurityManager(originalSecurityManager);
-	private final NoExitSecurityManager managerWithoutOriginal = new NoExitSecurityManager(null);
+	private final NoExitSecurityManager managerWithOriginal = new NoExitSecurityManager(originalSecurityManager, 0);
+	private final NoExitSecurityManager managerWithoutOriginal = new NoExitSecurityManager(null, 0);
 
 	@Test
 	public void an_exception_with_the_status_is_thrown_when_checkExit_is_called() {
