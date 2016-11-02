@@ -33,8 +33,8 @@ public class NoExitSecurityManager extends SecurityManager {
 	}
 
 	public boolean isCheckExitCalled() throws InterruptedException {
-		synchLatch.await(timeout, TimeUnit.MILLISECONDS);
-		return statusOfFirstExitCall != null;
+		boolean wasCountDown = synchLatch.await(timeout, TimeUnit.MILLISECONDS);
+		return statusOfFirstExitCall != null && wasCountDown;
 	}
 
 	public int getStatusOfFirstCheckExitCall() throws InterruptedException {
