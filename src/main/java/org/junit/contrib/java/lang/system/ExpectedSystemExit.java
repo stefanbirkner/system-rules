@@ -1,17 +1,17 @@
 package org.junit.contrib.java.lang.system;
 
+import static java.lang.System.getSecurityManager;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
+import java.util.ArrayList;
+import java.util.Collection;
+
 import org.junit.contrib.java.lang.system.internal.CheckExitCalled;
 import org.junit.contrib.java.lang.system.internal.NoExitSecurityManager;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
-
-import java.util.ArrayList;
-import java.util.Collection;
-
-import static java.lang.System.getSecurityManager;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 /**
  * The {@code ExpectedSystemExit} allows in-test specification of expected
@@ -140,16 +140,12 @@ public class ExpectedSystemExit implements TestRule {
 		};
 	}
 
-	private void checkSystemExit() {
+	private void checkSystemExit() throws InterruptedException {
 		NoExitSecurityManager securityManager = (NoExitSecurityManager) getSecurityManager();
-		try {
-			if (securityManager.isCheckExitCalled())
-                handleSystemExitWithStatus(securityManager.getStatusOfFirstCheckExitCall());
-            else
-                handleMissingSystemExit();
-		} catch (InterruptedException e) {
-			fail("Unexpected waiting loop break.");
-		}
+		if (securityManager.isCheckExitCalled())
+			handleSystemExitWithStatus(securityManager.getStatusOfFirstCheckExitCall());
+		else
+			handleMissingSystemExit();
 	}
 
 	private void handleMissingSystemExit() {
