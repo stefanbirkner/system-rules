@@ -28,7 +28,9 @@ import org.junit.runners.model.Statement;
  * <p>
  * Some care must be taken if your system under test creates a new thread and
  * this thread calls {@code System.exit()}. In this case you have to ensure that
- * the test does not finish before {@code System.exit()} is called.
+ * the test does not finish before {@code System.exit()} is called. Use
+ * {@code ExpectedSystemExit.timeout(...)} method call to specify test method
+ * waiting time in milliseconds.
  *
  * <pre>
  * public class AppWithExit {
@@ -75,6 +77,13 @@ import org.junit.runners.model.Statement;
  *   public void systemExitWithStatusCode1() {
  *     exit.expectSystemExitWithStatus(1);
  *     AppWithExit.doSomethingAndExit();
+ *   }
+ *
+ *   &#064;Test
+ *   public void systemExitInSeparateThread() {
+ *     exit.expectSystemExitWithStatus(1);
+ *     exit.timeout(1000);
+ *     AppWithExit.doSomethingInSeparateThreadAndExit();
  *   }
  *
  *   &#064;Test
