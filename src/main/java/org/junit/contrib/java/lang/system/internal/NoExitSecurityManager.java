@@ -16,7 +16,7 @@ public class NoExitSecurityManager extends SecurityManager {
 	private final SecurityManager originalSecurityManager;
 	private final long timeout;
 
-	private final CountDownLatch synchLatch = new CountDownLatch(1);
+	private final CountDownLatch exitLatch = new CountDownLatch(1);
 	private Integer statusOfFirstExitCall = null;
 
 	public NoExitSecurityManager(SecurityManager originalSecurityManager, long timeout) {
@@ -28,13 +28,12 @@ public class NoExitSecurityManager extends SecurityManager {
 	public void checkExit(int status) {
 		if (statusOfFirstExitCall == null)
 			statusOfFirstExitCall = status;
-		synchLatch.countDown();
+		exitLatch.countDown();
 		throw new CheckExitCalled(status);
 	}
 
 	public boolean isCheckExitCalled() throws InterruptedException {
-		boolean wasCountDown = synchLatch.await(timeout, TimeUnit.MILLISECONDS);
-		return statusOfFirstExitCall != null && wasCountDown;
+		return exitLatch.await(timeout, TimeUnit.MILLISECONDS);
 	}
 
 	public int getStatusOfFirstCheckExitCall() throws InterruptedException {
