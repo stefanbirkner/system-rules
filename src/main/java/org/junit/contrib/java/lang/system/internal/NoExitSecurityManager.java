@@ -14,14 +14,12 @@ import java.util.concurrent.TimeUnit;
 public class NoExitSecurityManager extends SecurityManager {
 
 	private final SecurityManager originalSecurityManager;
-	private final long timeout;
-
 	private final CountDownLatch exitLatch = new CountDownLatch(1);
+
 	private Integer statusOfFirstExitCall = null;
 
-	public NoExitSecurityManager(SecurityManager originalSecurityManager, long timeout) {
+	public NoExitSecurityManager(SecurityManager originalSecurityManager) {
 		this.originalSecurityManager = originalSecurityManager;
-		this.timeout = timeout;
 	}
 
 	@Override
@@ -32,7 +30,7 @@ public class NoExitSecurityManager extends SecurityManager {
 		throw new CheckExitCalled(status);
 	}
 
-	public Integer getStatusOfFirstCheckExitCall() throws InterruptedException {
+	public Integer getStatusOfFirstCheckExitCall(long timeout) throws InterruptedException {
 		if (statusOfFirstExitCall != null)
 			return statusOfFirstExitCall;
 		exitLatch.await(timeout, TimeUnit.MILLISECONDS);

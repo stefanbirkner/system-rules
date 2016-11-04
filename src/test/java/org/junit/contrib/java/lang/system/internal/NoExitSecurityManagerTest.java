@@ -22,8 +22,8 @@ public class NoExitSecurityManagerTest {
 	public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
 	private final SecurityManager originalSecurityManager = mock(SecurityManager.class);
-	private final NoExitSecurityManager managerWithOriginal = new NoExitSecurityManager(originalSecurityManager, 0);
-	private final NoExitSecurityManager managerWithoutOriginal = new NoExitSecurityManager(null, 0);
+	private final NoExitSecurityManager managerWithOriginal = new NoExitSecurityManager(originalSecurityManager);
+	private final NoExitSecurityManager managerWithoutOriginal = new NoExitSecurityManager(null);
 
 	@Test
 	public void an_exception_with_the_status_is_thrown_when_checkExit_is_called() {
@@ -442,7 +442,7 @@ public class NoExitSecurityManagerTest {
 	public void status_of_first_call_of_checkExit_is_available() throws InterruptedException {
 		safeCallCheckExitWithStatus(DUMMY_STATUS);
 		safeCallCheckExitWithStatus(DUMMY_STATUS + 1);
-		assertThat(managerWithOriginal.getStatusOfFirstCheckExitCall())
+		assertThat(managerWithOriginal.getStatusOfFirstCheckExitCall(0))
 			.isEqualTo(DUMMY_STATUS);
 	}
 
@@ -455,6 +455,6 @@ public class NoExitSecurityManagerTest {
 
 	@Test
 	public void null_status_of_first_checkExit_call_if_this_call_did_not_happen() throws InterruptedException {
-		assertThat(managerWithOriginal.getStatusOfFirstCheckExitCall()).isNull();
+		assertThat(managerWithOriginal.getStatusOfFirstCheckExitCall(0)).isNull();
 	}
 }

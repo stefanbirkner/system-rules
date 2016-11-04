@@ -131,7 +131,7 @@ public class ExpectedSystemExit implements TestRule {
 	}
 
 	private ProvideSecurityManager createNoExitSecurityManagerRule() {
-		SecurityManager noExitSecurityManager = new NoExitSecurityManager(getSecurityManager(), timeout);
+		SecurityManager noExitSecurityManager = new NoExitSecurityManager(getSecurityManager());
 		return new ProvideSecurityManager(noExitSecurityManager);
 	}
 
@@ -151,7 +151,7 @@ public class ExpectedSystemExit implements TestRule {
 
 	private void checkSystemExit() throws InterruptedException {
 		NoExitSecurityManager securityManager = (NoExitSecurityManager) getSecurityManager();
-		Integer exitStatus = securityManager.getStatusOfFirstCheckExitCall();
+		Integer exitStatus = securityManager.getStatusOfFirstCheckExitCall(timeout);
 		if (exitStatus != null)
 			handleSystemExitWithStatus(exitStatus);
 		else
