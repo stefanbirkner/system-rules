@@ -47,7 +47,8 @@ public class NoExitSecurityManager extends SecurityManager {
 
 	@Override
 	public Object getSecurityContext() {
-		return (originalSecurityManager == null) ? super.getSecurityContext()
+		return originalSecurityManager == null
+			? super.getSecurityContext()
 			: originalSecurityManager.getSecurityContext();
 	}
 
@@ -179,7 +180,8 @@ public class NoExitSecurityManager extends SecurityManager {
 
 	@Override
 	public boolean checkTopLevelWindow(Object window) {
-		return (originalSecurityManager == null) ? super.checkTopLevelWindow(window)
+		return originalSecurityManager == null
+			? super.checkTopLevelWindow(window)
 			: originalSecurityManager.checkTopLevelWindow(window);
 	}
 
@@ -233,7 +235,8 @@ public class NoExitSecurityManager extends SecurityManager {
 
 	@Override
 	public ThreadGroup getThreadGroup() {
-		return (originalSecurityManager == null) ? super.getThreadGroup()
+		return originalSecurityManager == null
+			? super.getThreadGroup()
 			: originalSecurityManager.getThreadGroup();
 	}
 }
