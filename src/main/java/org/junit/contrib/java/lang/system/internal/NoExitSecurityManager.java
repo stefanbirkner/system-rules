@@ -32,15 +32,11 @@ public class NoExitSecurityManager extends SecurityManager {
 		throw new CheckExitCalled(status);
 	}
 
-	public boolean isCheckExitCalled() throws InterruptedException {
-		return exitLatch.await(timeout, TimeUnit.MILLISECONDS);
-	}
-
-	public int getStatusOfFirstCheckExitCall() throws InterruptedException {
-		if (isCheckExitCalled())
+	public Integer getStatusOfFirstCheckExitCall() throws InterruptedException {
+		if (statusOfFirstExitCall != null)
 			return statusOfFirstExitCall;
-		else
-			throw new IllegalStateException("checkExit(int) has not been called.");
+		exitLatch.await(timeout, TimeUnit.MILLISECONDS);
+		return statusOfFirstExitCall;
 	}
 
 	@Override

@@ -151,8 +151,9 @@ public class ExpectedSystemExit implements TestRule {
 
 	private void checkSystemExit() throws InterruptedException {
 		NoExitSecurityManager securityManager = (NoExitSecurityManager) getSecurityManager();
-		if (securityManager.isCheckExitCalled())
-			handleSystemExitWithStatus(securityManager.getStatusOfFirstCheckExitCall());
+		Integer exitStatus = securityManager.getStatusOfFirstCheckExitCall();
+		if (exitStatus != null)
+			handleSystemExitWithStatus(exitStatus);
 		else
 			handleMissingSystemExit();
 	}
