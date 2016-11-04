@@ -3,7 +3,8 @@ package org.junit.contrib.java.lang.system.internal;
 import java.io.FileDescriptor;
 import java.net.InetAddress;
 import java.security.Permission;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -14,9 +15,7 @@ import java.util.concurrent.TimeUnit;
 public class NoExitSecurityManager extends SecurityManager {
 
 	private final SecurityManager originalSecurityManager;
-	private final CountDownLatch exitLatch = new CountDownLatch(1);
-
-	private Integer statusOfFirstExitCall = null;
+	private final BlockingQueue<Integer> exitStatusHolder = new LinkedBlockingQueue<Integer>(1);
 
 	public NoExitSecurityManager(SecurityManager originalSecurityManager) {
 		this.originalSecurityManager = originalSecurityManager;
@@ -24,17 +23,12 @@ public class NoExitSecurityManager extends SecurityManager {
 
 	@Override
 	public void checkExit(int status) {
-		if (statusOfFirstExitCall == null)
-			statusOfFirstExitCall = status;
-		exitLatch.countDown();
+		exitStatusHolder.offer(status);
 		throw new CheckExitCalled(status);
 	}
 
 	public Integer getStatusOfFirstCheckExitCall(long timeout) throws InterruptedException {
-		if (statusOfFirstExitCall != null)
-			return statusOfFirstExitCall;
-		exitLatch.await(timeout, TimeUnit.MILLISECONDS);
-		return statusOfFirstExitCall;
+		return exitStatusHolder.poll(timeout, TimeUnit.MILLISECONDS);
 	}
 
 	@Override
