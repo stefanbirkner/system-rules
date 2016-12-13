@@ -49,6 +49,12 @@
 {% highlight groovy %}
 testCompile '{{ page.groupId }}:{{ page.artifactId }}:{{ page.version }}'
 {% endhighlight %}
+
+<h3>Use in SBT</h3>
+{% highlight scala %}
+libraryDependencies += "{{ page.groupId }}" % "{{ page.artifactId }}" % "{{ page.version }}" % "test"
+{% endhighlight %}
+
   </div>
   {% include navbar-js.html %}
   {% include tracking.html %}
