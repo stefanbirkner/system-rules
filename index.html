@@ -61,7 +61,7 @@ description: A collection of JUnit rules for testing code that uses java.lang.Sy
 				<p>The ClearSystemProperties rule deletes the property before the test
 				and restores the original value of the property when the test is
 				finished.</p>
-				{% highlight java %}public void MyTest {
+				{% highlight java %}public class MyTest {
 	@Rule
 	public final ClearSystemProperties myPropertyIsCleared
 	 = new ClearSystemProperties("MyProperty");
@@ -78,7 +78,7 @@ description: A collection of JUnit rules for testing code that uses java.lang.Sy
 				<p>The ProvideSystemProperty rule provides an arbitrary value for a
 				system property to a test. After the test the original value is
 				restored.</p>
-				{% highlight java %}public void MyTest {
+				{% highlight java %}public class MyTest {
 	@Rule
 	public final ProvideSystemProperty myPropertyHasMyValue
 	 = new ProvideSystemProperty("MyProperty", "MyValue");
@@ -95,7 +95,7 @@ description: A collection of JUnit rules for testing code that uses java.lang.Sy
 }{% endhighlight %}
 				<p>You could also use a single instance of the rule to achieve the
 				same effect:</p>
-				{% highlight java %}public void MyTest {
+				{% highlight java %}public class MyTest {
 	@Rule
 	public final ProvideSystemProperty properties
 	 = new ProvideSystemProperty("MyProperty", "MyValue").and("OtherProperty", null);
@@ -123,7 +123,7 @@ public final ProvideSystemProperty properties
 			<section id="RestoreSystemProperties">
 				<h3>Restore Properties</h3>
 				<p>The RestoreSystemProperties rule undoes changes of all system properties when the test finishes (whether it passes or fails).</p>
-				{% highlight java %}public void MyTest {
+				{% highlight java %}public class MyTest {
 	@Rule
 	public final RestoreSystemProperties restoreSystemProperties
 	 = new RestoreSystemProperties();
@@ -144,7 +144,7 @@ public final ProvideSystemProperty properties
 	<code>System.err</code> or <code>System.out</code>. They can record
 	everything written to <code>System.err</code> or <code>System.out</code>.
 	The text is available by calling <code>getLog()</code>.</p>
-	{% highlight java %}public void MyTest {
+	{% highlight java %}public class MyTest {
 	@Rule
 	public final SystemErrRule systemErrRule = new SystemErrRule().enableLog();
 
@@ -155,7 +155,7 @@ public final ProvideSystemProperty properties
 	}
 }{% endhighlight %}
 
-    	{% highlight java %}public void MyTest {
+    	{% highlight java %}public class MyTest {
 	@Rule
 	public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();
 
@@ -169,7 +169,7 @@ public final ProvideSystemProperty properties
 	are different (e.g. Linux: <code>\n</code>, Windows: <code>\r\n</code>).
 	Use <code>getLogWithNormalizedLineSeparator()</code> for a log that
 	always has the line separator <code>\n</code>.</p>
-	{% highlight java %}public void MyTest {
+	{% highlight java %}public class MyTest {
 	@Rule
 	public final SystemErrRule systemErrRule = new SystemErrRule().enableLog();
 
@@ -180,7 +180,7 @@ public final ProvideSystemProperty properties
 	}
 }{% endhighlight %}
 
-    	{% highlight java %}public void MyTest {
+    	{% highlight java %}public class MyTest {
 	@Rule
 	public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();
 
@@ -193,7 +193,7 @@ public final ProvideSystemProperty properties
 
 	<p>The log can be cleared if you want to discard some text that has been
 	written to the log.</p>
-	{% highlight java %}public void MyTest {
+	{% highlight java %}public class MyTest {
 	@Rule
 	public final SystemErrRule systemErrRule = new SystemErrRule().enableLog();
 
@@ -206,7 +206,7 @@ public final ProvideSystemProperty properties
 	}
 }{% endhighlight %}
 
-    	{% highlight java %}public void MyTest {
+    	{% highlight java %}public class MyTest {
 	@Rule
 	public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();
 
@@ -353,7 +353,7 @@ public class SummarizeTest {
 }{% endhighlight %}
 
 				<h4>Test</h4>
-				{% highlight java %}public void AppWithExitTest {
+				{% highlight java %}public class AppWithExitTest {
   @Rule
   public final ExpectedSystemExit exit = ExpectedSystemExit.none();
 
@@ -399,7 +399,7 @@ public class SummarizeTest {
   <p>If you need to set an environment variable then use the
   <code>EnvironmentVariables</code> rule. It does all the tedious work for
   setting environment variables and reverts your changes after the test.</p>
-  {% highlight java %}public void EnvironmentVariablesTest {
+  {% highlight java %}public class EnvironmentVariablesTest {
   @Rule
   public final EnvironmentVariables environmentVariables
     = new EnvironmentVariables();
@@ -418,7 +418,7 @@ public class SummarizeTest {
 				provide it by using the ProvideSecurityManager rule. This rule
 				replaces the system's security manager with yours throughout the
 				test</p>
-				{% highlight java %}public void MyTest {
+				{% highlight java %}public class MyTest {
 	private final MySecurityManager securityManager
 	 = new MySecurityManager();
 
