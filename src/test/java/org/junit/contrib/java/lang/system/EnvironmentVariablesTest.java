@@ -1,9 +1,11 @@
 package org.junit.contrib.java.lang.system;
 
 
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runners.model.Statement;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -117,6 +119,26 @@ public class EnvironmentVariablesTest {
 				assertThat(getenv()).doesNotContainKey("dummy name");
 			}
 		}, environmentVariables);
+	}
+
+	@Test
+	public void environment_variables_can_be_set_when_instantiating_the_rule() {
+		final EnvironmentVariables environmentVariables = EnvironmentVariables.builder()
+			.with("k1", "v1")
+			.with("k2", "v2")
+			.without("PATH")
+			.build();
+		executeTestWithRule(new Statement() {
+			@Override
+			public void evaluate() {
+				assertThat(getenv("k1")).isEqualTo("v1");
+				assertThat(getenv("k2")).isEqualTo("v2");
+				assertThat(getenv("PATH")).isNull();
+			}
+		}, environmentVariables);
+		assertThat(getenv("k1")).isNull();
+		assertThat(getenv("k2")).isNull();
+		assertThat(getenv("PATH")).isNotNull();
 	}
 
 	@Test

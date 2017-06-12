@@ -5,6 +5,7 @@ import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
 import java.lang.reflect.Field;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,15 +35,46 @@ import static java.lang.System.getenv;
  * such modifications.
  */
 public class EnvironmentVariables implements TestRule {
+	private final Map<String, String> predefined;
+
+	public EnvironmentVariables() {
+		this(Collections.<String, String>emptyMap());
+	}
+
+
+	public EnvironmentVariables(Map<String, String> predefined) {
+		this.predefined = predefined;
+	}
+
 	/**
 	 * Set the value of an environment variable.
 	 *
 	 * @param name the environment variable's name.
 	 * @param value the environment variable's new value. May be {@code null}.
-     */
-	public void set(String name, String value) {
+	*/
+	public static void set(String name, String value) {
 		set(getEditableMapOfVariables(), name, value);
 		set(getTheCaseInsensitiveEnvironment(), name, value);
+	}
+
+	static Builder builder() {
+		return new Builder();
+	}
+
+	static class Builder {
+		Map<String, String> predefined = new HashMap<String, String>();
+		public Builder with(String name, String value) {
+			predefined.put(name, value);
+			return this;
+		}
+
+		public Builder without(String name) {
+			return with(name, null);
+		}
+
+		public EnvironmentVariables build() {
+			return new EnvironmentVariables(predefined);
+		}
 	}
 
 	/**
@@ -55,7 +87,7 @@ public class EnvironmentVariables implements TestRule {
 			set(name, null);
 	}
 
-	private void set(Map<String, String> variables, String name, String value) {
+	private static void set(Map<String, String> variables, String name, String value) {
 		if (variables != null) //theCaseInsensitiveEnvironment may be null
 			if (value == null)
 				variables.remove(name);
@@ -64,20 +96,25 @@ public class EnvironmentVariables implements TestRule {
 	}
 
 	public Statement apply(Statement base, Description description) {
-		return new EnvironmentVariablesStatement(base);
+		return new EnvironmentVariablesStatement(base, predefined);
 	}
 
 	private static class EnvironmentVariablesStatement extends Statement {
 		final Statement baseStatement;
+		private final Map<String, String> predefined;
 		Map<String, String> originalVariables;
 
-		EnvironmentVariablesStatement(Statement baseStatement) {
+		EnvironmentVariablesStatement(Statement baseStatement, Map<String, String> predefined) {
 			this.baseStatement = baseStatement;
+			this.predefined = predefined;
 		}
 
 		@Override
 		public void evaluate() throws Throwable {
 			saveCurrentState();
+			for (Map.Entry<String, String> entry : predefined.entrySet()) {
+				set(entry.getKey(), entry.getValue());
+			}
 			try {
 				baseStatement.evaluate();
 			} finally {
