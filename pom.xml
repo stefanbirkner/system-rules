@@ -9,7 +9,7 @@
 	</parent>
 
 	<artifactId>system-rules</artifactId>
-	<version>1.17.0</version>
+	<version>1.18.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>System Rules</name>
@@ -98,4 +98,38 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<profiles>
+		<profile>
+			<id>java9</id>
+			<activation>
+				<jdk>[1.9,)</jdk>
+			</activation>
+			<properties>
+				<!-- Java 9 minimal source and target are 1.6 -->
+				<maven.compiler.source>1.6</maven.compiler.source>
+				<maven.compiler.target>1.6</maven.compiler.target>
+			</properties>
+
+			<build>
+				<!-- Use Java9 compatible version of plugins -->
+				<pluginManagement>
+					<plugins>
+						<plugin>
+							<artifactId>maven-jar-plugin</artifactId>
+							<version>3.0.2</version>
+						</plugin>
+						<plugin>
+							<artifactId>maven-javadoc-plugin</artifactId>
+							<version>3.0.0-M1</version>
+						</plugin>
+						<plugin>
+							<artifactId>maven-source-plugin</artifactId>
+							<version>3.0.1</version>
+						</plugin>
+					</plugins>
+				</pluginManagement>
+			</build>
+		</profile>
+	</profiles>
 </project>
