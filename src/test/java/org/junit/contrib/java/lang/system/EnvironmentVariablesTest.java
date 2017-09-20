@@ -118,4 +118,37 @@ public class EnvironmentVariablesTest {
 			}
 		}, environmentVariables);
 	}
+
+	@Test
+	public void environment_variables_that_are_cleared_in_the_test_are_null_in_the_test() {
+		final EnvironmentVariables environmentVariables = new EnvironmentVariables();
+		executeTestWithRule(new Statement() {
+			@Override
+			public void evaluate() {
+				//we need to set a value because it is null by default
+				environmentVariables.set("dummy name", "dummy value");
+				environmentVariables.set("another name", "dummy value");
+				environmentVariables.clear("dummy name", "another name");
+				assertThat(getenv("dummy name")).isNull();
+				assertThat(getenv("another name")).isNull();
+			}
+		}, environmentVariables);
+	}
+
+	@Test
+	public void environment_variables_that_are_cleared_in_the_test_are_not_stored_in_the_environment_variables_map() {
+		final EnvironmentVariables environmentVariables = new EnvironmentVariables();
+		executeTestWithRule(new Statement() {
+			@Override
+			public void evaluate() {
+				//we need to set a value because it is null by default
+				environmentVariables.set("dummy name", "dummy value");
+				environmentVariables.set("another name", "dummy value");
+				environmentVariables.clear("dummy name", "another name");
+				assertThat(getenv())
+					.doesNotContainKey("dummy name")
+					.doesNotContainKey("another name");
+			}
+		}, environmentVariables);
+	}
 }
