@@ -97,6 +97,8 @@ public class EnvironmentVariablesTest {
 		executeTestWithRule(new Statement() {
 			@Override
 			public void evaluate() {
+				//we need to set a value because it is null by default
+				environmentVariables.set("dummy name", "dummy value");
 				environmentVariables.set("dummy name", null);
 				assertThat(getenv("dummy name")).isNull();
 			}
@@ -109,6 +111,8 @@ public class EnvironmentVariablesTest {
 		executeTestWithRule(new Statement() {
 			@Override
 			public void evaluate() {
+				//we need to set a value because it is null by default
+				environmentVariables.set("dummy name", "dummy value");
 				environmentVariables.set("dummy name", null);
 				assertThat(getenv()).doesNotContainKey("dummy name");
 			}
