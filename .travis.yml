@@ -1,5 +1,5 @@
 language: java
-install: mvn install -DskipTests=true -Dgpg.skip=true
+install: ./mvnw install -DskipTests=true -Dgpg.skip=true
 jdk:
   - oraclejdk8
   - openjdk7

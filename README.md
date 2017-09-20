@@ -44,7 +44,7 @@ System Rules is build with [Maven](http://maven.apache.org/). If you
 want to contribute code than
 
 * Please write a test for your change.
-* Ensure that you didn't break the build by running `mvn test`.
+* Ensure that you didn't break the build by running `mvnw test`.
 * Fork the repo and create a pull request. (See [Understanding the GitHub Flow](https://guides.github.com/introduction/flow/index.html))
 
 The basic coding style is described in the
@@ -63,5 +63,5 @@ servers.
 * Set the new version in `pom.xml` and in the `Installation` section of
   this readme.
 * Commit the modified `pom.xml` and `README.md`.
-* Run `mvn clean deploy` with JDK 6 or 7.
+* Run `mvnw clean deploy` with JDK 6 or 7.
 * Add a tag for the release: `git tag system-rules-X.X.X`
