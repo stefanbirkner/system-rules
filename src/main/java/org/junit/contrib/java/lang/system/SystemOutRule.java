@@ -181,6 +181,11 @@ public class SystemOutRule implements TestRule {
 		return this;
 	}
 
+	public SystemOutRule untrack() {
+		logPrintStream.unTrackOriginalStream();
+		return this;
+	}
+
 	/**
 	 * Suppress the output to {@code System.out} for successful tests only.
 	 * The output is still written to {@code System.out} for failing tests.

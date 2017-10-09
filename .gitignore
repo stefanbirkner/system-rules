@@ -1,2 +1,6 @@
 .flattened-pom.xml
 target
+/.idea/
+/.mvn/
+.idea/
+system-rules.iml
