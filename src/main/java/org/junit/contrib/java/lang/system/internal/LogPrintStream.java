@@ -11,11 +11,11 @@ import static java.lang.System.getProperty;
 
 public class LogPrintStream {
 	private final PrintStreamHandler printStreamHandler;
-	private final MuteableLogStream muteableLogStream;
+	private final MutableLogStream mutableLogStream;
 
 	public LogPrintStream(PrintStreamHandler printStreamHandler) {
 		this.printStreamHandler = printStreamHandler;
-		this.muteableLogStream = new MuteableLogStream(printStreamHandler.getStream());
+		this.mutableLogStream = new MutableLogStream(printStreamHandler.getStream());
 	}
 
 	public Statement createStatement(final Statement base) {
@@ -26,12 +26,12 @@ public class LogPrintStream {
 					printStreamHandler.createRestoreStatement(new Statement() {
 						@Override
 						public void evaluate() throws Throwable {
-							printStreamHandler.replaceCurrentStreamWithOutputStream(muteableLogStream);
+							printStreamHandler.replaceCurrentStreamWithOutputStream(mutableLogStream);
 							base.evaluate();
 						}
 					}).evaluate();
 				} catch (Throwable e) {
-					muteableLogStream.failureLog.writeTo(printStreamHandler.getStream());
+					mutableLogStream.failureLog.writeTo(printStreamHandler.getStream());
 					throw e;
 				}
 			}
@@ -39,15 +39,15 @@ public class LogPrintStream {
 	}
 
 	public void clearLog() {
-		muteableLogStream.log.reset();
+		mutableLogStream.log.reset();
 	}
 
 	public void enableLog() {
-		muteableLogStream.logMuted = false;
+		mutableLogStream.logMuted = false;
 	}
 
 	public String getLog() {
-		/* The MuteableLogStream is created with the default encoding
+		/* The MutableLogStream is created with the default encoding
 		 * because it writes to System.out or System.err if not muted and
 		 * System.out/System.err uses the default encoding. As a result all
 		 * other streams receive input that is encoded with the default
@@ -55,7 +55,7 @@ public class LogPrintStream {
 		 */
 		String encoding = getProperty("file.encoding");
 		try {
-			return muteableLogStream.log.toString(encoding);
+			return mutableLogStream.log.toString(encoding);
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
 		}
@@ -67,15 +67,15 @@ public class LogPrintStream {
 	}
 
 	public void mute() {
-		muteableLogStream.originalStreamMuted = true;
+		mutableLogStream.originalStreamMuted = true;
 	}
 
 	public void muteForSuccessfulTests() {
 		mute();
-		muteableLogStream.failureLogMuted = false;
+		mutableLogStream.failureLogMuted = false;
 	}
 
-	private static class MuteableLogStream extends OutputStream {
+	private static class MutableLogStream extends OutputStream {
 		final OutputStream originalStream;
 		final ByteArrayOutputStream failureLog = new ByteArrayOutputStream();
 		final ByteArrayOutputStream log = new ByteArrayOutputStream();
@@ -83,7 +83,7 @@ public class LogPrintStream {
 		boolean failureLogMuted = true;
 		boolean logMuted = true;
 
-		MuteableLogStream(OutputStream originalStream) {
+		MutableLogStream(OutputStream originalStream) {
 			this.originalStream = originalStream;
 		}
 
