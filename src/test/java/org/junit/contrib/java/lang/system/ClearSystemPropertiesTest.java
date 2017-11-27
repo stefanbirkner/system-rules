@@ -2,79 +2,127 @@ package org.junit.contrib.java.lang.system;
 
 import static java.lang.System.*;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.contrib.java.lang.system.Executor.executeTestWithRule;
-import static org.junit.contrib.java.lang.system.Statements.SUCCESSFUL_TEST;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runners.model.Statement;
+import org.junit.*;
+import org.junit.experimental.runners.Enclosed;
+import org.junit.runner.RunWith;
+import org.junit.runner.notification.Failure;
 
-import java.util.Map;
-import java.util.Properties;
+import java.util.Collection;
 
+@RunWith(Enclosed.class)
 public class ClearSystemPropertiesTest {
-	@Rule
-	public final RestoreSystemProperties restore = new RestoreSystemProperties();
+	@RunWith(AcceptanceTestRunner.class)
+	public static class properties_are_cleared_at_start_of_test {
+		@ClassRule
+		public static final RestoreSystemProperties RESTORE
+			= new RestoreSystemProperties();
 
-	@Test
-	public void properties_are_cleared_at_start_of_test() {
-		setProperty("first property", "dummy value");
-		setProperty("second property", "another dummy value");
-		ClearSystemProperties rule = new ClearSystemProperties(
-			"first property", "second property");
-		TestThatCapturesProperties test = new TestThatCapturesProperties();
-		executeTestWithRule(test, rule);
-		assertThat(test.propertiesAtStart)
-			.doesNotContainKey("first property")
-			.doesNotContainKey("second property");
-	}
-
-	@Test
-	public void property_is_cleared_after_added_to_rule_within_test() {
-		setProperty("property", "dummy value");
-		ClearSystemProperties rule = new ClearSystemProperties();
-		TestThatAddsProperty test = new TestThatAddsProperty("property", rule);
-		executeTestWithRule(test, rule);
-		assertThat(test.propertiesAfterAddingProperty)
-			.doesNotContainKey("property");
-	}
-
-	@Test
-	public void after_test_properties_have_the_same_values_as_before() {
-		setProperty("first property", "dummy value");
-		setProperty("second property", "another dummy value");
-		setProperty("third property", "another dummy value");
-		ClearSystemProperties rule = new ClearSystemProperties(
-			"first property", "second property");
-		executeTestWithRule(new TestThatAddsProperty("third property", rule), rule);
-		assertThat(getProperties())
-			.containsEntry("first property", "dummy value")
-			.containsEntry("second property", "another dummy value")
-			.containsEntry("third property", "another dummy value");
-	}
-
-	@Test
-	public void property_that_is_not_present_does_not_cause_failure() {
-		clearProperty("property");
-		ClearSystemProperties rule = new ClearSystemProperties("property");
-		executeTestWithRule(SUCCESSFUL_TEST, rule);
-		//everything is fine if no exception is thrown
-	}
-
-	private class TestThatAddsProperty extends Statement {
-		private final String property;
-		private ClearSystemProperties rule;
-		Map<Object, Object> propertiesAfterAddingProperty;
-
-		TestThatAddsProperty(String property, ClearSystemProperties rule) {
-			this.property = property;
-			this.rule = rule;
+		@BeforeClass
+		public static void populateProperties() {
+			setProperty("first property", "dummy value");
+			setProperty("second property", "another dummy value");
 		}
 
-		@Override
-		public void evaluate() throws Throwable {
-			rule.clearProperty(property);
-			propertiesAfterAddingProperty = new Properties(getProperties());
+		public static class TestClass {
+			@Rule
+			public final ClearSystemProperties clearSystemProperties
+				= new ClearSystemProperties("first property", "second property");
+
+			@Test
+			public void test() {
+				assertThat(getProperty("first property")).isNull();
+				assertThat(getProperty("second property")).isNull();
+			}
+		}
+
+		public static void verifyResult(Collection<Failure> failures) {
+			assertThat(failures).isEmpty();
+		}
+	}
+
+	@RunWith(AcceptanceTestRunner.class)
+	public static class property_is_cleared_after_added_to_rule_within_test {
+		@ClassRule
+		public static final RestoreSystemProperties RESTORE
+			= new RestoreSystemProperties();
+
+		@BeforeClass
+		public static void populateProperty() {
+			setProperty("property", "dummy value");
+		}
+
+		public static class TestClass {
+			@Rule
+			public final ClearSystemProperties clearSystemProperties
+				= new ClearSystemProperties();
+
+			@Test
+			public void test() {
+				clearSystemProperties.clearProperty("property");
+				assertThat(getProperty("property")).isNull();
+			}
+		}
+
+		public static void verifyResult(Collection<Failure> failures) {
+			assertThat(failures).isEmpty();
+		}
+	}
+
+	@RunWith(AcceptanceTestRunner.class)
+	public static class after_test_properties_have_the_same_values_as_before {
+		@ClassRule
+		public static final RestoreSystemProperties RESTORE
+			= new RestoreSystemProperties();
+
+		@BeforeClass
+		public static void populateProperty() {
+			setProperty("first property", "dummy value");
+			setProperty("second property", "another dummy value");
+			setProperty("third property", "another dummy value");
+		}
+
+		public static class TestClass {
+			@Rule
+			public final ClearSystemProperties clearSystemProperties
+				= new ClearSystemProperties("first property", "second property");
+
+			@Test
+			public void test() {
+				clearSystemProperties.clearProperty("third property");
+			}
+		}
+
+		public static void verifyStateAfterTest() {
+			assertThat(getProperty("first property")).isEqualTo("dummy value");
+			assertThat(getProperty("second property")).isEqualTo("another dummy value");
+			assertThat(getProperty("third property")).isEqualTo("another dummy value");
+		}
+	}
+
+	@RunWith(AcceptanceTestRunner.class)
+	public static class property_that_is_not_present_does_not_cause_failure {
+		@ClassRule
+		public static final RestoreSystemProperties RESTORE
+			= new RestoreSystemProperties();
+
+		@BeforeClass
+		public static void ensurePropertyIsNotPresent() {
+			clearProperty("property");
+		}
+
+		public static class TestClass {
+			@Rule
+			public final ClearSystemProperties clearSystemProperties
+				= new ClearSystemProperties("property");
+
+			@Test
+			public void test() {
+			}
+		}
+
+		public static void verifyResult(Collection<Failure> failures) {
+			assertThat(failures).isEmpty();
 		}
 	}
 }
