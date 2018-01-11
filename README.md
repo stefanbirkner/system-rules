@@ -9,7 +9,7 @@ System Rules is a collection of JUnit rules for testing code which uses
 ## Installation
 
 System Rules is available from
-[Maven Central](http://search.maven.org/).
+[Maven Central](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.github.stefanbirkner%22%20AND%20a%3A%22system-rules%22).
 
     <dependency>
       <groupId>com.github.stefanbirkner</groupId>
