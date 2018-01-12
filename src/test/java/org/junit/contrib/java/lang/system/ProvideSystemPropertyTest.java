@@ -79,7 +79,7 @@ public class ProvideSystemPropertyTest {
 	}
 
 	@Test
-	public void properties_from_resource_are_present_during_test() throws Exception {
+	public void properties_from_resource_are_present_during_test() {
 		ProvideSystemProperty rule = fromResource(EXAMPLE_PROPERTIES);
 		TestThatCapturesProperties test = new TestThatCapturesProperties();
 		executeTestWithRule(test, rule);

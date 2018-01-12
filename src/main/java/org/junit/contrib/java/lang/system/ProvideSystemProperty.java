@@ -82,16 +82,28 @@ public class ProvideSystemProperty extends ExternalResource {
 	private final Map<String, String> properties = new LinkedHashMap<String, String>();
 	private final RestoreSpecificSystemProperties restoreSystemProperty = new RestoreSpecificSystemProperties();
 
-	public static ProvideSystemProperty fromFile(String name)
-		throws IOException {
-		FileInputStream fis = new FileInputStream(name);
-		return fromInputStream(fis);
+	public static ProvideSystemProperty fromFile(String name) {
+		try {
+			FileInputStream fis = new FileInputStream(name);
+			return fromInputStream(fis);
+		} catch (IOException e) {
+			throw new IllegalArgumentException(
+				"Cannot create ProvideSystemProperty rule because file \""
+					+ name + "\" cannot be read.",
+				e);
+		}
 	}
 
-	public static ProvideSystemProperty fromResource(String name)
-		throws IOException {
+	public static ProvideSystemProperty fromResource(String name) {
 		InputStream is = ProvideSystemProperty.class.getResourceAsStream(name);
-		return fromInputStream(is);
+		try {
+			return fromInputStream(is);
+		} catch (IOException e) {
+			throw new IllegalArgumentException(
+				"Cannot create ProvideSystemProperty rule because resource \""
+					+ name + "\" cannot be read.",
+				e);
+		}
 	}
 
 	private static ProvideSystemProperty fromInputStream(InputStream is)
