@@ -410,6 +410,20 @@ public class SummarizeTest {
     assertEquals("value", System.getenv("name"));
   }
 }{% endhighlight %}
+  <p>If your test needs some environment variables not to be present then you
+	can clear it.</p>
+{% highlight java %}public class EnvironmentVariablesTest {
+@Rule
+public final EnvironmentVariables environmentVariables
+	= new EnvironmentVariables();
+
+@Test
+public void setEnvironmentVariable() {
+	environmentVariables.clear("first variable", "second variable");
+	assertNull(System.getenv("first variable"));
+	assertNull(System.getenv("second variable"));
+}
+}{% endhighlight %}
 </section>
 
 			<section id="ProvideSecurityManager">
