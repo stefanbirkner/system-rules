@@ -3,6 +3,9 @@ package org.junit.contrib.java.lang.system.internal;
 import java.io.FileDescriptor;
 import java.net.InetAddress;
 import java.security.Permission;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A {@code NoExitSecurityManager} throws a {@link CheckExitCalled} exception
@@ -10,8 +13,9 @@ import java.security.Permission;
  * delegated to the original security manager.
  */
 public class NoExitSecurityManager extends SecurityManager {
+
 	private final SecurityManager originalSecurityManager;
-	private Integer statusOfFirstExitCall = null;
+	private final BlockingQueue<Integer> exitStatusHolder = new LinkedBlockingQueue<Integer>(1);
 
 	public NoExitSecurityManager(SecurityManager originalSecurityManager) {
 		this.originalSecurityManager = originalSecurityManager;
@@ -19,21 +23,12 @@ public class NoExitSecurityManager extends SecurityManager {
 
 	@Override
 	public void checkExit(int status) {
-		if (statusOfFirstExitCall == null)
-			statusOfFirstExitCall = status;
+		exitStatusHolder.offer(status);
 		throw new CheckExitCalled(status);
 	}
 
-	public boolean isCheckExitCalled() {
-		return statusOfFirstExitCall != null;
-	}
-
-	public int getStatusOfFirstCheckExitCall() {
-		if (isCheckExitCalled())
-			return statusOfFirstExitCall;
-		else
-			throw new IllegalStateException(
-				"checkExit(int) has not been called.");
+	public Integer getStatusOfFirstCheckExitCall(long timeout) throws InterruptedException {
+		return exitStatusHolder.poll(timeout, TimeUnit.MILLISECONDS);
 	}
 
 	@Override
@@ -44,7 +39,8 @@ public class NoExitSecurityManager extends SecurityManager {
 
 	@Override
 	public Object getSecurityContext() {
-		return (originalSecurityManager == null) ? super.getSecurityContext()
+		return originalSecurityManager == null
+			? super.getSecurityContext()
 			: originalSecurityManager.getSecurityContext();
 	}
 
@@ -176,7 +172,8 @@ public class NoExitSecurityManager extends SecurityManager {
 
 	@Override
 	public boolean checkTopLevelWindow(Object window) {
-		return (originalSecurityManager == null) ? super.checkTopLevelWindow(window)
+		return originalSecurityManager == null
+			? super.checkTopLevelWindow(window)
 			: originalSecurityManager.checkTopLevelWindow(window);
 	}
 
@@ -230,7 +227,8 @@ public class NoExitSecurityManager extends SecurityManager {
 
 	@Override
 	public ThreadGroup getThreadGroup() {
-		return (originalSecurityManager == null) ? super.getThreadGroup()
+		return originalSecurityManager == null
+			? super.getThreadGroup()
 			: originalSecurityManager.getThreadGroup();
 	}
 }

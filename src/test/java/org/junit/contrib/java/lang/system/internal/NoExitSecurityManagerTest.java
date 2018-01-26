@@ -22,8 +22,7 @@ public class NoExitSecurityManagerTest {
 	public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
 	private final SecurityManager originalSecurityManager = mock(SecurityManager.class);
-	private final NoExitSecurityManager managerWithOriginal = new NoExitSecurityManager(
-		originalSecurityManager);
+	private final NoExitSecurityManager managerWithOriginal = new NoExitSecurityManager(originalSecurityManager);
 	private final NoExitSecurityManager managerWithoutOriginal = new NoExitSecurityManager(null);
 
 	@Test
@@ -440,21 +439,10 @@ public class NoExitSecurityManagerTest {
 	}
 
 	@Test
-	public void information_about_a_missing_checkExit_call_is_available() {
-		assertThat(managerWithOriginal.isCheckExitCalled()).isFalse();
-	}
-
-	@Test
-	public void information_about_a_checkExit_call_is_available() {
-		safeCallCheckExitWithStatus(DUMMY_STATUS);
-		assertThat(managerWithOriginal.isCheckExitCalled()).isTrue();
-	}
-
-	@Test
-	public void status_of_first_call_of_checkExit_is_available() {
+	public void status_of_first_call_of_checkExit_is_available() throws InterruptedException {
 		safeCallCheckExitWithStatus(DUMMY_STATUS);
 		safeCallCheckExitWithStatus(DUMMY_STATUS + 1);
-		assertThat(managerWithOriginal.getStatusOfFirstCheckExitCall())
+		assertThat(managerWithOriginal.getStatusOfFirstCheckExitCall(0))
 			.isEqualTo(DUMMY_STATUS);
 	}
 
@@ -466,14 +454,7 @@ public class NoExitSecurityManagerTest {
 	}
 
 	@Test
-	public void fails_to_provide_status_of_first_checkExit_call_if_this_call_did_not_happen() {
-		Throwable exception = exceptionThrownBy(new Statement() {
-			public void evaluate() throws Throwable {
-				managerWithOriginal.getStatusOfFirstCheckExitCall();
-			}
-		});
-		assertThat(exception)
-			.isInstanceOf(IllegalStateException.class)
-			.hasMessage("checkExit(int) has not been called.");
+	public void null_status_of_first_checkExit_call_if_this_call_did_not_happen() throws InterruptedException {
+		assertThat(managerWithOriginal.getStatusOfFirstCheckExitCall(0)).isNull();
 	}
 }

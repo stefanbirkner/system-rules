@@ -28,7 +28,9 @@ import org.junit.runners.model.Statement;
  * <p>
  * Some care must be taken if your system under test creates a new thread and
  * this thread calls {@code System.exit()}. In this case you have to ensure that
- * the test does not finish before {@code System.exit()} is called.
+ * the test does not finish before {@code System.exit()} is called. Use
+ * {@code ExpectedSystemExit.timeout(...)} method call to specify test method
+ * waiting time in milliseconds.
  *
  * <pre>
  * public class AppWithExit {
@@ -78,6 +80,13 @@ import org.junit.runners.model.Statement;
  *   }
  *
  *   &#064;Test
+ *   public void systemExitInSeparateThread() {
+ *     exit.expectSystemExitWithStatus(1);
+ *     exit.timeout(1000);
+ *     AppWithExit.doSomethingInSeparateThreadAndExit();
+ *   }
+ *
+ *   &#064;Test
  *   public void noSystemExit() {
  *     AppWithExit.doNothing();
  *     //passes
@@ -93,6 +102,7 @@ public class ExpectedSystemExit implements TestRule {
 	private final Collection<Assertion> assertions = new ArrayList<Assertion>();
 	private boolean expectExit = false;
 	private Integer expectedStatus = null;
+	private long timeout = 0;
 
 	private ExpectedSystemExit() {
 	}
@@ -106,6 +116,10 @@ public class ExpectedSystemExit implements TestRule {
 		expectExit = true;
 	}
 
+	public void timeout(long timeout) {
+		this.timeout = timeout;
+	}
+
 	public void checkAssertionAfterwards(Assertion assertion) {
 		assertions.add(assertion);
 	}
@@ -117,8 +131,7 @@ public class ExpectedSystemExit implements TestRule {
 	}
 
 	private ProvideSecurityManager createNoExitSecurityManagerRule() {
-		NoExitSecurityManager noExitSecurityManager = new NoExitSecurityManager(
-			getSecurityManager());
+		SecurityManager noExitSecurityManager = new NoExitSecurityManager(getSecurityManager());
 		return new ProvideSecurityManager(noExitSecurityManager);
 	}
 
@@ -136,10 +149,11 @@ public class ExpectedSystemExit implements TestRule {
 		};
 	}
 
-	private void checkSystemExit() {
+	private void checkSystemExit() throws InterruptedException {
 		NoExitSecurityManager securityManager = (NoExitSecurityManager) getSecurityManager();
-		if (securityManager.isCheckExitCalled())
-			handleSystemExitWithStatus(securityManager.getStatusOfFirstCheckExitCall());
+		Integer exitStatus = securityManager.getStatusOfFirstCheckExitCall(timeout);
+		if (exitStatus != null)
+			handleSystemExitWithStatus(exitStatus);
 		else
 			handleMissingSystemExit();
 	}
