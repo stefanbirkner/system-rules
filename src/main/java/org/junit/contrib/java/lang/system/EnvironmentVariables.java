@@ -13,7 +13,7 @@ import static java.lang.System.getenv;
 
 /**
  * The {@code EnvironmentVariables} rule allows you to set environment variables
- * within your test. All changes to environment variables are reverted after the
+ * for your test. All changes to environment variables are reverted after the
  * test.
  * <pre>
  * public class EnvironmentVariablesTest {
@@ -27,6 +27,19 @@ import static java.lang.System.getenv;
  *   }
  * }
  * </pre>
+ * <p>Common variables can be set directly after creating the rule
+ * <pre>
+ * public class EnvironmentVariablesTest {
+ *   &#064;Rule
+ *   public final EnvironmentVariables environmentVariables = new EnvironmentVariables()
+ *       .set("name", "value");
+ *
+ *   &#064;Test
+ *   public void test() {
+ *     assertEquals("value", System.getenv("name"));
+ *   }
+ * }
+ * </pre>
  * <p>You can ensure that some environment variables are not set by calling
  * {@link #clear(String...)}.
  * <p><b>Warning:</b> This rule uses reflection for modifying internals of the
@@ -34,25 +47,39 @@ import static java.lang.System.getenv;
  * such modifications.
  */
 public class EnvironmentVariables implements TestRule {
+	private final Map<String, String> buffer = new HashMap<String, String>();
+	private boolean statementIsExecuting = false;
+
 	/**
 	 * Set the value of an environment variable.
 	 *
 	 * @param name the environment variable's name.
 	 * @param value the environment variable's new value. May be {@code null}.
+	 * @return the rule itself.
      */
-	public void set(String name, String value) {
-		set(getEditableMapOfVariables(), name, value);
-		set(getTheCaseInsensitiveEnvironment(), name, value);
+	public EnvironmentVariables set(String name, String value) {
+		if (statementIsExecuting)
+			writeVariableToEnvMap(name, value);
+		else
+			writeVariableToBuffer(name, value);
+		return this;
 	}
 
 	/**
 	 * Delete multiple environment variables.
 	 *
 	 * @param names the environment variables' names.
+	 * @return the rule itself.
      */
-	public void clear(String... names) {
+	public EnvironmentVariables clear(String... names) {
 		for (String name: names)
 			set(name, null);
+		return this;
+	}
+
+	private void writeVariableToEnvMap(String name, String value) {
+		set(getEditableMapOfVariables(), name, value);
+		set(getTheCaseInsensitiveEnvironment(), name, value);
 	}
 
 	private void set(Map<String, String> variables, String name, String value) {
@@ -63,11 +90,22 @@ public class EnvironmentVariables implements TestRule {
 				variables.put(name, value);
 	}
 
+	private void writeVariableToBuffer(String name, String value) {
+		buffer.put(name, value);
+	}
+
+	private void copyVariablesFromBufferToEnvMap() {
+		for (Map.Entry<String, String> nameAndValue: buffer.entrySet()) {
+			writeVariableToEnvMap(
+				nameAndValue.getKey(), nameAndValue.getValue());
+		}
+	}
+
 	public Statement apply(Statement base, Description description) {
 		return new EnvironmentVariablesStatement(base);
 	}
 
-	private static class EnvironmentVariablesStatement extends Statement {
+	private class EnvironmentVariablesStatement extends Statement {
 		final Statement baseStatement;
 		Map<String, String> originalVariables;
 
@@ -78,9 +116,12 @@ public class EnvironmentVariables implements TestRule {
 		@Override
 		public void evaluate() throws Throwable {
 			saveCurrentState();
+			EnvironmentVariables.this.statementIsExecuting = true;
 			try {
+				copyVariablesFromBufferToEnvMap();
 				baseStatement.evaluate();
 			} finally {
+				EnvironmentVariables.this.statementIsExecuting = false;
 				restoreOriginalVariables();
 			}
 		}
