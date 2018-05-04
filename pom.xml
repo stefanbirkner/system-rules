@@ -9,7 +9,7 @@
 	</parent>
 
 	<artifactId>system-rules</artifactId>
-	<version>1.17.2-SNAPSHOT</version>
+	<version>1.17.2</version>
 	<packaging>jar</packaging>
 
 	<name>System Rules</name>
@@ -54,6 +54,10 @@
 		<developerConnection>scm:git:git@github.com:stefanbirkner/system-rules.git</developerConnection>
 		<url>https://github.com/stefanbirkner/system-rules/</url>
 	</scm>
+
+	<properties>
+		<findbugs.excludeFilterFile>findbugs-exclude.xml</findbugs.excludeFilterFile>
+	</properties>
 
 	<dependencies>
 		<dependency>

@@ -3,7 +3,6 @@ package org.junit.contrib.java.lang.system;
 import static java.lang.System.getProperty;
 import static java.lang.System.in;
 import static java.lang.System.setIn;
-import static java.nio.charset.Charset.defaultCharset;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -213,8 +212,7 @@ public class TextFromStandardInputStream extends ExternalResource {
 
 		private boolean isCompleteLineWritten(byte[] buffer,
 				int indexLastByteWritten) {
-			byte[] separator = getProperty("line.separator")
-				.getBytes(defaultCharset());
+			byte[] separator = getProperty("line.separator").getBytes();
 			int indexFirstByteOfSeparator = indexLastByteWritten
 				- separator.length + 1;
 			return indexFirstByteOfSeparator >= 0

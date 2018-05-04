@@ -1,0 +1,9 @@
+<FindBugsFilter>
+	<!-- we have to use default encoding here because Java 5 does not provide
+	the same method with a parameter for encoding. -->
+	<Match>
+		<Class name="org.junit.contrib.java.lang.system.TextFromStandardInputStream$SystemInMock" />
+		<Method name="isCompleteLineWritten" />
+		<Bug pattern="DM_DEFAULT_ENCODING" />
+	</Match>
+</FindBugsFilter>
