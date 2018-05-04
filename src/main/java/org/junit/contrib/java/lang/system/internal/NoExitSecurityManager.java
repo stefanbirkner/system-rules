@@ -233,4 +233,39 @@ public class NoExitSecurityManager extends SecurityManager {
 		return (originalSecurityManager == null) ? super.getThreadGroup()
 			: originalSecurityManager.getThreadGroup();
 	}
+
+	@Override
+	protected Class[] getClassContext() {
+		return super.getClassContext();
+	}
+
+	@Override
+	protected ClassLoader currentClassLoader() {
+		return super.currentClassLoader();
+	}
+
+	@Override
+	protected Class<?> currentLoadedClass() {
+		return super.currentLoadedClass();
+	}
+
+	@Override
+	protected int classDepth(String name) {
+		return super.classDepth(name);
+	}
+
+	@Override
+	protected int classLoaderDepth() {
+		return super.classLoaderDepth();
+	}
+
+	@Override
+	protected boolean inClass(String name) {
+		return super.inClass(name);
+	}
+
+	@Override
+	protected boolean inClassLoader() {
+		return super.inClassLoader();
+	}
 }
