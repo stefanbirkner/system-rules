@@ -3,6 +3,7 @@ package org.junit.contrib.java.lang.system.internal;
 import static com.github.stefanbirkner.fishbowl.Fishbowl.exceptionThrownBy;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assume.assumeTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockingDetails;
 import static org.mockito.Mockito.when;
@@ -209,6 +210,8 @@ public class NoExitSecurityManagerTest {
 
 		@Test
 		public void getInCheck_is_delegated_to_original_security_manager() {
+			//method "getInCheck" was removed in JDK 10
+			skipOnJavaGreaterThan9();
 			when(originalSecurityManager.getInCheck()).thenReturn(true);
 			assertThat(managerWithOriginal.getInCheck()).isTrue();
 		}
@@ -232,6 +235,13 @@ public class NoExitSecurityManagerTest {
 			ThreadGroup threadGroup = new ThreadGroup("dummy name");
 			when(originalSecurityManager.getThreadGroup()).thenReturn(threadGroup);
 			assertThat(managerWithOriginal.getThreadGroup()).isSameAs(threadGroup);
+		}
+
+		private void skipOnJavaGreaterThan9() {
+			String version = System.getProperty("java.version");
+			assumeTrue(
+				version.startsWith("1.") || version.equals("9")
+			);
 		}
 	}
 
