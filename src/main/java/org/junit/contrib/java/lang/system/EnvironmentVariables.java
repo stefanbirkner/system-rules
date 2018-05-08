@@ -27,7 +27,7 @@ import static java.lang.System.getenv;
  *   }
  * }
  * </pre>
- * <p>You can ensure that some environment variables are no set by calling
+ * <p>You can ensure that some environment variables are not set by calling
  * {@link #clear(String...)}.
  * <p><b>Warning:</b> This rule uses reflection for modifying internals of the
  * environment variables map. It fails if your {@code SecurityManager} forbids
