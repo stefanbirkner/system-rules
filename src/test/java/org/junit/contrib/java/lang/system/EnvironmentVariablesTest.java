@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static java.lang.System.getenv;
+import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(Enclosed.class)
@@ -31,7 +32,7 @@ public class EnvironmentVariablesTest {
 
 			@Test
 			public void test() {
-				environmentVariables.set("dummy name", "dummy value");
+				environmentVariables.set("dummy name", randomValue());
 			}
 		}
 
@@ -55,7 +56,7 @@ public class EnvironmentVariablesTest {
 
 			@Test
 			public void test() {
-				environmentVariables.set("dummy name", "dummy value");
+				environmentVariables.set("dummy name", randomValue());
 			}
 		}
 
@@ -79,7 +80,7 @@ public class EnvironmentVariablesTest {
 
 			@Test
 			public void test() {
-				environmentVariables.set("dummy name", "dummy value");
+				environmentVariables.set("dummy name", randomValue());
 				throw new RuntimeException("dummy exception");
 			}
 		}
@@ -104,7 +105,7 @@ public class EnvironmentVariablesTest {
 
 			@Test
 			public void test() {
-				environmentVariables.set("dummy name", "dummy value");
+				environmentVariables.set("dummy name", randomValue());
 				throw new RuntimeException("dummy exception");
 			}
 		}
@@ -143,7 +144,7 @@ public class EnvironmentVariablesTest {
 		@Test
 		public void test() {
 			//we need to set a value because it is null by default
-			environmentVariables.set("dummy name", "dummy value");
+			environmentVariables.set("dummy name", randomValue());
 			environmentVariables.set("dummy name", null);
 			assertThat(getenv("dummy name")).isNull();
 		}
@@ -156,7 +157,7 @@ public class EnvironmentVariablesTest {
 		@Test
 		public void test() {
 			//we need to set a value because it is null by default
-			environmentVariables.set("dummy name", "dummy value");
+			environmentVariables.set("dummy name", randomValue());
 			environmentVariables.set("dummy name", null);
 			assertThat(getenv()).doesNotContainKey("dummy name");
 		}
@@ -169,8 +170,8 @@ public class EnvironmentVariablesTest {
 		@Test
 		public void test() {
 			//we need to set a value because it is null by default
-			environmentVariables.set("dummy name", "dummy value");
-			environmentVariables.set("another name", "dummy value");
+			environmentVariables.set("dummy name", randomValue());
+			environmentVariables.set("another name", randomValue());
 			environmentVariables.clear("dummy name", "another name");
 			assertThat(getenv("dummy name")).isNull();
 			assertThat(getenv("another name")).isNull();
@@ -184,12 +185,16 @@ public class EnvironmentVariablesTest {
 		@Test
 		public void test() {
 			//we need to set a value because it is null by default
-			environmentVariables.set("dummy name", "dummy value");
-			environmentVariables.set("another name", "dummy value");
+			environmentVariables.set("dummy name", randomValue());
+			environmentVariables.set("another name", randomValue());
 			environmentVariables.clear("dummy name", "another name");
 			assertThat(getenv())
 				.doesNotContainKey("dummy name")
 				.doesNotContainKey("another name");
 		}
+	}
+
+	private static String randomValue() {
+		return randomUUID().toString();
 	}
 }
