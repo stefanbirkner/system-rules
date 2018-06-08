@@ -8,8 +8,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.FileDescriptor;
+import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.security.Permission;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.github.stefanbirkner.fishbowl.Statement;
@@ -19,6 +21,7 @@ import org.junit.experimental.runners.Enclosed;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
 @RunWith(Enclosed.class)
@@ -95,6 +98,31 @@ public class NoExitSecurityManagerTest {
 			assertThat(exception)
 				.isInstanceOf(IllegalStateException.class)
 				.hasMessage("checkExit(int) has not been called.");
+		}
+	}
+
+	@RunWith(Parameterized.class)
+	public static class public_methods_override {
+
+		@Parameters(name = "{0}")
+		public static List<Object[]> data() {
+			List<Object[]> methods = new ArrayList<Object[]>();
+			for (Method method : NoExitSecurityManager.class.getMethods())
+				if (notDeclaredByObjectClass(method))
+					methods.add(new Object[] { testName(method), method });
+			return methods;
+		}
+
+		@Parameter(0)
+		public String methodName;
+
+		@Parameter(1)
+		public Method method;
+
+		@Test
+		public void is_implemented_by_NoExitSecurityManager() {
+			assertThat(method.getDeclaringClass())
+				.isEqualTo(NoExitSecurityManager.class);
 		}
 	}
 
@@ -515,5 +543,24 @@ public class NoExitSecurityManagerTest {
 		public void getThreadGroup_may_be_called() {
 			managerWithoutOriginal.getThreadGroup();
 		}
+	}
+
+	private static boolean notDeclaredByObjectClass(Method method) {
+		return !method.getDeclaringClass().equals(Object.class);
+	}
+
+	private static String testName(Method method) {
+		return method.getName()
+			+ "(" + join(method.getParameterTypes()) + ")";
+	}
+
+	private static String join(Class<?>[] types) {
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < types.length; i++) {
+			if (i != 0)
+				sb.append(",");
+			sb.append(types[i].getSimpleName());
+		}
+		return sb.toString();
 	}
 }
