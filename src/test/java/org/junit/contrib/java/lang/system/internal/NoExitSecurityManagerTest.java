@@ -4,25 +4,21 @@ import static com.github.stefanbirkner.fishbowl.Fishbowl.exceptionThrownBy;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.mockingDetails;
 import static org.mockito.Mockito.when;
 
 import java.io.FileDescriptor;
 import java.lang.reflect.Method;
-import java.net.InetAddress;
-import java.security.Permission;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import com.github.stefanbirkner.fishbowl.Statement;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
-import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
+import org.mockito.invocation.Invocation;
 
 @RunWith(Enclosed.class)
 public class NoExitSecurityManagerTest {
@@ -126,10 +122,81 @@ public class NoExitSecurityManagerTest {
 		}
 	}
 
-	public static class with_original_SecurityManager {
-		@Rule
-		public final TemporaryFolder temporaryFolder = new TemporaryFolder();
+	@RunWith(Parameterized.class)
+	public static class public_void_methods {
+		@Parameters(name = "{0}")
+		public static List<Object[]> data() {
+			List<Object[]> methods = new ArrayList<Object[]>();
+			for (Method method : NoExitSecurityManager.class.getMethods()) {
+				if (voidMethod(method)
+					&& notDeclaredByObjectClass(method)
+					&& notChangedByNoExitSecurityManager(method))
+					methods.add(new Object[] { testName(method), method });
+			}
+			return methods;
+		}
 
+		@Parameter(0)
+		public String testName;
+
+		@Parameter(1)
+		public Method method;
+
+		@Test
+		public void may_be_called_when_original_security_manager_is_missing(
+		) throws Exception {
+			SecurityManager manager = new NoExitSecurityManager(null);
+			method.invoke(manager, dummyArguments());
+		}
+
+		@Test
+		public void is_delegated_to_original_security_manager_when_it_is_present(
+		) throws Exception {
+			SecurityManager originalManager = mock(SecurityManager.class);
+			SecurityManager manager = new NoExitSecurityManager(
+				originalManager);
+			Object[] arguments = dummyArguments();
+			method.invoke(manager, arguments);
+			assertCallIsDelegated(originalManager, arguments);
+		}
+
+		private Object[] dummyArguments() {
+			Class<?>[] parameterTypes = method.getParameterTypes();
+			Object[] args = new Object[parameterTypes.length];
+			for (int i = 0; i < args.length; ++i)
+				args[i] = dummy(parameterTypes[i]);
+			return args;
+		}
+
+		private Object dummy(Class<?> type) {
+			if (type.getName().equals("int"))
+				return new Random().nextInt();
+			else if (type.getName().equals("byte"))
+				return (byte) new Random().nextInt();
+			else if (type.equals(String.class))
+				return UUID.randomUUID().toString();
+			else if (type.equals(Class.class))
+				return String.class;
+			else if (type.equals(FileDescriptor.class))
+				return new FileDescriptor();
+			else
+				return mock(type);
+		}
+
+		private void assertCallIsDelegated(
+			SecurityManager target, Object[] arguments) {
+			Collection<Invocation> invocations = mockingDetails(target)
+				.getInvocations();
+			assertThat(invocations).hasSize(1);
+			Invocation invocation = invocations.iterator().next();
+			assertThat(invocation.getMethod())
+				.isEqualToComparingOnlyGivenFields(
+					method, "name", "parameterTypes", "returnType");
+			assertThat(invocation.getRawArguments()).containsExactly(arguments);
+		}
+	}
+
+	public static class with_original_SecurityManager {
 		private final SecurityManager originalSecurityManager = mock(SecurityManager.class);
 		private final NoExitSecurityManager managerWithOriginal = new NoExitSecurityManager(
 			originalSecurityManager);
@@ -148,202 +215,10 @@ public class NoExitSecurityManagerTest {
 		}
 
 		@Test
-		public void checkPermission_without_context_is_delegated_to_original_security_manager() {
-			Permission permission = mock(Permission.class);
-			managerWithOriginal.checkPermission(permission);
-			verify(originalSecurityManager).checkPermission(permission);
-		}
-
-		@Test
-		public void checkPermission_with_context_is_delegated_to_original_security_manager() {
-			Permission permission = mock(Permission.class);
-			Object context = new Object();
-			managerWithOriginal.checkPermission(permission, context);
-			verify(originalSecurityManager).checkPermission(permission, context);
-		}
-
-		@Test
-		public void checkCreateClassLoader_is_delegated_to_original_security_manager() {
-			managerWithOriginal.checkCreateClassLoader();
-			verify(originalSecurityManager).checkCreateClassLoader();
-		}
-
-		@Test
-		public void checkAccess_for_thread_is_delegated_to_original_security_manager() {
-			Thread thread = mock(Thread.class);
-			managerWithOriginal.checkAccess(thread);
-			verify(originalSecurityManager).checkAccess(thread);
-		}
-
-		@Test
-		public void checkAccess_for_thread_group_is_delegated_to_original_security_manager() {
-			ThreadGroup threadGroup = mock(ThreadGroup.class);
-			managerWithOriginal.checkAccess(threadGroup);
-			verify(originalSecurityManager).checkAccess(threadGroup);
-		}
-
-		@Test
-		public void checkExec_is_delegated_to_original_security_manager() {
-			managerWithOriginal.checkExec("arbitrary cmd");
-			verify(originalSecurityManager).checkExec("arbitrary cmd");
-		}
-
-		@Test
-		public void checkLink_is_delegated_to_original_security_manager() {
-			managerWithOriginal.checkLink("arbitrary lib");
-			verify(originalSecurityManager).checkLink("arbitrary lib");
-		}
-
-		@Test
-		public void checkRead_for_file_descriptor_is_delegated_to_original_security_manager() {
-			FileDescriptor fileDescriptor = new FileDescriptor();
-			managerWithOriginal.checkRead(fileDescriptor);
-			verify(originalSecurityManager).checkRead(fileDescriptor);
-		}
-
-		@Test
-		public void checkRead_for_filename_without_context_is_delegated_to_original_security_manager() {
-			managerWithOriginal.checkRead("arbitrary file");
-			verify(originalSecurityManager).checkRead("arbitrary file");
-		}
-
-		@Test
-		public void checkRead_for_filename_with_context_is_delegated_to_original_security_manager() {
-			Object context = new Object();
-			managerWithOriginal.checkRead("arbitrary file", context);
-			verify(originalSecurityManager).checkRead("arbitrary file", context);
-		}
-
-		@Test
-		public void checkWrite_of_file_descriptor_is_delegated_to_original_security_manager() {
-			FileDescriptor fileDescriptor = new FileDescriptor();
-			managerWithOriginal.checkWrite(fileDescriptor);
-			verify(originalSecurityManager).checkWrite(fileDescriptor);
-		}
-
-		@Test
-		public void checkWrite_of_filename_is_delegated_to_original_security_manager() {
-			managerWithOriginal.checkWrite("arbitrary file");
-			verify(originalSecurityManager).checkWrite("arbitrary file");
-		}
-
-		@Test
-		public void checkDelete_is_delegated_to_original_security_manager() {
-			managerWithOriginal.checkDelete("arbitrary file");
-			verify(originalSecurityManager).checkDelete("arbitrary file");
-		}
-
-		@Test
-		public void checkConnect_without_context_is_delegated_to_original_security_manager() {
-			int port = 234;
-			managerWithOriginal.checkConnect("host", port);
-			verify(originalSecurityManager).checkConnect("host", port);
-		}
-
-		@Test
-		public void checkConnect_with_context_is_delegated_to_original_security_manager() {
-			int port = 234;
-			Object context = new Object();
-			managerWithOriginal.checkConnect("host", port, context);
-			verify(originalSecurityManager).checkConnect("host", port, context);
-		}
-
-		@Test
-		public void checkListen_is_delegated_to_original_security_manager() {
-			int port = 234;
-			managerWithOriginal.checkListen(port);
-			verify(originalSecurityManager).checkListen(port);
-		}
-
-		@Test
-		public void checkAccept_is_delegated_to_original_security_manager() {
-			int port = 234;
-			managerWithOriginal.checkAccept("host", port);
-			verify(originalSecurityManager).checkAccept("host", port);
-		}
-
-		@Test
-		public void checkMulticast_without_TTL_is_delegated_to_original_security_manager() {
-			InetAddress inetAddress = mock(InetAddress.class);
-			managerWithOriginal.checkMulticast(inetAddress);
-			verify(originalSecurityManager).checkMulticast(inetAddress);
-		}
-
-		@Test
-		public void checkMulticast_with_TTL_is_delegated_to_original_security_manager() {
-			InetAddress inetAddress = mock(InetAddress.class);
-			byte ttl = 24;
-			managerWithOriginal.checkMulticast(inetAddress, ttl);
-			verify(originalSecurityManager).checkMulticast(inetAddress, ttl);
-		}
-
-		@Test
-		public void checkPropertiesAccess_is_delegated_to_original_security_manager() {
-			managerWithOriginal.checkPropertiesAccess();
-			verify(originalSecurityManager).checkPropertiesAccess();
-		}
-
-		@Test
-		public void checkPropertyAccess_is_delegated_to_original_security_manager() {
-			managerWithOriginal.checkPropertyAccess("arbitrary key");
-			verify(originalSecurityManager).checkPropertyAccess("arbitrary key");
-		}
-
-		@Test
 		public void checkTopLevelWindow_is_delegated_to_original_security_manager() {
 			Object window = new Object();
 			when(originalSecurityManager.checkTopLevelWindow(window)).thenReturn(true);
 			assertThat(managerWithOriginal.checkTopLevelWindow(window)).isTrue();
-		}
-
-		@Test
-		public void checkPrintJobAccess_is_delegated_to_original_security_manager() {
-			managerWithOriginal.checkPrintJobAccess();
-			verify(originalSecurityManager).checkPrintJobAccess();
-		}
-
-		@Test
-		public void checkSystemClipboardAccess_is_delegated_to_original_security_manager() {
-			managerWithOriginal.checkSystemClipboardAccess();
-			verify(originalSecurityManager).checkSystemClipboardAccess();
-		}
-
-		@Test
-		public void checkAwtEventQueueAccess_is_delegated_to_original_security_manager() {
-			managerWithOriginal.checkAwtEventQueueAccess();
-			verify(originalSecurityManager).checkAwtEventQueueAccess();
-		}
-
-		@Test
-		public void checkPackageAccess_is_delegated_to_original_security_manager() {
-			managerWithOriginal.checkPackageAccess("arbitrary package");
-			verify(originalSecurityManager).checkPackageAccess("arbitrary package");
-		}
-
-		@Test
-		public void checkPackageDefinition_is_delegated_to_original_security_manager() {
-			managerWithOriginal.checkPackageDefinition("arbitrary package");
-			verify(originalSecurityManager).checkPackageDefinition("arbitrary package");
-		}
-
-		@Test
-		public void checkSetFactory_is_delegated_to_original_security_manager() {
-			managerWithOriginal.checkSetFactory();
-			verify(originalSecurityManager).checkSetFactory();
-		}
-
-		@Test
-		public void checkMemberAccess_is_delegated_to_original_security_manager() {
-			Class<?> arbitraryClass = Integer.class;
-			int which = 394;
-			managerWithOriginal.checkMemberAccess(arbitraryClass, which);
-			verify(originalSecurityManager).checkMemberAccess(arbitraryClass, which);
-		}
-
-		@Test
-		public void checkSecurityAccess_is_delegated_to_original_security_manager() {
-			managerWithOriginal.checkSecurityAccess("arbitrary target");
-			verify(originalSecurityManager).checkSecurityAccess("arbitrary target");
 		}
 
 		@Test
@@ -355,9 +230,6 @@ public class NoExitSecurityManagerTest {
 	}
 
 	public static class without_original_SecurityManager {
-		@Rule
-		public final TemporaryFolder temporaryFolder = new TemporaryFolder();
-
 		private final NoExitSecurityManager managerWithoutOriginal = new NoExitSecurityManager(null);
 
 		@Test
@@ -371,172 +243,9 @@ public class NoExitSecurityManagerTest {
 		}
 
 		@Test
-		public void checkPermission_without_context_may_be_called() {
-			Permission permission = mock(Permission.class);
-			managerWithoutOriginal.checkPermission(permission);
-		}
-
-		@Test
-		public void checkPermission_with_context_may_be_called() {
-			Permission permission = mock(Permission.class);
-			Object context = new Object();
-			managerWithoutOriginal.checkPermission(permission, context);
-		}
-
-		@Test
-		public void checkCreateClassLoader_may_be_called() {
-			managerWithoutOriginal.checkCreateClassLoader();
-		}
-
-		@Test
-		public void checkAccess_for_thread_may_be_called() {
-			Thread thread = mock(Thread.class);
-			managerWithoutOriginal.checkAccess(thread);
-		}
-
-		@Test
-		public void checkAccess_for_thread_group_may_be_called() {
-			ThreadGroup threadGroup = mock(ThreadGroup.class);
-			managerWithoutOriginal.checkAccess(threadGroup);
-		}
-
-		@Test
-		public void checkExec_may_be_called() {
-			managerWithoutOriginal.checkExec("dummy cmd");
-		}
-
-		@Test
-		public void checkLink_may_be_called() {
-			managerWithoutOriginal.checkLink("dummy lib");
-		}
-
-		@Test
-		public void checkRead_for_file_descriptor_may_be_called() {
-			FileDescriptor fileDescriptor = new FileDescriptor();
-			managerWithoutOriginal.checkRead(fileDescriptor);
-		}
-
-		@Test
-		public void checkRead_for_filename_without_context_may_be_called() {
-			managerWithoutOriginal.checkRead("dummy file");
-		}
-
-		@Test
-		public void checkRead_for_fukebane_with_context_may_be_called() {
-			Object context = new Object();
-			managerWithoutOriginal.checkRead("dummy file", context);
-		}
-
-		@Test
-		public void checkWrite_of_file_descriptor_may_be_called() {
-			FileDescriptor fileDescriptor = new FileDescriptor();
-			managerWithoutOriginal.checkWrite(fileDescriptor);
-		}
-
-		@Test
-		public void checkWrite_of_filename_may_be_called() {
-			managerWithoutOriginal.checkWrite("dummy file");
-		}
-
-		@Test
-		public void checkDelete_may_be_called() {
-			managerWithoutOriginal.checkDelete("dummy file");
-		}
-
-		@Test
-		public void checkConnect_without_context_may_be_called() {
-			int port = 234;
-			managerWithoutOriginal.checkConnect("host", port);
-		}
-
-		@Test
-		public void checkConnect_with_context_may_be_called() {
-			int port = 234;
-			Object context = new Object();
-			managerWithoutOriginal.checkConnect("host", port, context);
-		}
-
-		@Test
-		public void checkListen_may_be_called() {
-			int port = 234;
-			managerWithoutOriginal.checkListen(port);
-		}
-
-		@Test
-		public void checkAccept_may_be_called() {
-			int port = 234;
-			managerWithoutOriginal.checkAccept("host", port);
-		}
-
-		@Test
-		public void checkMulticast_without_TTL_may_be_called() {
-			InetAddress inetAddress = mock(InetAddress.class);
-			managerWithoutOriginal.checkMulticast(inetAddress);
-		}
-
-		@Test
-		public void checkMulticast_with_TTL_may_be_called() {
-			InetAddress inetAddress = mock(InetAddress.class);
-			byte ttl = 24;
-			managerWithoutOriginal.checkMulticast(inetAddress, ttl);
-		}
-
-		@Test
-		public void checkPropertiesAccess_may_be_called() {
-			managerWithoutOriginal.checkPropertiesAccess();
-		}
-
-		@Test
-		public void checkPropertyAccess_may_be_called() {
-			managerWithoutOriginal.checkPropertyAccess("dummy key");
-		}
-
-		@Test
 		public void checkTopLevelWindow_may_be_called() {
 			Object window = new Object();
 			managerWithoutOriginal.checkTopLevelWindow(window);
-		}
-
-		@Test
-		public void checkPrintJobAccess_may_be_called() {
-			managerWithoutOriginal.checkPrintJobAccess();
-		}
-
-		@Test
-		public void checkSystemClipboardAccess_may_be_called() {
-			managerWithoutOriginal.checkSystemClipboardAccess();
-		}
-
-		@Test
-		public void checkAwtEventQueueAccess_may_be_called() {
-			managerWithoutOriginal.checkAwtEventQueueAccess();
-		}
-
-		@Test
-		public void checkPackageAccess_may_be_called() {
-			managerWithoutOriginal.checkPackageAccess("dummy package");
-		}
-
-		@Test
-		public void checkPackageDefinition_may_be_called() {
-			managerWithoutOriginal.checkPackageDefinition("dummy package");
-		}
-
-		@Test
-		public void checkSetFactory_may_be_called() {
-			managerWithoutOriginal.checkSetFactory();
-		}
-
-		@Test
-		public void checkMemberAccess_may_be_called() {
-			Class<?> arbitraryClass = Integer.class;
-			int which = 394;
-			managerWithoutOriginal.checkMemberAccess(arbitraryClass, which);
-		}
-
-		@Test
-		public void checkSecurityAccess_may_be_called() {
-			managerWithoutOriginal.checkSecurityAccess("arbitrary target");
 		}
 
 		@Test
@@ -545,8 +254,16 @@ public class NoExitSecurityManagerTest {
 		}
 	}
 
+	private static boolean notChangedByNoExitSecurityManager(Method method) {
+		return !method.getName().equals("checkExit");
+	}
+
 	private static boolean notDeclaredByObjectClass(Method method) {
 		return !method.getDeclaringClass().equals(Object.class);
+	}
+
+	private static boolean voidMethod(Method method) {
+		return method.getReturnType().getName().equals("void");
 	}
 
 	private static String testName(Method method) {
