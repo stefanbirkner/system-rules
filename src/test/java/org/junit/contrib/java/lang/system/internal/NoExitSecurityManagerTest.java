@@ -98,13 +98,13 @@ public class NoExitSecurityManagerTest {
 	}
 
 	@RunWith(Parameterized.class)
-	public static class public_methods_override {
+	public static class public_non_void_methods {
 
 		@Parameters(name = "{0}")
 		public static List<Object[]> data() {
 			List<Object[]> methods = new ArrayList<Object[]>();
 			for (Method method : NoExitSecurityManager.class.getMethods())
-				if (notDeclaredByObjectClass(method))
+				if (!voidMethod(method) && notDeclaredByObjectClass(method))
 					methods.add(new Object[] { testName(method), method });
 			return methods;
 		}
@@ -141,6 +141,12 @@ public class NoExitSecurityManagerTest {
 
 		@Parameter(1)
 		public Method method;
+
+		@Test
+		public void is_implemented_by_NoExitSecurityManager() {
+			assertThat(method.getDeclaringClass())
+				.isEqualTo(NoExitSecurityManager.class);
+		}
 
 		@Test
 		public void may_be_called_when_original_security_manager_is_missing(
