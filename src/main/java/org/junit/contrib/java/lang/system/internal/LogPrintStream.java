@@ -66,6 +66,10 @@ public class LogPrintStream {
 		return getLog().replace(lineSeparator, "\n");
 	}
 
+	public byte[] getLogAsBytes() {
+		return muteableLogStream.log.toByteArray();
+	}
+
 	public void mute() {
 		muteableLogStream.originalStreamMuted = true;
 	}

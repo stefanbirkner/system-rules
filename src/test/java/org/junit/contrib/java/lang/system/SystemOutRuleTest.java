@@ -372,4 +372,17 @@ public class SystemOutRuleTest {
 			assertThat(failures).isEmpty();
 		}
 	}
+
+	public static class raw_bytes_of_output_are_available_when_logging_is_enabled {
+		@Rule
+		public final SystemOutRule systemOutRule = new SystemOutRule()
+			.enableLog();
+
+		@Test
+		public void test() {
+			byte[] data = { 1, 2, 3, 4, 5 };
+			System.out.write(data, 0, data.length);
+			assertThat(systemOutRule.getLogAsBytes()).isEqualTo(data);
+		}
+	}
 }

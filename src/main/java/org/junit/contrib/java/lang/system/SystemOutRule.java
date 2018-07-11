@@ -49,6 +49,23 @@ import org.junit.runners.model.Statement;
  * }
  * </pre>
  *
+ * <p>If your code under test writes raw binary data to {@code System.out} then
+ * you can read it by means of {@link #getLogAsBytes()}).
+ *
+ * <pre>
+ * public class SystemOutTest {
+ *   &#064;Rule
+ *   public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();
+ *
+ *   &#064;Test
+ *   public void test() {
+ *     byte[] data = { 1, 2, 3, 4, 5 };
+ *     System.out.write(data, 0, data.length);
+ *     assertEquals(data, systemOutRule.{@link #getLogAsBytes()});
+ *   }
+ * }
+ * </pre>
+ *
  * <p>You don't have to enable logging for every test. It can be enabled for
  * specific tests only.
  *
@@ -219,6 +236,17 @@ public class SystemOutRule implements TestRule {
 	 */
 	public String getLogWithNormalizedLineSeparator() {
 		return logPrintStream.getLogWithNormalizedLineSeparator();
+	}
+
+	/**
+	 * Returns the raw bytes that are written to {@code System.out} since
+	 * {@link #enableLog()} (respectively {@link #clearLog()} has been called.
+	 *
+	 * @return the raw bytes that are written to {@code System.out} since
+	 * {@link #enableLog()} (respectively {@link #clearLog()} has been called.
+	 */
+	public byte[] getLogAsBytes() {
+		return logPrintStream.getLogAsBytes();
 	}
 
 	/**
