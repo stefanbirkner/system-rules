@@ -373,4 +373,17 @@ public class SystemErrRuleTest {
 			assertThat(failures).isEmpty();
 		}
 	}
+
+	public static class raw_bytes_of_output_are_available_when_logging_is_enabled {
+		@Rule
+		public final SystemErrRule systemErrRule = new SystemErrRule()
+			.enableLog();
+
+		@Test
+		public void test() {
+			byte[] data = { 1, 2, 3, 4, 5 };
+			System.err.write(data, 0, data.length);
+			assertThat(systemErrRule.getLogAsBytes()).isEqualTo(data);
+		}
+	}
 }
