@@ -53,7 +53,8 @@ The basic coding style is described in the
 System Rules supports [Travis CI](https://travis-ci.org/) (Linux) and
 [AppVeyor](http://www.appveyor.com/) (Windows) for continuous
 integration. Your pull request will be automatically build by both CI
-servers.
+servers. On Travis CI we build your pull request with OpenJDK 6 and run test
+with different JDKs (Java 6 to 9).
 
 
 ## Release Guide

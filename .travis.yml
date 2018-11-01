@@ -7,10 +7,13 @@ install:
   - ./mvnw test -DskipTests
   # Delete all files created with JDK 8
   - ./mvnw clean
-  # Restore desired JDK
-  - export JAVA_HOME=$ORIGINAL_JAVA_HOME
+  # Build with JDK 6 because we build the artifacts that are published
+  # to Maven Central with OpenJDK 6, too.
+  - jdk_switcher use openjdk6
   # Run original install command but without GPG signing
   - ./mvnw install -DskipTests=true -Dgpg.skip=true
+  # Restore desired JDK
+  - export JAVA_HOME=$ORIGINAL_JAVA_HOME
 addons:
   apt:
     packages:
