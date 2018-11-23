@@ -191,6 +191,33 @@ public final ProvideSystemProperty properties
 	}
 }{% endhighlight %}
 
+	<p>If your code under test writes raw binary data to <code>System.err</code>
+	or <code>System.out</code> then you can read it by means of
+	<code>getLogAsBytes()</code>.</p>
+	{% highlight java %}public class MyTest {
+	@Rule
+	public final SystemErrRule systemErrRule = new SystemErrRule().enableLog();
+
+	@Test
+	public void writesBytesToSystemErr() {
+		byte[] data = { 1, 2, 3, 4, 5 };
+		System.err.write(data, 0, data.length);
+		assertEquals(data, systemErrRule.getLogAsBytes());
+	}
+}{% endhighlight %}
+
+    	{% highlight java %}public class MyTest {
+	@Rule
+	public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();
+
+	@Test
+	public void writesBytesToSystemOut() {
+		byte[] data = { 1, 2, 3, 4, 5 };
+		System.out.write(data, 0, data.length);
+		assertEquals(data, systemOutRule.getLogAsBytes());
+	}
+}{% endhighlight %}
+
 	<p>The log can be cleared if you want to discard some text that has been
 	written to the log.</p>
 	{% highlight java %}public class MyTest {
