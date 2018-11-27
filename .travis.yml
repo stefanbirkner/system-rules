@@ -19,6 +19,7 @@ addons:
     packages:
       - openjdk-6-jdk
 jdk:
+  - openjdk11
   - openjdk10
   - oraclejdk9
   - oraclejdk8
