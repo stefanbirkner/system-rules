@@ -1,3 +1,5 @@
+# openjdk-6-jdk is not available in more recent Ubuntu versions
+dist: trusty
 language: java
 install:
   # Download dependencies with JDK 8 because Maven Central supports
@@ -23,4 +25,10 @@ jdk:
   - oraclejdk9
   - oraclejdk8
   - openjdk7
-  - openjdk6
+
+# The jdk key does not work for openjdk6 in Travis CI any more, so
+# we manually install openjdk-6-jdk and set JAVA_HOME appropriately
+# (https://github.com/travis-ci/travis-ci/issues/9713)
+matrix:
+  include:
+  - env: JAVA_HOME=/usr/lib/jvm/java-6-openjdk-amd64
