@@ -1,5 +1,9 @@
 version: '{build}'
-os: Windows Server 2012
+image: Visual Studio 2017
+# Download dependencies with Maven 3.6.x because Maven 3.1.1 (which is used by
+# mvnw) does not use HTTPS but Maven Central requires HTTPS.
+install:
+  - mvn clean verify -Dgpg.skip -Dmaven.test.failure.ignore
 build_script:
   - mvnw clean package -DskipTest -Dgpg.skip
 test_script:
