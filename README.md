@@ -5,6 +5,12 @@
 System Rules is a collection of JUnit rules for testing code which uses
 `java.lang.System`.
 
+[System Lambda](https://github.com/stefanbirkner/system-lambda) is an
+alternative to System Rules that leverages the possibilities of Java 8. It is
+independent of the test framework. You can use it for example as a replacement
+for System Rules in [JUnit Jupiter](https://junit.org/junit5/) and
+[TestNG](https://testng.org/doc/index.html).
+
 
 ## Installation
 
